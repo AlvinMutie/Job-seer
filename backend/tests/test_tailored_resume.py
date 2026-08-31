@@ -126,6 +126,7 @@ def test_delete_tailored_resume(client, test_user, seed_test_jobs):
     assert get_res.json()["error"]["code"] == "RESOURCE_NOT_FOUND"
 
 
+@pytest.mark.security
 def test_tailoring_unauthenticated_rejected(client, seed_test_jobs):
     """
     SECURITY SAFETY GATE (P3-04):
@@ -138,6 +139,7 @@ def test_tailoring_unauthenticated_rejected(client, seed_test_jobs):
     assert client.delete("/resume/tailored/1").status_code == 401
 
 
+@pytest.mark.security
 def test_tailoring_ownership_isolation(client, test_user, secondary_user, seed_test_jobs):
     """
     SECURITY SAFETY GATE (P3-04):
