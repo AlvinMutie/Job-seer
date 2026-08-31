@@ -19,37 +19,21 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
+## Application Tracker Query Security & User Isolation (P2-02)
+
+`GET /applications` enforces strict query parameter validation and resource-owner isolation:
+
+1. **User Ownership Isolation**: The query condition `ApplicationTracker.user_id == current_user.id` is applied as the base constraint before status filtering, keyword search, or pagination. Filtering or searching can never leak another user's application records.
+2. **SQL Injection Prevention**: All search queries use SQLAlchemy parameterized expressions (`Job.title.ilike(term)`). Raw SQL string concatenation is prohibited. Attacks using `' OR 1=1; --` or wildcard characters are safely escaped and parameterized.
+3. **Limit & Offset Boundaries**: `limit` is bounded between `1` and `100` (`Query(default=50, ge=1, le=100)`). `offset` is bounded to non-negative integers (`ge=0`). Invalid or negative pagination parameters return HTTP 422 `VALIDATION_ERROR`.
+4. **Status Filter Validation**: Unrecognized status strings are rejected with HTTP 422 `VALIDATION_ERROR`, preventing arbitrary parameter injection.
+
+---
+
 ## Error Handling & Information Disclosure Prevention (P2-01)
 
 The backend enforces centralized exception handling (`app/core/errors.py`) to prevent sensitive implementation detail leakage:
 
 1. **Sanitized 500 Responses**: Unhandled internal exceptions return a generic safe message `"An unexpected server error occurred."` with zero raw tracebacks or exception internals exposed to the client.
 2. **Secrets Protection**: Exception responses never reveal database connection strings, passwords, JWT secrets, or filesystem paths.
-3. **Structured Error Codes**: Standardizes error codes (`VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `TOKEN_INVALID`, `UPLOAD_TOO_LARGE`) while preserving backward-compatible top-level `detail` fields for frontend rendering.
-4. **Server-Side Logging**: Full tracebacks are logged server-side via `logging.exception` for developer diagnosis without client exposure.
-
----
-
-## Resume Upload Security & Safety Gate (P0-03 / P1-05)
-
-`POST /upload-resume` enforces a 10-layer security boundary verified by automated safety tests:
-
-1. **Extension Whitelisting**: Strictly permits `.pdf`, `.docx`, `.txt` (case-insensitive). Rejects executable scripts (`.exe`, `.py`, `.sh`, `.js`, `.php`, `.html`, `.jpg`, `.png`, `.zip`, `.doc`) with `400 Bad Request`.
-2. **MIME Magic Byte Verification**: Validates PDF header (`%PDF-`), DOCX header (`PK\x03\x04`), and TXT UTF-8 decodability.
-3. **File Size Boundaries**: Enforces 10MB (`10,485,760 bytes`) maximum file size limit. Oversized uploads return `413 Content Too Large`.
-4. **Path Traversal Protection**: Client-supplied filenames (e.g. `../../evil.txt`, `/etc/passwd.txt`) are discarded for storage purposes.
-5. **Server UUID Filenames**: Files are saved strictly in `uploads/` using server-generated UUIDs (`resume_{user_id}_{uuid.hex}{ext}`).
-6. **Old File Lifecycle Cleanup**: Uploading a new resume automatically deletes the previous stored resume from disk.
-7. **User Storage Isolation**: User uploads are stored independently without cross-user deletion or file collision.
-
----
-
-## JWT Authentication Safety Gate (P1-04)
-
-The backend enforces strict JWT authentication validation across all protected routes via `app/auth.py` (`get_current_user`):
-
-1. **Secret Key Verification**: Signed using externalized `settings.SECRET_KEY`. Tokens signed with unauthorized keys are rejected with `401 Unauthorized`.
-2. **Algorithm Restriction**: Strictly specifies `algorithms=[settings.ALGORITHM]` (`HS256`).
-3. **Signature & Expiration Validation**: Automatically rejects expired (`exp`) or payload-tampered tokens.
-4. **Subject Claim Verification**: Requires valid `sub` claim mapping to an active database user.
-5. **Scheme Enforcement**: Strictly enforces `Authorization: Bearer <token>`.
+3. **Structured Error Codes**: Standardizes error codes (`VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `TOKEN_INVALID`, `UPLOAD_TOO_LARGE`) while preserving backward-compatible top-level `detail` fields.

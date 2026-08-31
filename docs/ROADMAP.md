@@ -27,7 +27,7 @@ flowchart TD
 
     subgraph P2 [P2: Feature & Schema Polish]
         P2-01[P2-01: Enhanced Error Handling & Standardized API Responses ✓ COMPLETED]
-        P2-02[P2-02: Application Tracker Filtering & Pagination]
+        P2-02[P2-02: Application Tracker Filtering & Pagination ✓ COMPLETED]
         P2-03[P2-03: Frontend Client Hardening & State Management]
     end
 
@@ -72,12 +72,14 @@ flowchart TD
 - **Result**: Added 21 file upload and matching safety gate tests. 92 / 92 tests passing (91% coverage).
 
 ### P2-01 — Enhanced Error Handling & Standardized API Responses (✓ COMPLETED)
-- **Result**: Created `app/core/errors.py` providing `ErrorCode` taxonomy, custom `APIException`, and global exception handlers for validation (422), auth (401), resource (404), upload (400/413), and unhandled server (500) errors. Added `backend/tests/test_errors.py` verifying sanitized output with zero information disclosure. **103 / 103 tests passing** (90% coverage).
+- **Result**: Centralized error infrastructure with `ErrorCode` taxonomy, custom `APIException`, and global exception handlers. 103 / 103 tests passing (90% coverage).
+
+### P2-02 — Application Tracker Filtering & Pagination (✓ COMPLETED)
+- **Result**: Enhanced `GET /applications` with status filtering (`status`), partial keyword search (`search`), limit (`ge=1, le=100`), offset (`ge=0`), and single-query `joinedload` performance optimization. Added 7 dedicated tests in `backend/tests/test_applications.py`. **110 / 110 tests passing** (91% coverage).
 
 ---
 
 ## Pending Task Breakdown (Phase 2)
 
-### P2-02 — Application Tracker Filtering & Pagination
-- **Objective**: Add status filters, search capabilities, and offset/limit pagination to `GET /applications`.
-- **Files Likely Affected**: `backend/app/routers/applications.py`, `backend/tests/test_applications.py`.
+### P2-03 — Frontend Client Hardening & State Management
+- **Objective**: Harden frontend API service layer and improve error feedback state in UI components.

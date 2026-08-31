@@ -20,7 +20,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Resume-to-Job Matching**: Statistical NLP matching engine evaluating technical skill overlap and content similarity.
 - **Resume Tailoring**: Rule-based suggestion engine identifying missing skill requirements for specific job listings.
 - **Cover Letter Generation**: Dynamic cover letter template formatting tailored to specific roles and extracted skills.
-- **Application Pipeline Tracker**: Application status tracking (Not Applied, Applied, Interview, Offer, Rejected).
+- **Application Pipeline Tracker**: Application status tracking with filtering (`status`), partial search (`search`), and limit/offset pagination.
 - **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
 
 ---
@@ -111,7 +111,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ### Testing Infrastructure
 - **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-- **Coverage Baseline**: **90% Overall Code Coverage (100% auth.py & main.py coverage)**
+- **Coverage Baseline**: **91% Overall Code Coverage (100% auth.py, main.py, applications.py coverage)**
 
 ---
 
@@ -130,7 +130,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT generation and verification (100% coverage)
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # App entry point & router registration (36 lines)
-│   ├── tests/              # Automated test suite (103 tests)
+│   ├── tests/              # Automated test suite (110 tests)
 │   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -229,7 +229,7 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 
 - **Public Endpoints**: `GET /`, `POST /register`, `POST /login`, `GET /jobs`
 - **Authenticated Endpoints**: `POST /match`, `POST /tailor-resume`, `POST /generate-cover-letter` (Protected by `Depends(get_current_user)`)
-- **Resource Owner Endpoints**: `GET /me`, `POST /profile`, `POST /upload-resume`, `GET /applications`, `POST /applications`
+- **Resource Owner Endpoints**: `GET /me`, `POST /profile`, `POST /upload-resume`, `GET /applications` (Enhanced P2-02), `POST /applications`
 
 ---
 
@@ -238,10 +238,10 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 ```bash
 cd backend
 
-# Run full test suite (103 tests)
+# Run full test suite (110 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run with test coverage (90% baseline)
+# Run with test coverage (91% baseline)
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
 
 # Run specific test markers
@@ -251,9 +251,9 @@ cd backend
 ./venv/bin/pytest tests/ -m regression -v
 ```
 
-- **Total Test Count**: **103 tests**
-- **Pass Rate**: **100% (103 / 103)**
-- **Measured Code Coverage**: **90% Baseline**
+- **Total Test Count**: **110 tests**
+- **Pass Rate**: **100% (110 / 110)**
+- **Measured Code Coverage**: **91% Baseline**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -264,4 +264,5 @@ cd backend
 - **Phase 1 (Modular Monolith Refactoring — COMPLETED)**: P1-01 through P1-05 completed.
 - **Phase 2 (Feature & Schema Polish)**:
   - `P2-01`: Enhanced Error Handling & Standardized API Responses (**Completed — 103 tests**)
-  - `P2-02`: Application Tracker Filtering & Pagination (*Pending*)
+  - `P2-02`: Application Tracker Filtering & Pagination (**Completed — 110 tests**)
+  - `P2-03`: Frontend Client Hardening & State Management (*Pending*)
