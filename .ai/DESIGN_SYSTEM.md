@@ -1,4 +1,4 @@
-# Job Seer Design System & UI Foundation (UX-01)
+# Job Seer Design System & UI Foundation (UX-01 to UX-05)
 
 ## Executive Summary
 This document specifies the visual identity, design tokens, typography hierarchy, semantic color matrix, reusable UI component standards, responsive guidelines, and accessibility conventions for **Job Seer**.
@@ -24,9 +24,9 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 | Brand Primary Hover | `--brand-primary-hover` | `#4f46e5` | Primary button hover state |
 | Brand Secondary | `--brand-secondary` | `#a855f7` | Secondary accents, score breakdown bars |
 | Brand Cyan | `--brand-cyan` | `#06b6d4` | Informational chips, experience metrics |
-| Background App | `--bg-app` | `#0b0f19` | Main application background |
-| Surface Glass | `--bg-surface` | `rgba(15, 23, 42, 0.75)` | Glassmorphic card backgrounds |
-| Surface Hover | `--bg-surface-hover` | `rgba(30, 41, 59, 0.85)` | Card hover & elevated elements |
+| Background App | `--bg-app` | `#0b0f19` | Main application background (Level 1) |
+| Surface Glass | `--bg-surface` | `rgba(15, 23, 42, 0.75)` | Content panels & cards (Level 2) |
+| Surface Hover | `--bg-surface-hover` | `rgba(30, 41, 59, 0.85)` | Elevated modals & focus areas (Level 3) |
 | Text Main | `--text-main` | `#f8fafc` | Primary headings and text |
 | Text Muted | `--text-muted` | `#64748b` | Subtitles, metadata, timestamps |
 | Semantic Success | `--color-success` | `#10b981` | Matched skills, high scores (≥80%), pass badges |
@@ -35,7 +35,25 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 3. Typography Hierarchy
+## 3. Surface & Depth Hierarchy Scale (UX-04 / UX-05)
+
+- **Level 1 (Page Surface)**: `#0b0f19` solid slate app background.
+- **Level 2 (Content Panels)**: Glass slate containers (`bg-slate-900/75 border border-white/10 rounded-2xl`).
+- **Level 3 (Elevated Overlays)**: Modal dialogs, active dropdowns, and toast notifications (`bg-slate-950/95 border border-indigo-500/30 shadow-2xl`).
+
+---
+
+## 4. Navigation & Workflow Grouping (UX-05)
+
+Sidebar and drawer menus organize application tools into 4 core candidate workflow sections:
+1. **Overview**: Dashboard Command Center
+2. **Discover**: Jobs Discovery Hub, V2 Matches
+3. **Manage**: Application Tracker (Kanban / List), Resume Intelligence Hub
+4. **Account**: Candidate Profile & Career Preferences
+
+---
+
+## 5. Typography Hierarchy
 
 - **Font Family**: `Outfit` sans-serif (Google Fonts).
 - **Display Headings**: `text-5xl` to `text-7xl`, `font-black`, `tracking-tight`.
@@ -46,7 +64,7 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 4. Component Foundation (`frontend/src/components/ui/`)
+## 6. Component Foundation (`frontend/src/components/ui/`)
 
 1. **`Button.jsx`**: Variants (`primary`, `secondary`, `ghost`, `destructive`, `success`, `outline`), sizes (`sm`, `md`, `lg`), loading spinner state (`isLoading`), and keyboard focus rings.
 2. **`Input.jsx`**: Standardized text input with label, placeholder, error state, helper text, start icon slot, and ARIA attributes.
@@ -60,8 +78,9 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 5. Accessibility Conventions
+## 7. Accessibility & Reduced Motion Conventions
 
 - **Focus Rings**: All interactive controls implement `focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950`.
+- **Reduced Motion**: Bypasses CSS keyframe animations when `@media (prefers-reduced-motion: reduce)` is enabled.
+- **Color Independence**: Status information always pairs color badges with explicit text labels (e.g., `Applied`, `Interview`, `Offer`, `Rejected`).
 - **Keyboard Traps & Dialogs**: `Modal.jsx` listens for `Escape` events and traps overflow scrolling cleanly.
-- **Form Association**: `Input.jsx` and `Select.jsx` automatically connect `<label htmlFor>` with `<input id>`.

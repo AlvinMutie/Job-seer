@@ -133,13 +133,33 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
         }
     };
 
-    const navItems = [
-        { icon: <LayoutDashboard size={18} />, label: 'Dashboard', path: '/dashboard' },
-        { icon: <Briefcase size={18} />, label: 'Jobs Hub', path: '/jobs' },
-        { icon: <Trophy size={18} />, label: 'Matches', path: '/matches' },
-        { icon: <Clock size={18} />, label: 'Tracker', path: '/tracker' },
-        { icon: <FileText size={18} />, label: 'Resume Hub', path: '/resume-hub' },
-        { icon: <SettingsIcon size={18} />, label: 'Settings', path: '/settings' },
+    const navSections = [
+        {
+            group: 'Overview',
+            items: [
+                { icon: <LayoutDashboard size={18} />, label: 'Dashboard', path: '/dashboard' }
+            ]
+        },
+        {
+            group: 'Discover',
+            items: [
+                { icon: <Briefcase size={18} />, label: 'Jobs Hub', path: '/jobs' },
+                { icon: <Trophy size={18} />, label: 'Matches', path: '/matches' }
+            ]
+        },
+        {
+            group: 'Manage',
+            items: [
+                { icon: <Clock size={18} />, label: 'Tracker', path: '/tracker' },
+                { icon: <FileText size={18} />, label: 'Resume Hub', path: '/resume-hub' }
+            ]
+        },
+        {
+            group: 'Account',
+            items: [
+                { icon: <SettingsIcon size={18} />, label: 'Settings', path: '/settings' }
+            ]
+        }
     ];
 
     const getInitials = (name) => {
@@ -150,7 +170,7 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
     return (
         <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-indigo-500/30">
             {/* Desktop Sidebar (Fixed / Sticky) */}
-            <aside className="hidden md:flex w-64 glass-card m-4 mr-0 rounded-3xl flex-col p-6 space-y-8 h-[calc(100vh-2rem)] sticky top-4 border-slate-800 bg-slate-950/80">
+            <aside className="hidden md:flex w-64 glass-card m-4 mr-0 rounded-3xl flex-col p-6 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border-slate-800 bg-slate-950/80">
                 <Link to="/dashboard" className="flex items-center gap-3 px-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1">
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
                         <Sparkles className="w-5 h-5 text-white" />
@@ -163,25 +183,36 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                     </div>
                 </Link>
 
-                <nav className="flex-1 space-y-1.5">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.label}
-                            to={item.path}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${window.location.pathname === item.path
-                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 translate-x-1'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
-                                }`}
-                        >
-                            {item.icon}
-                            <span>{item.label}</span>
-                        </Link>
+                <nav className="flex-1 space-y-6 overflow-y-auto pr-1">
+                    {navSections.map((sec) => (
+                        <div key={sec.group} className="space-y-1.5">
+                            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block">{sec.group}</span>
+                            {sec.items.map((item) => {
+                                const isActive = window.location.pathname === item.path;
+                                return (
+                                    <Link
+                                        key={item.label}
+                                        to={item.path}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative ${isActive
+                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
+                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                                            }`}
+                                    >
+                                        {isActive && (
+                                            <span className="absolute left-0 top-2 bottom-2 w-1 bg-white rounded-r-full"></span>
+                                        )}
+                                        {item.icon}
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
                     ))}
                 </nav>
 
                 <div className="pt-4 border-t border-slate-800/80 space-y-3">
                     {/* User Identity Chip */}
-                    <div className="flex items-center gap-3 p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div className="flex items-center gap-3 p-2.5 bg-slate-900/60 rounded-xl border border-slate-800">
                         <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center border border-indigo-500/30">
                             {getInitials(user?.full_name)}
                         </div>
@@ -228,20 +259,25 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                         exit={{ opacity: 0, y: -10 }}
                         className="md:hidden bg-slate-950/95 border-b border-slate-800 p-6 space-y-4 fixed top-[65px] left-0 w-full z-40 shadow-2xl"
                     >
-                        <nav className="space-y-2">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.label}
-                                    to={item.path}
-                                    onClick={() => setMobileDrawerOpen(false)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${window.location.pathname === item.path
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-400 hover:bg-slate-900'
-                                        }`}
-                                >
-                                    {item.icon}
-                                    <span>{item.label}</span>
-                                </Link>
+                        <nav className="space-y-4">
+                            {navSections.map(sec => (
+                                <div key={sec.group} className="space-y-1">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block px-2">{sec.group}</span>
+                                    {sec.items.map(item => (
+                                        <Link
+                                            key={item.label}
+                                            to={item.path}
+                                            onClick={() => setMobileDrawerOpen(false)}
+                                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${window.location.pathname === item.path
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'text-slate-400 hover:bg-slate-900'
+                                                }`}
+                                        >
+                                            {item.icon}
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    ))}
+                                </div>
                             ))}
                         </nav>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2 } from 'lucide-react';
+import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2, UserCheck, Compass } from 'lucide-react';
 import { jobService, authService, trackerService, dashboardService } from '../services/api';
 import TailorModal from '../components/TailorModal';
 import PageHeader from '../components/ui/PageHeader';
@@ -21,6 +21,14 @@ function Dashboard() {
     const [resumeText, setResumeText] = useState('');
     const [matchingJobId, setMatchingJobId] = useState(null);
     const [matchResults, setMatchResults] = useState({});
+
+    // Toast feedback message
+    const [toast, setToast] = useState({ show: false, text: '', type: 'info' });
+
+    const showToast = (text, type = 'info') => {
+        setToast({ show: true, text, type });
+        setTimeout(() => setToast({ show: false, text: '', type: 'info' }), 3000);
+    };
 
     // Tailoring State
     const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
@@ -78,7 +86,7 @@ function Dashboard() {
 
     const handleMatch = async (jobId) => {
         if (!resumeText) {
-            alert("Please upload your resume text in the Resume Hub first!");
+            showToast("Please upload your resume in the Resume Hub first!", "warning");
             return;
         }
         setMatchingJobId(jobId);
@@ -88,6 +96,7 @@ function Dashboard() {
             formData.append('job_id', jobId);
             const result = await jobService.matchResume(formData);
             setMatchResults(prev => ({ ...prev, [jobId]: result }));
+            showToast("AI match score calculated!", "success");
         } catch (error) {
             console.error("Match failed:", error);
         }
@@ -108,6 +117,7 @@ function Dashboard() {
                 company: result.company
             });
             setIsTailorModalOpen(true);
+            showToast("CV tailored for " + result.company, "success");
         } catch (error) {
             console.error("Tailoring failed:", error);
         } finally {
@@ -115,8 +125,22 @@ function Dashboard() {
         }
     };
 
+    const isNewUser = !user?.profile?.has_resume && (analytics?.total_applications || 0) === 0;
+
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in relative">
+            {/* Toast Feedback Notification */}
+            {toast.show && (
+                <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border flex items-center gap-2.5 animate-fade-in text-xs font-semibold ${
+                    toast.type === 'success' ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-300' :
+                    toast.type === 'warning' ? 'bg-amber-950/90 border-amber-500/30 text-amber-300' :
+                    'bg-indigo-950/90 border-indigo-500/30 text-indigo-300'
+                }`}>
+                    <Sparkles size={16} />
+                    <span>{toast.text}</span>
+                </div>
+            )}
+
             {/* Page Header */}
             <PageHeader
                 badgeText={`Targeting: ${user?.profile?.preferred_role || 'General Engineering'}`}
@@ -138,6 +162,50 @@ function Dashboard() {
                     )
                 }
             />
+
+            {/* Candidate Workspace Onboarding Banner (For New Users) */}
+            {isNewUser && (
+                <Card variant="glass" className="p-6 bg-gradient-to-r from-indigo-950/30 via-slate-900 to-indigo-950/20 border-indigo-500/30 space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400">
+                            <Compass size={22} />
+                        </div>
+                        <div>
+                            <h3 className="text-base font-bold text-white">Let's build your job search workspace</h3>
+                            <p className="text-xs text-slate-400">Follow 3 quick steps to unlock V2 match scoring and automated resume tailoring.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <a href="/settings" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
+                            <div className="flex items-center justify-between mb-2">
+                                <Badge variant="indigo" size="sm">Step 1</Badge>
+                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                            </div>
+                            <h4 className="text-sm font-bold text-white">1. Configure Preferences</h4>
+                            <p className="text-xs text-slate-400 mt-0.5">Set target title & technical skills</p>
+                        </a>
+
+                        <a href="/resume-hub" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
+                            <div className="flex items-center justify-between mb-2">
+                                <Badge variant="cyan" size="sm">Step 2</Badge>
+                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                            </div>
+                            <h4 className="text-sm font-bold text-white">2. Upload Base CV</h4>
+                            <p className="text-xs text-slate-400 mt-0.5">Run 10-layer ATS health scan</p>
+                        </a>
+
+                        <a href="/jobs" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
+                            <div className="flex items-center justify-between mb-2">
+                                <Badge variant="emerald" size="sm">Step 3</Badge>
+                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                            </div>
+                            <h4 className="text-sm font-bold text-white">3. Discover & Match Jobs</h4>
+                            <p className="text-xs text-slate-400 mt-0.5">Explore tech roles & calculate fit</p>
+                        </a>
+                    </div>
+                </Card>
+            )}
 
             {/* KPI Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -284,7 +352,10 @@ function Dashboard() {
                                 isMatching={matchingJobId === job.id}
                                 isTailoring={isTailoring}
                                 matchResult={matchResults[job.id]}
-                                onApplySuccess={initDashboard}
+                                onApplySuccess={() => {
+                                    initDashboard();
+                                    showToast("Application added to Tracker!", "success");
+                                }}
                             />
                         ))
                     )}
