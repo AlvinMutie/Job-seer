@@ -1,9 +1,10 @@
-# DATABASE.md — Database Architecture & Schema Specification
+# DATABASE.md — Database Architecture & Evolution Specification
 
-## Engine & Connection Details
-- **Database Engine**: SQLite 3 (Dev default via `job_hunter_v3.db`) / PostgreSQL ready via SQLAlchemy `DATABASE_URL` environment variable.
-- **ORM**: SQLAlchemy 2.0 declarative base (`app/models/models.py`).
-- **Migration Tool**: None configured (tables are created via `Base.metadata.create_all(bind=engine)` on FastAPI startup).
+## Engine & Infrastructure Strategy
+
+- **Development Engine**: **SQLite 3** (`job_hunter_v3.db`) is retained for zero-configuration local development.
+- **Production Engine**: **PostgreSQL 15+** is designated as the target production database. SQLAlchemy ORM abstractions guarantee compatibility across both engines.
+- **Migration Tooling**: **Alembic** must be introduced to manage schema migrations deterministically.
 
 ---
 
@@ -11,10 +12,10 @@
 
 ```text
        ┌────────────────────────┐
-       │         User           │
+       │         users          │
        ├────────────────────────┤
-       │ id (PK)                │
-       │ email (Unique)         │
+       │ id (PK, Integer)       │
+       │ email (Unique, String) │
        │ hashed_password        │
        │ full_name              │
        │ is_profile_complete    │
@@ -22,9 +23,9 @@
                    │ 1:1
                    ▼
        ┌────────────────────────┐
-       │        Profile         │
+       │        profiles        │
        ├────────────────────────┤
-       │ id (PK)                │
+       │ id (PK, Integer)       │
        │ user_id (FK -> users)  │
        │ preferred_role         │
        │ skills                 │
@@ -36,16 +37,16 @@
        └────────────────────────┘
 
        ┌────────────────────────┐         ┌────────────────────────┐
-       │         User           │         │          Job           │
+       │         users          │         │          jobs          │
        └───────────┬────────────┘         └───────────┬────────────┘
                    │ 1:N                              │ 1:N
                    ▼                                  ▼
        ┌───────────────────────────────────────────────────────────┐
-       │                    ApplicationTracker                     │
+       │                    application_tracker                    │
        ├───────────────────────────────────────────────────────────┤
-       │ id (PK)                                                   │
-       │ user_id (FK -> users.id)                                  │
-       │ job_id (FK -> jobs.id)                                    │
+       │ id (PK, Integer)                                          │
+       │ user_id (FK -> users.id, Index)                           │
+       │ job_id (FK -> jobs.id, Index)                             │
        │ status (Enum: Not Applied, Applied, Interview, etc.)      │
        │ match_score (Float)                                       │
        │ applied_at (DateTime)                                     │
@@ -54,73 +55,35 @@
 
  [ORPHAN / UNUSED TABLE]
        ┌────────────────────────┐
-       │         Resume         │
-       ├────────────────────────┤
-       │ id (PK)                │
-       │ user_id (FK -> users)  │
-       │ content_text           │
-       │ extracted_skills       │
-       │ created_at             │
-       └────────────────────────┘
+       │        resumes         │  <- Currently unused in code.
+       └────────────────────────┘     Targeted for removal or versioning.
 ```
 
 ---
 
-## Detailed Schema Specification
+## Database Anomalies & Recommended Schema Refactorings
 
-### 1. `users` Table
-| Column | Type | Constraints | Description |
-| ------ | ---- | ----------- | ----------- |
-| `id` | Integer | PK, Indexed | Primary Key |
-| `email` | String | Unique, Indexed | User Email Address |
-| `hashed_password` | String | Non-null | Bcrypt hashed password |
-| `full_name` | String | Nullable | User display name |
-| `is_profile_complete` | Integer | Default: 0 | Profile status flag (0 = false, 1 = true) |
+### 1. Orphan Table Removal / Integration (`resumes`)
+- **Current State**: `resumes` table exists in `app/models/models.py#L53-L62` with fields (`id`, `user_id`, `content_text`, `extracted_skills`, `created_at`), but no application route or service queries or inserts into it. Parsed text is stored directly on `profiles.resume_text`.
+- **Target Recommendation**: Remove the dead `resumes` ORM model, OR repurpose it as a `resume_versions` table to support historical CV uploads.
 
-### 2. `profiles` Table
-| Column | Type | Constraints | Description |
-| ------ | ---- | ----------- | ----------- |
-| `id` | Integer | PK, Indexed | Primary Key |
-| `user_id` | Integer | FK (`users.id`), Unique | Foreign key linking to user |
-| `preferred_role` | String | Nullable | Target job title |
-| `skills` | Text | Nullable | Comma-separated user technical skills |
-| `experience_level` | String | Nullable | Junior, Mid-Level, Senior, etc. |
-| `location_preference` | String | Nullable | Remote, NYC, etc. |
-| `salary_expectation` | String | Nullable | Annual target salary |
-| `resume_path` | String | Nullable | Absolute or relative disk path to uploaded PDF/DOCX |
-| `resume_text` | Text | Nullable | Extracted raw text from resume file |
-
-### 3. `jobs` Table
-| Column | Type | Constraints | Description |
-| ------ | ---- | ----------- | ----------- |
-| `id` | Integer | PK, Indexed | Primary Key |
-| `title` | String | Indexed | Job Posting Title |
-| `company` | String | Indexed | Company Name |
-| `location` | String | Nullable | Job Location |
-| `description` | Text | Non-null | Job Description content |
-| `remote_status` | String | Nullable | Remote, Hybrid, On-site |
-| `experience_level` | String | Nullable | Junior, Mid-Level, Senior |
-| `skills_required` | Text | Nullable | Required skills list |
-| `salary_range` | String | Nullable | Display salary string |
-| `posted_at` | DateTime | Default: `utcnow()` | Post timestamp |
-
-### 4. `application_tracker` Table
-| Column | Type | Constraints | Description |
-| ------ | ---- | ----------- | ----------- |
-| `id` | Integer | PK, Indexed | Primary Key |
-| `user_id` | Integer | FK (`users.id`) | Foreign key linking to user |
-| `job_id` | Integer | FK (`jobs.id`) | Foreign key linking to job |
-| `status` | Enum | Enum values (`ApplicationStatus`) | "Not Applied", "Applied", "Interview", "Rejected", "Offer" |
-| `match_score` | Float | Nullable | Stored match score percentage |
-| `applied_at` | DateTime | Nullable | Application timestamp |
-| `notes` | Text | Nullable | User notes |
-
-### 5. `resumes` Table (**DEAD / UNUSED**)
-- Table exists in `app/models/models.py#L53-L62` but is never referenced anywhere in `main.py` or service layer.
+### 2. Missing Indexes & Constraints
+- **Missing Index**: `application_tracker` requires a composite index on `(user_id, job_id)` for high-performance lookup in `GET /applications` and `POST /applications`.
+- **Missing Constraint**: `application_tracker` should enforce a unique constraint `UniqueConstraint('user_id', 'job_id', name='uix_user_job')` to prevent duplicate tracking rows.
 
 ---
 
-## Schema Anomalies & Recommendations
-1. **Unused Table**: Drop or integrate the `resumes` table. Currently, resume file path and text are duplicated directly inside `profiles`.
-2. **Missing Database Indexing**: `application_tracker` missing composite index on `(user_id, job_id)`.
-3. **No Migration History**: Database schema changes are currently unmanaged. Introduce Alembic migrations.
+## Alembic Migration Setup Strategy
+
+```bash
+# Initialize Alembic in backend/
+cd backend
+alembic init alembic
+
+# Configure alembic.ini and env.py to import SQLAlchemy Base
+# Generate initial migration snapshot from existing models
+alembic revision --autogenerate -m "initial_schema_snapshot"
+
+# Upgrade database
+alembic upgrade head
+```

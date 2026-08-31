@@ -53,13 +53,15 @@ The React SPA will run at `http://localhost:5173` (or `http://localhost:3000` pe
 
 ---
 
-## 3. Engineering Guidelines
+## 3. Mandatory Engineering Workflow
 
-### Backend Standards
-- All database queries must be scoped to `SessionLocal` DB sessions via `Depends(get_db)`.
-- Enforce explicit Pydantic response models for all endpoints.
-- Modularize routes out of `main.py` into `app/routers/` when adding new domains.
+All development tasks MUST follow the 8-step engineering lifecycle:
 
-### Frontend Standards
-- Component styling must strictly utilize Tailwind utility classes following the existing dark glassmorphism system (`glass-card`, `btn-primary`, `input-field`).
-- Do not introduce UI frameworks (e.g. Material UI, Chakra UI, Tailwind UI components) without prior approval.
+```text
+ANALYSE ➔ PLAN ➔ APPROVE ➔ IMPLEMENT ➔ TEST ➔ SECURITY REVIEW ➔ DOCUMENT ➔ REPORT
+```
+
+### Standards Summary
+- **Backend**: FastAPI, SQLAlchemy ORM, Pydantic v2 schemas. Routes MUST be placed in `backend/app/routers/` when refactoring `main.py`.
+- **Frontend**: React 18, Vite, Tailwind CSS v3 dark glassmorphism system.
+- **Testing**: Run `pytest` before requesting completion.

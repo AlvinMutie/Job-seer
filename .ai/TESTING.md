@@ -1,44 +1,73 @@
-# TESTING.md — Testing Strategy & Verification Gaps
+# TESTING.md — Testing Strategy & Quality Assurance Framework
 
-## Current Testing State
+## Testing Strategy Overview
 
-The project currently contains **NO formal unit test framework** (e.g. `pytest`, `unittest`, or `Jest`).
-
-Instead, verification is handled via ad-hoc standalone Python scripts in the `backend/` root directory:
-
-1. `backend/seed_jobs.py`:
-   - Seeds 4 mock job postings into `job_hunter_v3.db`.
-2. `backend/test_search.py`:
-   - Fires HTTP GET requests to `http://localhost:8000/jobs` with keyword and location params using `requests`.
-3. `backend/verify_matches.py`:
-   - Direct SQLite query reading User 1's resume text and printing calculated match scores for all database jobs.
-4. `backend/verify_system.py`:
-   - Asynchronous script calling `JobService` and `MatchingEngine` directly in Python memory.
+The **Smart Job Hunter** application currently has **0 automated unit or integration tests**. To ensure reliability during refactoring and feature additions, we establish a formal testing pyramid.
 
 ---
 
-## Testing Gaps & Recommendations
-
-### Backend Gaps
-- No automated unit tests for `MatchingEngine.calculate_match_score()`, `extract_skills()`, or `normalize_spaced_text()`.
-- No API contract testing (HTTP status codes, authorization header validation, error schemas).
-- No regression test suite for database transactions.
-
-### Frontend Gaps
-- No component unit tests (`vitest` / `@testing-library/react`).
-- No End-to-End (E2E) testing framework (Cypress / Playwright).
-
----
-
-## Recommended Testing Architecture
+## The Testing Pyramid
 
 ```text
-tests/
+               / \
+              / E2E \           <- Critical User Journeys (Playwright)
+             /-------\
+            /   API   \         <- FastAPI Endpoints & Security (pytest + httpx)
+           /-----------\
+          /  Business   \       <- Service Layer & Matching Engine (pytest)
+         /---------------\
+        /   Unit Tests    \     <- Utility Functions, Token Auth, Schemas (pytest)
+       /-------------------\
+```
+
+---
+
+## High-Risk Priority Areas
+
+When establishing automated test coverage, the following high-risk modules **MUST be tested first**:
+
+| Priority | Component | Target Files | Test Objective |
+| -------- | --------- | ------------ | -------------- |
+| **P0** | Authentication & Token Security | `app/core/security.py`, `app/routers/auth.py` | Verify password hashing, token encoding/decoding, expiration, and invalid token rejection. |
+| **P0** | API Authorization & Access Control | `app/routers/*.py` | Assert unauthenticated requests to protected endpoints return `401 Unauthorized`. |
+| **P1** | Matching Engine & Similarity | `app/services/matching_engine.py` | Test TF-IDF vectorization, skill extraction precision, alias normalization, and score accuracy. |
+| **P1** | Resume Parsing & Validation | `app/services/resume_parser.py` | Test text extraction from valid PDF/DOCX/TXT files and rejection of invalid/corrupt files. |
+| **P1** | File Upload Security | `app/routers/profile.py` | Verify extension validation, MIME type checks, and path traversal protection. |
+| **P2** | Application Tracker Ownership | `app/routers/applications.py` | Assert users can only read/update their own application tracking records. |
+
+---
+
+## Backend Testing Architecture
+
+### Framework Choice: `pytest` + `httpx`
+
+```text
+backend/tests/
+├── conftest.py                   # Pytest fixtures (DB session, mock client, auth tokens)
 ├── unit/
-│   ├── test_matching_engine.py    # Test TF-IDF and skill extraction logic
-│   ├── test_auth.py               # Test JWT creation & bcrypt verification
-│   └── test_job_service.py        # Test SQL filtering logic
-└── integration/
-    ├── test_api_auth.py           # Test /register, /login, /me endpoints
-    └── test_api_matching.py       # Test /match and /tailor-resume endpoints
+│   ├── test_security.py          # Test password hashing & JWT handling
+│   ├── test_matching_engine.py    # Test TF-IDF & skill extraction logic
+│   └── test_resume_parser.py     # Test PDF/DOCX text extraction
+├── integration/
+│   ├── test_auth_api.py          # Test /register, /login, /me routes
+│   ├── test_matching_api.py      # Test /match and /tailor-resume routes
+│   └── test_applications_api.py  # Test /applications CRUD routes
+└── security/
+    ├── test_authorization_matrix.py # Assert endpoints enforce security boundaries
+    └── test_upload_security.py   # Test malicious file upload rejection
+```
+
+---
+
+## Recommended Execution Commands
+
+```bash
+# Run full test suite with coverage report
+pytest --cov=app tests/
+
+# Run security assertion tests only
+pytest tests/security/
+
+# Run matching engine unit tests
+pytest tests/unit/test_matching_engine.py
 ```

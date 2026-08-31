@@ -1,37 +1,85 @@
-# API.md — REST API Contract & Integration Analysis
+# API.md — REST API Contract & Security Boundary Specification
 
 ## Overview
 All API endpoints are hosted by FastAPI at `http://localhost:8000`. The React frontend proxies `/api/*` requests to `http://localhost:8000/*`.
 
 ---
 
-## Endpoint Inventory
+## Access Control & Security Boundaries
 
-| Method | Endpoint | Purpose | Auth Required | Frontend Usage | Status / Anomalies |
-| ------ | -------- | ------- | ------------- | -------------- | ------------------ |
-| `GET` | `/` | API Root / Health Check | No | None | WORKING |
-| `GET` | `/jobs` | Query job listings with filters | No | `Dashboard.jsx`, `Matches.jsx`, `api.js` | WORKING |
-| `POST` | `/match` | Calculate TF-IDF & Skill match score | **No (Missing Auth)** | `Dashboard.jsx`, `Matches.jsx`, `api.js` | WORKING (Unauthenticated) |
-| `POST` | `/generate-cover-letter` | Generate formatted cover letter | **No (Missing Auth)** | Defined in `api.js` **(No UI consumer)** | **IMPLEMENTED_BUT_UNUSED** |
-| `POST` | `/tailor-resume` | Generate resume improvement bullet points | **No (Missing Auth)** | `Dashboard.jsx`, `api.js` | WORKING (Unauthenticated) |
-| `POST` | `/register` | Register new user account | No | `Register.jsx`, `api.js` | WORKING |
-| `POST` | `/login` | Authenticate user & receive JWT | No | `Login.jsx`, `api.js` | WORKING (Form-encoded) |
-| `GET` | `/me` | Fetch active user profile & CV text | **Yes** (`Bearer JWT`) | `App.jsx`, `Dashboard.jsx`, `ResumeHub.jsx`, `Settings.jsx` | WORKING |
-| `POST` | `/profile` | Create/Update user profile fields | **Yes** (`Bearer JWT`) | `ProfileSetup.jsx`, `Settings.jsx` | WORKING |
-| `POST` | `/upload-resume` | Upload & extract PDF/DOCX/TXT text | **Yes** (`Bearer JWT`) | `ProfileSetup.jsx`, `ResumeHub.jsx` | WORKING (Security Risk: Unrestricted upload) |
-| `GET` | `/applications` | Fetch tracked applications for user | **Yes** (`Bearer JWT`) | `Dashboard.jsx`, `Tracker.jsx` | WORKING |
-| `POST` | `/applications` | Upsert tracked job application | **Yes** (`Bearer JWT`) | `Dashboard.jsx` (Quick Apply) | WORKING |
+Each API endpoint is classified according to its intended access control boundary:
+
+- **PUBLIC**: Accessible by any unauthenticated client.
+- **AUTHENTICATED**: Requires a valid logged-in user JWT bearer token.
+- **RESOURCE_OWNER**: Requires authentication AND verifies that the user owns the specific target resource.
+- **ROLE_RESTRICTED**: Requires specific user roles or permissions (e.g. Admin).
 
 ---
 
-## Detailed Endpoint Contracts
+## Endpoint Access Control Table
 
-### 1. `POST /match`
-- **Content-Type**: `application/x-www-form-urlencoded`
+| Method | Endpoint | Access Boundary | Current Auth Status | Required Security Enforcement | Frontend Usage | Status |
+| ------ | -------- | --------------- | ------------------- | ----------------------------- | -------------- | ------ |
+| `GET` | `/` | **PUBLIC** | Unauthenticated | None (System health check) | None | WORKING |
+| `POST` | `/register` | **PUBLIC** | Unauthenticated | Input validation & rate limiting | `Register.jsx`, `api.js` | WORKING |
+| `POST` | `/login` | **PUBLIC** | Unauthenticated | Rate limiting on failed attempts | `Login.jsx`, `api.js` | WORKING |
+| `GET` | `/jobs` | **PUBLIC** | Unauthenticated | Sanitized search parameters | `Dashboard.jsx`, `Matches.jsx` | WORKING |
+| `POST` | `/match` | **AUTHENTICATED** | **Unauthenticated (Vulnerable)** | Enforce `Depends(get_current_user)` | `Dashboard.jsx`, `Matches.jsx` | WORKING (Security Gap) |
+| `POST` | `/tailor-resume` | **AUTHENTICATED** | **Unauthenticated (Vulnerable)** | Enforce `Depends(get_current_user)` | `Dashboard.jsx` | WORKING (Security Gap) |
+| `POST` | `/generate-cover-letter` | **AUTHENTICATED** | **Unauthenticated (Vulnerable)** | Enforce `Depends(get_current_user)` | Defined in `api.js` | IMPLEMENTED_BUT_UNUSED |
+| `GET` | `/me` | **RESOURCE_OWNER** | Authenticated | Verified via `get_current_user` | `App.jsx`, `Dashboard.jsx` | WORKING |
+| `POST` | `/profile` | **RESOURCE_OWNER** | Authenticated | Scoped to `current_user.id` | `ProfileSetup.jsx`, `Settings.jsx` | WORKING |
+| `POST` | `/upload-resume` | **RESOURCE_OWNER** | Authenticated | Add file extension & mime validation | `ProfileSetup.jsx`, `ResumeHub.jsx` | WORKING (Upload Vulnerability) |
+| `GET` | `/applications` | **RESOURCE_OWNER** | Authenticated | Query filtered to `user_id == current_user.id` | `Dashboard.jsx`, `Tracker.jsx` | WORKING |
+| `POST` | `/applications` | **RESOURCE_OWNER** | Authenticated | Assert `user_id == current_user.id` on upsert | `Dashboard.jsx` | WORKING |
+
+---
+
+## Detailed Endpoint Specifications
+
+### 1. Public Authentication Endpoints
+
+#### `POST /register`
+- **Boundary**: `PUBLIC`
+- **Request Body** (`application/json`):
+  ```json
+  {
+    "full_name": "John Doe",
+    "email": "john@example.com",
+    "password": "SecurePassword123!"
+  }
+  ```
+- **Response** (`200 OK`):
+  ```json
+  {
+    "access_token": "eyJhbGciOiJIUzI1Ni...",
+    "token_type": "bearer"
+  }
+  ```
+
+#### `POST /login`
+- **Boundary**: `PUBLIC`
+- **Request Body** (`application/x-www-form-urlencoded`):
+  - `username`: `john@example.com`
+  - `password`: `SecurePassword123!`
+- **Response** (`200 OK`):
+  ```json
+  {
+    "access_token": "eyJhbGciOiJIUzI1Ni...",
+    "token_type": "bearer"
+  }
+  ```
+
+---
+
+### 2. Computational & AI Services Endpoints
+
+#### `POST /match`
+- **Boundary**: `AUTHENTICATED` (Currently unauthenticated in code — MUST fix)
 - **Request Form Data**:
   - `resume_text` (string, required)
   - `job_id` (integer, required)
-- **Response JSON**:
+- **Response** (`200 OK`):
   ```json
   {
     "match_percentage": 78.5,
@@ -43,12 +91,12 @@ All API endpoints are hosted by FastAPI at `http://localhost:8000`. The React fr
   }
   ```
 
-### 2. `POST /tailor-resume`
-- **Content-Type**: `application/x-www-form-urlencoded`
+#### `POST /tailor-resume`
+- **Boundary**: `AUTHENTICATED` (Currently unauthenticated in code — MUST fix)
 - **Request Form Data**:
   - `resume_text` (string, required)
   - `job_id` (integer, required)
-- **Response JSON**:
+- **Response** (`200 OK`):
   ```json
   {
     "job_title": "Senior Python Developer",
@@ -56,7 +104,6 @@ All API endpoints are hosted by FastAPI at `http://localhost:8000`. The React fr
     "suggestions": [
       {
         "section": "Professional Summary",
-        "original_context": "Current profile focuses on general experience.",
         "suggestion": "Integrate your knowledge of AWS, DOCKER directly into your summary...",
         "impact": "High - Targets initial screening"
       }
@@ -64,23 +111,47 @@ All API endpoints are hosted by FastAPI at `http://localhost:8000`. The React fr
   }
   ```
 
-### 3. `POST /generate-cover-letter` (Unused Endpoint)
-- **Content-Type**: `application/x-www-form-urlencoded`
-- **Request Form Data**:
-  - `job_id` (integer)
-  - `candidate_name` (string)
-  - `resume_text` (string)
-- **Response JSON**:
+---
+
+### 3. Resource-Owner Protected Endpoints
+
+#### `GET /me`
+- **Boundary**: `RESOURCE_OWNER`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response** (`200 OK`):
   ```json
   {
-    "cover_letter": "Dear Hiring Manager at TechCorp...\n..."
+    "id": 1,
+    "email": "john@example.com",
+    "full_name": "John Doe",
+    "is_profile_complete": true,
+    "profile": {
+      "preferred_role": "Senior Python Developer",
+      "skills": "Python, FastAPI, AWS",
+      "experience_level": "Senior",
+      "has_resume": true,
+      "resume_text": "Experienced Python Developer..."
+    }
+  }
+  ```
+
+#### `POST /upload-resume`
+- **Boundary**: `RESOURCE_OWNER`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Form Data**: `file` (Multipart file upload)
+- **Response** (`200 OK`):
+  ```json
+  {
+    "message": "Resume uploaded and parsed successfully",
+    "filename": "resume.pdf",
+    "text_preview": "Experienced Python Developer..."
   }
   ```
 
 ---
 
-## API Discrepancies & Recommendations
+## Endpoint Anomalies & Security Gaps
 
-1. **Unused Endpoint**: `POST /generate-cover-letter` exists on backend and in `frontend/src/services/api.js`, but no React page invokes it.
-2. **Missing Authorization**: `/match`, `/tailor-resume`, `/generate-cover-letter`, and `/jobs` can be queried anonymously. They must be wrapped with `current_user: User = Depends(get_current_user)`.
-3. **Inconsistent Request Payloads**: Auth endpoints (`/login`) use URL form encoding, `/register` uses JSON, `/match` uses Form data. Standardize request schemas.
+1. **Unauthenticated Computational Endpoints**: `/match`, `/tailor-resume`, `/generate-cover-letter`, and `/jobs` accept requests without a JWT token. An anonymous user or script can consume server CPU (TF-IDF vectorization and spaCy parsing) without logging in.
+2. **Orphan Endpoint**: `POST /generate-cover-letter` is fully defined in backend and API wrapper (`src/services/api.js`), but no React UI component invokes it.
+3. **Payload Inconsistency**: Authentication uses OAuth2 form encoding (`username`/`password`), registration uses JSON, matching uses multipart form data. Request validation schemas should be unified.

@@ -4,7 +4,24 @@ Welcome AI Agent. This document governs all automated and assisted code modifica
 
 ---
 
-## 1. Core Principles
+## 1. Mandatory Development Workflow
+
+Every AI agent working on this codebase MUST follow this explicit 8-step workflow. AI agents must **NEVER independently make large architectural changes or execute code modifications without prior approval**.
+
+```text
+  1. ANALYSE        -> Inspect authoritative source files; gather empirical facts.
+  2. PLAN           -> Formulate a detailed, modular implementation plan with risk assessment.
+  3. APPROVE        -> Present plan to user; wait for explicit confirmation.
+  4. IMPLEMENT      -> Execute targeted, minimal code modifications.
+  5. TEST           -> Run automated tests and linting to verify runtime correctness.
+  6. SECURITY REVIEW-> Verify security boundaries, input validation, and access control.
+  7. DOCUMENT       -> Update .ai/ and docs/ documentation system reflecting changes.
+  8. REPORT         -> Present concise, technical completion summary to user.
+```
+
+---
+
+## 2. Core Engineering Principles
 
 1. **Inspect Before Modifying**:
    - Never assume file locations, schema attributes, or API signatures.
@@ -30,20 +47,12 @@ Welcome AI Agent. This document governs all automated and assisted code modifica
 
 ---
 
-## 2. Codebase Conventions
+## 3. Proposal Requirements for Complex Tasks
 
-- **Backend**: FastAPI (Python 3.10+), SQLAlchemy ORM, Pydantic v2.
-  - Sub-routers should be placed in `backend/app/routers/` when modularizing `main.py`.
-  - Database migrations should use Alembic.
-  - Dependencies belong in `backend/requirements.txt`.
-- **Frontend**: React 18, Vite, Tailwind CSS v3, Framer Motion, Lucide React.
-  - Keep styling aligned with the established Dark Glassmorphism palette (`slate-950`, `indigo-600`, `glass-card`).
-  - Use `authService`, `jobService`, and `trackerService` inside `frontend/src/services/api.js` for API calls.
-
----
-
-## 3. Mandatory Workflow
-
-```text
-Understand Request -> Inspect Code -> Formulate Implementation Plan -> Get Approval -> Implement -> Verify empirically -> Document Changes
-```
+Before executing complex or multi-file tasks, an AI agent MUST explicitly explain:
+- **What was found** (Empirical facts from code inspection)
+- **What is intended to change** (Target files and specific code chunks)
+- **Why** (Technical justification and problem solved)
+- **Files affected** (Explicit absolute paths)
+- **Risks & Mitigation** (Potential side effects)
+- **Testing Approach** (How verification will be empirically demonstrated)
