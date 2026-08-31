@@ -99,7 +99,6 @@ function Landing() {
                         <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent block leading-none">
                             Job Seer
                         </span>
-                        <span className="text-[10px] text-slate-400 font-medium block mt-0.5">Intelligent Companion</span>
                     </div>
                 </div>
 
@@ -135,7 +134,7 @@ function Landing() {
                     className="max-w-4xl flex flex-col items-center"
                 >
                     <span className="badge badge-indigo text-xs py-1.5 px-4 mb-6 inline-flex items-center gap-2 border border-indigo-500/30 bg-indigo-500/10 rounded-full text-indigo-300">
-                        <Sparkles size={14} className="text-amber-400 animate-spin-slow" /> Your Intelligent Job Search Companion
+                        <Sparkles size={14} className="text-amber-400 animate-spin-slow" /> AI-Powered Career Platform
                     </span>
 
                     <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-[1.08] text-white">
@@ -404,7 +403,7 @@ function Landing() {
                     <span className="badge badge-indigo text-xs py-1 px-3 mb-3 inline-block">Step-by-Step System</span>
                     <h2 className="text-3xl md:text-4xl font-extrabold text-white">How Job Seer Accelerates Your Job Search</h2>
                     <p className="text-slate-400 max-w-2xl mx-auto mt-3 text-sm md:text-base">
-                        A structured AI companion workflow designed to transform generic applications into tailored interview invitations.
+                        A structured AI workflow designed to transform generic applications into tailored interview invitations.
                     </p>
                 </div>
 
@@ -661,7 +660,7 @@ function Landing() {
                             <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold">
                                 <Check size={20} />
                             </div>
-                            <h3 className="text-xl font-bold text-white">With Job Seer Companion</h3>
+                            <h3 className="text-xl font-bold text-white">With Job Seer</h3>
                         </div>
                         <ul className="space-y-4 text-sm text-slate-200">
                             <li className="flex items-start gap-3">
@@ -746,7 +745,7 @@ function Landing() {
                         <span className="text-base font-bold text-white">Job Seer</span>
                     </div>
                     <div>
-                        © {new Date().getFullYear()} Job Seer — Your intelligent job search companion. All rights reserved.
+                        © {new Date().getFullYear()} Job Seer. All rights reserved.
                     </div>
                     <div className="flex gap-6">
                         <a href="#how-it-works" className="hover:text-slate-300 transition-colors">How It Works</a>

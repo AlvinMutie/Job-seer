@@ -47,7 +47,7 @@ function Register() {
                         <Sparkles className="text-white" size={24} />
                     </div>
                     <h1 className="text-2xl font-bold">Welcome to Job Seer</h1>
-                    <p className="text-slate-500 mt-2">Your intelligent job search companion</p>
+                    <p className="text-slate-500 mt-2">Create your professional profile</p>
                 </div>
 
                 {error && (

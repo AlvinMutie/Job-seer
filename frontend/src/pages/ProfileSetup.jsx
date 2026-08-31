@@ -47,7 +47,7 @@ function ProfileSetup() {
                 <div className="flex justify-between items-center mb-10">
                     <div>
                         <h1 className="text-2xl font-bold">Profile Setup</h1>
-                        <p className="text-slate-500 mt-1">Let's personalize your Job Seer companion</p>
+                        <p className="text-slate-500 mt-1">Let's personalize your career preferences</p>
                     </div>
                     <div className="flex gap-2">
                         {[1, 2].map(i => (

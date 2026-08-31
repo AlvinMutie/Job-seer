@@ -44,7 +44,7 @@ function Login() {
                         <Sparkles className="text-white" size={24} />
                     </div>
                     <h1 className="text-2xl font-bold">Welcome Back</h1>
-                    <p className="text-slate-500 mt-2">Access your Job Seer companion</p>
+                    <p className="text-slate-500 mt-2">Sign in to your Job Seer account</p>
                 </div>
 
                 {error && (

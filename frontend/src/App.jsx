@@ -147,7 +147,6 @@ function DashboardLayout({ children }) {
                         <span className="text-xl font-bold bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent block leading-tight">
                             Job Seer
                         </span>
-                        <span className="text-[10px] text-slate-400 font-medium block">Intelligent Companion</span>
                     </div>
                 </div>
 
