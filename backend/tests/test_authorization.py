@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = [pytest.mark.security, pytest.mark.regression]
+
 def test_public_root_health_check(client):
     """Verify GET / is accessible publicly without authentication."""
     response = client.get("/")

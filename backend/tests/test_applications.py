@@ -1,4 +1,7 @@
 import pytest
+from app.models.models import ApplicationTracker
+
+pytestmark = [pytest.mark.integration, pytest.mark.regression]
 
 def test_create_application(client, test_user, seed_test_jobs):
     """Test creating an application tracking record returns success message."""

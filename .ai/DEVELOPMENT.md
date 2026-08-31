@@ -53,22 +53,37 @@ The backend follows a modular monolith architecture with clear layer separations
 
 ---
 
-## 3. Environment Configuration
+## 3. Testing Infrastructure & Coverage
+
+Automated testing is configured in `backend/pyproject.toml`:
+
+```bash
+cd backend
+
+# Run full test suite (58 tests)
+./venv/bin/pytest tests/ -v
+
+# Run with test coverage (88% baseline)
+./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
+
+# Run specific test markers
+./venv/bin/pytest tests/ -m security -v
+./venv/bin/pytest tests/ -m unit -v
+./venv/bin/pytest tests/ -m integration -v
+./venv/bin/pytest tests/ -m regression -v
+```
+
+HTML coverage reports are generated at `backend/htmlcov/index.html`.
+
+---
+
+## 4. Environment Configuration
 
 Application configuration is centralized in `backend/app/core/config.py` using `pydantic-settings`:
 
 - **Development**: Reads environment variables from local `backend/.env`.
 - **Testing**: Explicit test fixtures in `tests/conftest.py` supply isolated test settings.
 - **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Wildcard `*` in `CORS_ORIGINS` is prohibited in production.
-
----
-
-## 4. Running Automated Tests
-
-```bash
-cd backend
-./venv/bin/pytest tests/ -v
-```
 
 ---
 

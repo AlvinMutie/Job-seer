@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers"
+markers = [
+    "unit: Unit tests for isolated functions, services, and utility helpers",
+    "integration: API integration tests across HTTP endpoints and components",
+    "security: Security boundary tests for auth, authorization, CORS, and file uploads",
+    "regression: Core regression safety gate tests"
+]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = [
+    "tests/*",
+    "venv/*",
+    "*/__init__.py"
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError"
+]

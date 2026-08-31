@@ -1,6 +1,8 @@
 import pytest
 from app.core.config import settings
 
+pytestmark = [pytest.mark.security, pytest.mark.unit]
+
 
 def test_cors_allowed_origin_header(client):
     """Verify that requests from a trusted frontend origin receive Access-Control-Allow-Origin header."""

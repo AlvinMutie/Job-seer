@@ -107,8 +107,9 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Framework**: `pytest` 9.1+ with FastAPI `TestClient`
+- **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
+- **Coverage Baseline**: **88% Overall Code Coverage**
 
 ---
 
@@ -128,7 +129,7 @@ Smart-Job-Hunter/
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # App entry point & router registration (36 lines)
 │   ├── tests/              # Automated test suite (58 tests)
-│   ├── uploads/            # Server resume upload storage
+│   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
 ├── frontend/
@@ -234,11 +235,23 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 
 ```bash
 cd backend
+
+# Run full test suite
 ./venv/bin/pytest tests/ -v
+
+# Run with test coverage (88% baseline)
+./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
+
+# Run specific test markers
+./venv/bin/pytest tests/ -m security -v
+./venv/bin/pytest tests/ -m unit -v
+./venv/bin/pytest tests/ -m integration -v
+./venv/bin/pytest tests/ -m regression -v
 ```
 
 - **Total Test Count**: **58 tests**
 - **Pass Rate**: **100% (58 / 58)**
+- **Measured Code Coverage**: **88% Baseline**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -249,4 +262,5 @@ cd backend
 - **Phase 1 (Modular Monolith Refactoring)**:
   - `P1-01`: Modularize main.py into Routers (**Completed — 58 tests**)
   - `P1-02`: Separate Schemas & Models (**Completed — 58 tests**)
-  - `P1-03`: Setup pytest Safety Testing Framework (*Pending*)
+  - `P1-03`: Setup pytest Safety Testing Framework (**Completed — 88% coverage**)
+  - `P1-04`: Add Auth Security Safety Gate Tests (*Pending*)

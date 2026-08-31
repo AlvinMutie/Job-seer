@@ -3,6 +3,9 @@ import pytest
 from app.auth import get_password_hash, verify_password
 from app.models.models import User
 
+pytestmark = [pytest.mark.security, pytest.mark.unit]
+
+
 def test_register_valid_user(client):
     """Test registering a new user returns 200 OK and Bearer access token."""
     payload = {

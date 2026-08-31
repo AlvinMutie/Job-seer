@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -5,7 +6,14 @@ from app.core.config import settings
 from app.database import init_db
 from app.routers import auth, jobs, matching, profile, applications
 
-app = FastAPI(title="Smart Job Hunter API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="Smart Job Hunter API", lifespan=lifespan)
 
 # Configure CORS
 app.add_middleware(
@@ -22,11 +30,6 @@ app.include_router(jobs.router)
 app.include_router(matching.router)
 app.include_router(profile.router)
 app.include_router(applications.router)
-
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
 
 
 @app.get("/")

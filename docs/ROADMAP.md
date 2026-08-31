@@ -20,7 +20,7 @@ flowchart TD
     subgraph P1 [P1: High Stabilization & Testing]
         P1-01[P1-01: Modularize main.py into Routers ✓ COMPLETED]
         P1-02[P1-02: Separate Schemas & Models ✓ COMPLETED]
-        P1-03[P1-03: Setup pytest Safety Testing Framework]
+        P1-03[P1-03: Setup pytest Safety Testing Framework ✓ COMPLETED]
         P1-04[P1-04: Add Auth Security Safety Gate Tests]
         P1-05[P1-05: Add File Upload & Matching Safety Gate Tests]
     end
@@ -54,15 +54,18 @@ flowchart TD
 - **Result**: Structural refactoring of monolithic `main.py` into 5 APIRouters. 58 / 58 tests passing.
 
 ### P1-02 — Separate Schemas & Models (✓ COMPLETED)
-- **Result**: Extracted all Pydantic DTO models into dedicated `app/schemas/` package (`auth.py`, `profile.py`, `matching.py`, `applications.py`). Kept SQLAlchemy ORM models in `app/models/` 100% untouched. **58 / 58 tests passing**.
+- **Result**: Extracted Pydantic DTO models into `app/schemas/`. 58 / 58 tests passing.
+
+### P1-03 — Setup pytest Safety Testing Framework (✓ COMPLETED)
+- **Result**: Configured `pyproject.toml` with `pytest-cov` (88% code coverage baseline), strict test markers (`unit`, `integration`, `security`, `regression`), and reduced warnings from 75 to 1. **58 / 58 tests passing**.
 
 ---
 
 ## Detailed Pending Task Breakdown (Phase 1)
 
-### P1-03 — Setup pytest Safety Testing Framework Enhancements
+### P1-04 — Add Auth Security Safety Gate Tests
 
-- **Objective**: Standardize test markers, coverage generation, and test runner configurations in `pyproject.toml` or `pytest.ini`.
-- **Files Likely Affected**: `backend/pyproject.toml` (NEW).
-- **Preconditions**: P1-01, P1-02 completed.
+- **Objective**: Add edge-case safety tests for token expiration, payload tampering, header variations, and invalid user claims.
+- **Files Likely Affected**: `backend/tests/test_auth.py`, `backend/tests/test_authorization.py`.
+- **Preconditions**: P1-01, P1-02, P1-03 completed.
 - **Risk**: Low.

@@ -1,4 +1,7 @@
 import pytest
+from app.models.models import Job, User, Profile
+
+pytestmark = [pytest.mark.integration, pytest.mark.regression]
 
 def test_job_search_keyword_filter(client, seed_test_jobs):
     """Test GET /jobs filtering by keyword parameter returns matching jobs."""

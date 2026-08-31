@@ -1,6 +1,8 @@
 import pytest
 from app.services.matching_engine import MatchingEngine
 
+pytestmark = [pytest.mark.unit, pytest.mark.regression]
+
 @pytest.fixture
 def matching_engine():
     return MatchingEngine()

@@ -1,6 +1,8 @@
 import pytest
 import io
 
+pytestmark = [pytest.mark.security, pytest.mark.unit]
+
 def test_upload_txt_resume_valid(client, test_user):
     """Test uploading a valid TXT resume file extracts text and saves to profile."""
     file_content = b"John Doe\nExperienced Python Engineer\nSkills: Python, FastAPI, AWS, PostgreSQL"

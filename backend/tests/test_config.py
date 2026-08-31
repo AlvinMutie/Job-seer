@@ -2,6 +2,8 @@ import os
 import pytest
 from app.core.config import Settings
 
+pytestmark = [pytest.mark.unit, pytest.mark.security]
+
 
 def test_config_loads_defaults():
     """Verify default Settings values populate correctly in development mode."""

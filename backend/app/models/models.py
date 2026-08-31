@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 import datetime
 import enum
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -48,7 +47,7 @@ class Job(Base):
     experience_level = Column(String)
     skills_required = Column(Text)  # Comma separated or JSON
     salary_range = Column(String, nullable=True)
-    posted_at = Column(DateTime, default=datetime.datetime.utcnow)
+    posted_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 class Resume(Base):
     __tablename__ = "resumes"
@@ -56,7 +55,7 @@ class Resume(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     content_text = Column(Text)
     extracted_skills = Column(Text)  # Comma separated
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
     
     user = relationship("User")
 

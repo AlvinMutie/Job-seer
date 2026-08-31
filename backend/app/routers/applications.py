@@ -55,7 +55,7 @@ async def create_application(
         status=app_data.status,
         match_score=app_data.match_score,
         notes=app_data.notes,
-        applied_at=datetime.datetime.utcnow()
+        applied_at=datetime.datetime.now(datetime.timezone.utc)
     )
     db.add(new_app)
     db.commit()
