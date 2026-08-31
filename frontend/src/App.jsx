@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { Briefcase, FileText, LayoutDashboard, Clock, Trophy, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { Briefcase, FileText, LayoutDashboard, Clock, Trophy, LogOut, Settings as SettingsIcon, Sparkles } from 'lucide-react';
 
 import Dashboard from './pages/Dashboard';
 import Tracker from './pages/Tracker';
@@ -115,9 +115,15 @@ function ProtectedRoute({ children }) {
 }
 
 function DashboardLayout({ children }) {
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+        } catch (e) {
+            console.error("Logout request error:", e);
+        } finally {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+        }
     };
 
     const navItems = [
@@ -135,11 +141,14 @@ function DashboardLayout({ children }) {
             <aside className="w-64 glass-card m-4 mr-0 rounded-3xl flex flex-col p-6 space-y-8 h-[calc(100vh-2rem)] sticky top-4">
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                        <Briefcase className="w-6 h-6 text-white" />
+                        <Sparkles className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                        Hunter.io
-                    </span>
+                    <div>
+                        <span className="text-xl font-bold bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent block leading-tight">
+                            Job Seer
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium block">Intelligent Companion</span>
+                    </div>
                 </div>
 
                 <nav className="flex-1 space-y-2">

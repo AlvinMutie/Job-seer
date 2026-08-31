@@ -1,6 +1,8 @@
-# Smart Job Hunter
+# Job Seer
 
-**Smart Job Hunter** is an intelligent job matching platform that uses Natural Language Processing (NLP) and statistical similarity algorithms to analyze resume fit against job descriptions, generate resume tailoring recommendations, format cover letters, and track job applications.
+**Job Seer** is an intelligent job search companion that uses Natural Language Processing (NLP) and statistical similarity algorithms to analyze resume fit against job descriptions, evaluate ATS health, generate resume tailoring recommendations, format cover letters, and track job applications in a Kanban workspace.
+
+> **Tagline**: *Your intelligent job search companion.*
 
 ---
 
@@ -8,12 +10,13 @@
 
 Applying for jobs without understanding how well your resume matches a job description leads to low response rates and wasted effort. Standard job search tools rely on simple string keyword matching that misses skill synonyms and contextual fit.
 
-Smart Job Hunter addresses this problem by parsing candidate resumes, normalizing technical skill variations, performing TF-IDF statistical vectorization, and computing exact skill overlap metrics. Candidates gain clear visibility into missing requirements, tailored bullet point recommendations, and a centralized application tracking pipeline.
+Job Seer addresses this problem by parsing candidate resumes, normalizing technical skill variations, performing TF-IDF statistical vectorization, and computing exact skill overlap metrics. Candidates gain clear visibility into missing requirements, tailored bullet point recommendations, and a centralized application tracking pipeline.
 
 ---
 
 ## Key Features
 
+- **Deployment & Production Readiness (Phase 5)**: Health check probes (`GET /health` liveness, `GET /health/ready` DB readiness), production Docker containerization (`Dockerfile`, `docker-compose.yml`), `.env.example` configuration, and Job Seer rebrand.
 - **Production Security & Performance (Phase 4)**: Dual HttpOnly cookie & Bearer token authentication (SEC-06 resolved), sliding window rate limiting (SEC-07 resolved), production HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`), and database index query optimization.
 - **Authentication & User Profiles**: User registration, JWT bearer token & HttpOnly cookie authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
 - **Intelligent Command Center Dashboard**: Real-time aggregated intelligence workspace (`Dashboard.jsx`) featuring 4 KPI Stat Cards (Average V2 Match %, Active Application Pipeline, ATS Health Score & Status Badge, Saved Tailored Assets Count), pipeline stage breakdown, action launchpad, and job recommendations.
@@ -34,7 +37,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ### Backend
 - **Framework**: FastAPI 0.141+
 - **Architecture**: Layered Modular Monolith (Routers, Schemas, Models, Services)
-- **Database / ORM**: SQLAlchemy 2.0+ with SQLite
+- **Database / ORM**: SQLAlchemy 2.0+ with SQLite / PostgreSQL support
 - **NLP & Statistics**: `spacy` 3.8+ (`en_core_web_sm`), `scikit-learn` 1.9+ (`TfidfVectorizer`)
 - **Document Parsers**: PyMuPDF (`fitz`), `docx2txt`
 - **Authentication**: `python-jose` 3.5.0 (JWT), `passlib` 1.7.4 / `bcrypt` 4.0.1
@@ -46,7 +49,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (166 tests, 90 security tests, 91% coverage)
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (171 tests, 90 security tests, 91% coverage)
 - **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
 
@@ -55,7 +58,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Automated Test Suites
 
 ```bash
-# Backend (166 tests passing)
+# Backend (171 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
@@ -67,7 +70,7 @@ cd frontend
 npm test
 ```
 
-- **Backend Tests**: **166 tests (100% pass rate, 91% code coverage)**
+- **Backend Tests**: **171 tests (100% pass rate, 91% code coverage)**
 - **Security Tests**: **90 tests (100% pass rate)**
 - **Frontend Tests**: **6 unit tests (100% pass rate)**
 - **Production Build**: **Succeeded cleanly (`dist/index.html`)**

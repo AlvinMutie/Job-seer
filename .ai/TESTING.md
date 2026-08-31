@@ -1,21 +1,20 @@
 # TESTING.md — Pytest & Frontend Safety Testing Framework Specification
 
 ## Executive Overview
-This document specifies the testing strategy, test markers, coverage reporting baseline, warning audit, and database isolation architecture for **Smart Job Hunter**.
+This document specifies the testing strategy, test markers, coverage reporting baseline, warning audit, and database isolation architecture for **Job Seer**.
 
 ---
 
-## 1. Backend Pytest Metrics (166 Tests)
+## 1. Backend Pytest Metrics (171 Tests)
 
-- **Total Test Count**: **166 tests** (100% pass rate)
+- **Total Test Count**: **171 tests** (100% pass rate)
 - **Security Safety Gate Tests**: **90 tests** (`pytest -m security`)
-- **Phase 4 Production Security & Performance Tests**: Added 6 integration and security tests in `backend/tests/test_phase4_security_performance.py`:
-  - `test_sec_06_httponly_cookie_set_on_login`
-  - `test_sec_06_cookie_authenticated_access`
-  - `test_sec_06_logout_clears_cookie`
-  - `test_sec_07_rate_limiter_login`
-  - `test_http_security_headers_present`
-  - `test_database_indexes_query_performance`
+- **Phase 5 Production Readiness Tests**: Added 5 integration tests in `backend/tests/test_phase5_production_readiness.py`:
+  - `test_health_liveness_endpoint`
+  - `test_health_readiness_endpoint`
+  - `test_root_endpoint_job_seer_branding`
+  - `test_cookie_secure_property_in_production`
+  - `test_production_config_rejects_weak_secret_key`
 
 ---
 
@@ -40,9 +39,9 @@ Coverage is measured using `pytest-cov` against the `app/` package:
 cd backend
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing
 ```
-- **Overall Code Coverage**: **91% Baseline** (1,323 statements).
+- **Overall Code Coverage**: **91% Baseline** (1,353 statements).
 - `app/auth.py`: **100%**
 - `app/main.py`: **100%**
-- `app/models/models.py`: **100%**
 - `app/routers/auth.py`: **100%**
-- `app/schemas/dashboard.py`: **100%**
+- `app/routers/health.py`: **88%**
+- `app/core/config.py`: **93%**

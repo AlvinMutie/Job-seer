@@ -12,6 +12,7 @@ from app.auth import (
     create_access_token,
     get_current_user
 )
+from app.core.config import settings
 from app.core.rate_limiter import rate_limit
 
 router = APIRouter(tags=["Authentication"])
@@ -36,13 +37,13 @@ async def register(user: UserCreate, response: Response, db: Session = Depends(g
     
     access_token = create_access_token(data={"sub": new_user.email})
 
-    # SEC-06: Set HttpOnly Cookie for enhanced browser security alongside Bearer response
+    # SEC-06: Set HttpOnly Cookie for enhanced browser security
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=False,  # Allowed for local HTTP/HTTPS, set True in production environment
+        secure=settings.COOKIE_SECURE,
         max_age=1800
     )
 
@@ -67,7 +68,7 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.COOKIE_SECURE,
         max_age=1800
     )
 

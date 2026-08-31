@@ -1,6 +1,6 @@
 # ROADMAP.md — Implementation-Ready Engineering Task Plan
 
-This document contains the implementation-ready task breakdown for **Smart Job Hunter**. All tasks are prioritized using **P0 (Critical Security & Configuration)**, **P1 (High Stabilization & Refactoring)**, **P2 (Medium Feature & Schema Polish)**, **P3 (Product Intelligence & UX)**, and **Phase 4 (Production Security & Performance)**.
+This document contains the implementation-ready task breakdown for **Job Seer**. All tasks are prioritized using **P0 (Critical Security & Configuration)**, **P1 (High Stabilization & Refactoring)**, **P2 (Medium Feature & Schema Polish)**, **P3 (Product Intelligence & UX)**, **Phase 4 (Production Security & Performance)**, and **Phase 5 (Deployment & Production Readiness)**.
 
 ---
 
@@ -47,14 +47,20 @@ flowchart TD
         P4-PERF[Database Indexing & HTTP Security Headers ✓ COMPLETED]
     end
 
-    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P4-SEC07 --> P4-PERF
+    subgraph P5 [Phase 5: Deployment & Production Readiness - COMPLETED]
+        P5-HEALTH[Health Probes GET /health & GET /health/ready ✓ COMPLETED]
+        P5-DOCKER[Docker Containerization & Compose ✓ COMPLETED]
+        P5-REBRAND[Job Seer Product Rebrand ✓ COMPLETED]
+    end
+
+    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P5-DOCKER --> P5-REBRAND
 ```
 
 ---
 
 ## Completed Phases
 
-### Phase 0 through Phase 3 (✓ ALL COMPLETED)
+### Phase 0 through Phase 4 (✓ ALL COMPLETED)
 
-### Phase 4 — Production Security & Performance (✓ COMPLETED)
-- **Result**: Resolved SEC-06 (HttpOnly cookie authentication alongside Bearer tokens, `POST /logout`, `withCredentials: true`), resolved SEC-07 (sliding window rate limiter in `app/core/rate_limiter.py` enforcing request limits on auth and AI endpoints with HTTP 429 response), added HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`), added database indexes and compound indexes in `app/models/models.py`. Added 6 integration and security tests in `backend/tests/test_phase4_security_performance.py`. **166 / 166 backend pytest cases passing** (91% coverage), **90 security tests passing**, **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.
+### Phase 5 — Deployment & Production Readiness (✓ COMPLETED)
+- **Result**: Rebranded product to **Job Seer** (*Your intelligent job search companion*), created health check liveness (`GET /health`) and readiness (`GET /health/ready`) probes in `app/routers/health.py`, created production `Dockerfile`, `.dockerignore`, `docker-compose.yml`, environment variable template `.env.example`, and deployment guide in `docs/DEPLOYMENT.md`. Added 5 integration tests in `backend/tests/test_phase5_production_readiness.py`. **171 / 171 backend pytest cases passing** (91% coverage), **90 security tests passing**, **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.

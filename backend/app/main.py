@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.database import init_db
-from app.routers import auth, jobs, matching, profile, applications, dashboard
+from app.routers import auth, jobs, matching, profile, applications, dashboard, health
 
 
 @asynccontextmanager
@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Smart Job Hunter API", lifespan=lifespan)
+app = FastAPI(title="Job Seer API", lifespan=lifespan)
 
 # Register Centralized Global Exception Handlers
 register_exception_handlers(app)
@@ -39,6 +39,7 @@ app.add_middleware(
 )
 
 # Register API Routers
+app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(jobs.router)
 app.include_router(matching.router)
@@ -49,7 +50,7 @@ app.include_router(dashboard.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Smart Job Hunter API", "status": "running"}
+    return {"message": "Welcome to Job Seer API — Your intelligent job search companion", "status": "running"}
 
 
 if __name__ == "__main__":

@@ -4,7 +4,9 @@
 
 | Endpoint | HTTP Method | Access Classification | Auth Dependency | Status |
 | -------- | ----------- | --------------------- | --------------- | ------ |
-| `/` | `GET` | **PUBLIC** | None | Health check |
+| `/` | `GET` | **PUBLIC** | None | Welcome check (Job Seer API) |
+| `/health` | `GET` | **PUBLIC** | None | **NEW (Phase 5)** — Liveness Probe |
+| `/health/ready` | `GET` | **PUBLIC** | None | **NEW (Phase 5)** — Readiness Probe (DB Check) |
 | `/register` | `POST` | **PUBLIC** | None | User Registration (Rate limited: 15/min, HttpOnly Cookie) |
 | `/login` | `POST` | **PUBLIC** | OAuth2 Form | Obtains JWT Bearer Token & HttpOnly Cookie (Rate limited: 20/min) |
 | `/logout` | `POST` | **AUTHENTICATED** | None | Clears HttpOnly Cookie |
@@ -25,13 +27,3 @@
 | `/applications` | `POST` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **ENHANCED (P3-06)** — Track/Update Job Application |
 | `/applications/{id}` | `PATCH` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **NEW (P3-06)** — Kanban Status & Details Update |
 | `/applications/{id}` | `DELETE` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **NEW (P3-06)** — Delete Tracked Application |
-
----
-
-## HTTP Security Headers Matrix
-
-Every response returns the following production security headers:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `X-XSS-Protection: 1; mode=block`
