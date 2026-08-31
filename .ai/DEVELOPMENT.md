@@ -5,9 +5,13 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. UX Architecture & Product Intelligence (UX-01 to UX-08)
+## 1. UX Architecture & Real-World Product Validation (UX-01 to UX-09)
 
-UX-01 through UX-08 established a modern, product-grade frontend architecture:
+UX-01 through UX-09 established a modern, product-grade frontend architecture:
+
+### Real-World Product Validation (UX-09)
+- Frictionless end-to-end candidate journeys across Landing, Auth, Dashboard, Jobs Hub, Matches, Resume Studio, Tracker, and Settings.
+- Reduced cognitive load with transparent AI scoring rationale, candidate data integrity guarantees, and accessible modal navigation.
 
 ### Next Best Action & Product Intelligence (UX-08)
 - `NextBestAction.jsx` evaluates candidate state (Profile setup, Base CV upload, Job discovery, High match review, Interview preparation) and surfaces a high-priority "Next Move" action card.

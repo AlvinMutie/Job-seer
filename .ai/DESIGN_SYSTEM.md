@@ -1,7 +1,7 @@
-# Job Seer Design System & UI Foundation (UX-01 to UX-08)
+# Job Seer Design System & UI Foundation (UX-01 to UX-09)
 
 ## Executive Summary
-This document specifies the visual identity, design tokens, typography hierarchy, semantic color matrix, reusable UI component standards, responsive guidelines, and accessibility conventions for **Job Seer**.
+This document specifies the visual identity, design tokens, typography hierarchy, semantic color matrix, reusable UI component standards, responsive guidelines, accessibility conventions, and real-world UX validation methodology for **Job Seer**.
 
 ---
 
@@ -35,7 +35,7 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 3. Surface & Depth Hierarchy Scale (UX-04 to UX-08)
+## 3. Surface & Depth Hierarchy Scale (UX-04 to UX-09)
 
 - **Level 1 (Page Surface)**: `#0b0f19` solid slate app background.
 - **Level 2 (Content Panels)**: Glass slate containers (`bg-slate-900/75 border border-white/10 rounded-2xl`).
@@ -43,7 +43,7 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 4. Navigation & Workflow Grouping (UX-05 to UX-08)
+## 4. Navigation & Workflow Grouping (UX-05 to UX-09)
 
 Sidebar and drawer menus organize application tools into 4 core candidate workflow sections:
 1. **Overview**: Dashboard Command Center & Next Best Action Proactive Banner
@@ -79,7 +79,7 @@ Sidebar and drawer menus organize application tools into 4 core candidate workfl
 
 ---
 
-## 7. Accessibility & Reduced Motion Conventions
+## 7. Accessibility & Reduced Motion Conventions (UX-09)
 
 - **Focus Rings**: All interactive controls implement `focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950`.
 - **Reduced Motion**: Bypasses CSS keyframe animations when `@media (prefers-reduced-motion: reduce)` is enabled.

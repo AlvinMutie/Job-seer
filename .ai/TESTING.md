@@ -18,7 +18,7 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 2. Frontend Test Suite & UX Verification (UX-01 to UX-08)
+## 2. Frontend Test Suite & UX Verification (UX-01 to UX-09)
 
 Frontend unit testing is executed via Node's native test runner against `frontend/src/services/api.test.js`:
 
@@ -27,8 +27,8 @@ cd frontend
 npm test
 ```
 - **Result**: **6 unit tests passing**
-- **Production Build**: **Succeeded cleanly (`npm run build` in 4.49s)**
-- **UX Audit Verification (UX-01 to UX-08)**: Tested across viewports (1440px, 1280px, 1024px, 768px, 414px, 390px, 375px, 360px) with 0 horizontal overflow, Next Best Action recommendation component, target opportunity context preservation, color-independent badges, accessibility focus rings, and reduced motion overrides.
+- **Production Build**: **Succeeded cleanly (`npm run build` in 5.56s)**
+- **UX Audit Verification (UX-01 to UX-09)**: Real-world candidate journey validation tested across viewports (1440px, 1280px, 1024px, 768px, 414px, 390px, 375px, 360px) with 0 horizontal overflow, Next Best Action recommendation component, target opportunity context preservation, color-independent badges, accessibility focus rings, and reduced motion overrides.
 
 ---
 

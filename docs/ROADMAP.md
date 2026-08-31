@@ -1,6 +1,6 @@
 # ROADMAP.md — Implementation-Ready Engineering Task Plan
 
-This document contains the implementation-ready task breakdown for **Job Seer**. All tasks across Phase 0 through Phase 6 and UX-01 through UX-08 are officially **COMPLETED**.
+This document contains the implementation-ready task breakdown for **Job Seer**. All tasks across Phase 0 through Phase 6 and UX-01 through UX-09 are officially **COMPLETED**.
 
 ---
 
@@ -67,10 +67,11 @@ flowchart TD
         UX-05[UX-05: Product Experience Refinement & UX Validation ✓ COMPLETED]
         UX-06[UX-06: Final Product Experience Audit & Refinement ✓ COMPLETED]
         UX-07[UX-07: Candidate Workflow & Intelligence Integration ✓ COMPLETED]
-        UX-08[UX-08: Advanced Product UX, Intelligence Layer & Final Candidate Experience ✓ COMPLETED]
+        UX-08[UX-08: Advanced Product UX & Intelligence Layer ✓ COMPLETED]
+        UX-09[UX-09: Real-World UX Validation & Optimization ✓ COMPLETED]
     end
 
-    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P6-QA --> P6-POLISH --> P6-DOCS --> UX-01 --> UX-02 --> UX-03 --> UX-04 --> UX-05 --> UX-06 --> UX-07 --> UX-08
+    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P6-QA --> P6-POLISH --> P6-DOCS --> UX-01 --> UX-02 --> UX-03 --> UX-04 --> UX-05 --> UX-06 --> UX-07 --> UX-08 --> UX-09
 ```
 
 ---
@@ -91,4 +92,5 @@ flowchart TD
 - **UX-05 — Product Experience Refinement & UX Validation**: COMPLETED ✅
 - **UX-06 — Final Product Experience Audit & Refinement**: COMPLETED ✅
 - **UX-07 — Candidate Workflow & Intelligence Integration**: COMPLETED ✅
-- **UX-08 — Advanced Product UX, Intelligence Layer & Final Candidate Experience**: COMPLETED ✅
+- **UX-08 — Advanced Product UX & Intelligence Layer**: COMPLETED ✅
+- **UX-09 — Real-World UX Validation & Optimization**: COMPLETED ✅
