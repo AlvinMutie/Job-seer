@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, ChevronRight, Sparkles, AlertCircle } from 'lucide-react';
 import { jobService, authService } from '../services/api';
 import MatchBreakdownModal from '../components/MatchBreakdownModal';
+import PageHeader from '../components/ui/PageHeader';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 function Matches() {
     const [matches, setMatches] = useState([]);
@@ -49,77 +55,88 @@ function Matches() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center gap-3 mb-2">
-                <Target className="text-indigo-400" size={28} />
-                <div>
-                    <h2 className="text-2xl font-bold">Top Match Recommendations</h2>
-                    <p className="text-sm text-slate-400">Powered by V2 Explainable Multi-Factor Scoring (Skills 40%, Content 30%, Experience 15%, Title 15%).</p>
-                </div>
-            </div>
+            <PageHeader
+                badgeText="V2 EXPLAINABLE MATCH ENGINE"
+                title="Top Match Recommendations"
+                subtitle="Calculated fit across Skills Overlap (40%), Content Similarity (30%), Experience Level (15%), and Role Title (15%)."
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {loading ? (
-                    <div className="col-span-2 py-20 text-center text-slate-500">Calculating your multi-factor AI matches...</div>
+                    <div className="col-span-2">
+                        <LoadingSkeleton variant="card" count={2} />
+                    </div>
                 ) : matches.length === 0 ? (
-                    <div className="col-span-2 py-20 text-center text-slate-500">No matches found. Try uploading a detailed CV in the Resume Hub!</div>
+                    <div className="col-span-2">
+                        <EmptyState
+                            icon={Target}
+                            title="No match recommendations available"
+                            description="Upload or update your CV in the Resume Hub to start receiving explainable AI compatibility recommendations."
+                            action={<Button variant="primary" onClick={() => window.location.href = '/resume-hub'}>Upload Resume in Hub</Button>}
+                        />
+                    </div>
                 ) : (
                     matches.map(match => (
-                        <div key={match.id} className="glass-card p-6 flex flex-col justify-between hover:border-indigo-500/30 transition-all">
+                        <Card key={match.id} variant="interactive" className="p-6 flex flex-col justify-between">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <div className="text-4xl font-bold text-indigo-400">{match.match_percentage}%</div>
-                                        <span className="text-xs text-slate-500">Explainable AI Score</span>
+                                        <div className="text-4xl font-extrabold text-indigo-400">{match.match_percentage}%</div>
+                                        <span className="text-xs text-slate-500 font-mono">Explainable AI Score</span>
                                     </div>
-                                    <div className={`badge ${match.match_percentage > 70 ? 'badge-indigo' : 'badge-slate'}`}>
+                                    <Badge variant={match.match_percentage > 70 ? 'emerald' : 'slate'}>
                                         {match.match_percentage > 70 ? 'High Match' : 'Potential Match'}
-                                    </div>
+                                    </Badge>
                                 </div>
 
                                 <h3 className="text-lg font-bold text-white mb-1">{match.title}</h3>
                                 <p className="text-slate-400 text-sm mb-4 leading-relaxed">{match.company}</p>
 
                                 {match.explanation && (
-                                    <div className="p-3 bg-slate-900/50 rounded-xl border border-slate-800/80 mb-4">
+                                    <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 mb-4">
                                         <p className="text-xs text-slate-300 leading-relaxed font-mono">{match.explanation}</p>
                                     </div>
                                 )}
 
                                 {match.missing_skills?.length > 0 && (
                                     <div className="space-y-2">
-                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bridge the Gap</p>
-                                        <div className="flex flex-wrap gap-2">
+                                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bridge the Gap</p>
+                                        <div className="flex flex-wrap gap-1.5">
                                             {match.missing_skills.slice(0, 3).map(skill => (
-                                                <span key={skill} className="px-2 py-1 bg-red-500/5 text-red-400 text-xs rounded-lg border border-red-500/10">
+                                                <Badge key={skill} variant="rose" size="sm">
                                                     Learn {skill}
-                                                </span>
+                                                </Badge>
                                             ))}
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="mt-6 w-full text-indigo-400 border-t border-slate-800/50 rounded-none pt-3"
                                 onClick={() => handleOpenAnalytics(match)}
-                                className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors py-2.5 border-t border-slate-800/50"
                             >
                                 View Full Score Analytics <ChevronRight size={16} />
-                            </button>
-                        </div>
+                            </Button>
+                        </Card>
                     ))
                 )}
 
-                <div className="glass-card p-6 border-dashed border-slate-700 bg-transparent flex flex-col items-center justify-center text-center py-12">
+                <Card variant="flat" className="p-6 border-dashed border-slate-700 bg-transparent flex flex-col items-center justify-center text-center py-12">
                     <TrendingUp size={32} className="text-slate-600 mb-4" />
-                    <h4 className="text-slate-400 font-medium">Want higher match scores?</h4>
-                    <p className="text-xs text-slate-500 mt-1 max-w-[220px]">Update your skills or upload a fresh version of your CV.</p>
-                    <button
-                        onClick={() => window.location.href = '/profile-setup'}
-                        className="mt-4 text-xs font-bold text-white bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+                    <h4 className="text-slate-300 font-semibold">Want higher match scores?</h4>
+                    <p className="text-xs text-slate-400 mt-1 max-w-[240px]">Update your skills or upload a fresh version of your resume.</p>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => window.location.href = '/settings'}
                     >
-                        Update Profile
-                    </button>
-                </div>
+                        Update Profile Preferences
+                    </Button>
+                </Card>
             </div>
 
             <MatchBreakdownModal

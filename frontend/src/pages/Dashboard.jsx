@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2 } from 'lucide-react';
 import { jobService, authService, trackerService, dashboardService } from '../services/api';
 import TailorModal from '../components/TailorModal';
+import PageHeader from '../components/ui/PageHeader';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
@@ -110,148 +117,147 @@ function Dashboard() {
 
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Command Center Hero Greeting */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border-indigo-500/20">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="badge badge-indigo">Command Center</span>
-                        <span className="text-xs text-slate-400 font-mono">Targeting: {user?.profile?.preferred_role || 'General Engineering'}</span>
-                    </div>
-                    <h1 className="text-3xl font-extrabold text-white">Welcome back, {user?.full_name?.split(' ')[0] || 'Candidate'} 👋</h1>
-                    <p className="text-xs text-slate-400 mt-1">Real-time intelligence dashboard across your matching scores, application pipeline, and AI assets.</p>
-                </div>
+            {/* Page Header */}
+            <PageHeader
+                badgeText={`Targeting: ${user?.profile?.preferred_role || 'General Engineering'}`}
+                title={`Welcome back, ${user?.full_name?.split(' ')[0] || 'Candidate'} 👋`}
+                subtitle="Real-time intelligence dashboard across your matching scores, application pipeline, and AI assets."
+                action={
+                    !user?.profile?.has_resume ? (
+                        <a href="/resume-hub">
+                            <Button variant="outline" size="sm" icon={AlertTriangle} className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10">
+                                Upload CV for AI Match Scoring
+                            </Button>
+                        </a>
+                    ) : (
+                        <a href="/resume-hub">
+                            <Button variant="outline" size="sm" icon={ShieldCheck} className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10">
+                                ATS Health: {analytics?.ats_health_score ? `${analytics.ats_health_score}% (${analytics.ats_classification})` : 'Active'}
+                            </Button>
+                        </a>
+                    )
+                }
+            />
 
-                {!user?.profile?.has_resume ? (
-                    <a href="/resume-hub" className="px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors">
-                        <AlertTriangle size={16} /> Upload CV for AI Match Scoring
-                    </a>
-                ) : (
-                    <a href="/resume-hub" className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-2 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors">
-                        <ShieldCheck size={16} /> ATS Health: {analytics?.ats_health_score ? `${analytics.ats_health_score}% (${analytics.ats_classification})` : 'Active'}
-                    </a>
-                )}
-            </div>
-
-            {/* Command Intelligence KPI Analytics Grid (P3-07) */}
+            {/* KPI Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="glass-card p-5 space-y-3 border-indigo-500/20 bg-indigo-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-indigo-500/20 bg-indigo-500/5">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-indigo-500/20 rounded-xl text-indigo-400">
                             <Target size={20} />
                         </div>
-                        <span className="text-xs text-indigo-400 font-bold">AI V2 Score</span>
+                        <Badge variant="indigo">V2 Score</Badge>
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Average Match</p>
-                        <p className="text-2xl font-bold text-white mt-1">{analytics?.average_match_score || 0}%</p>
+                        <p className="text-2xl font-extrabold text-white mt-1">{analytics?.average_match_score || 0}%</p>
                     </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-1000" style={{ width: `${analytics?.average_match_score || 0}%` }}></div>
+                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-700" style={{ width: `${analytics?.average_match_score || 0}%` }}></div>
                     </div>
-                </div>
+                </Card>
 
-                <div className="glass-card p-5 space-y-3 border-emerald-500/20 bg-emerald-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-emerald-500/20 bg-emerald-500/5">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
                             <TrendingUp size={20} />
                         </div>
-                        <span className="text-xs text-emerald-400 font-bold">Pipeline</span>
+                        <Badge variant="emerald">Pipeline</Badge>
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Total Applications</p>
-                        <p className="text-2xl font-bold text-white mt-1">{analytics?.total_applications || 0}</p>
+                        <p className="text-2xl font-extrabold text-white mt-1">{analytics?.total_applications || 0}</p>
                     </div>
                     <p className="text-[11px] text-slate-400">
                         {analytics?.status_counts?.interview || 0} Interviews · {analytics?.status_counts?.applied || 0} Applied
                     </p>
-                </div>
+                </Card>
 
-                <div className="glass-card p-5 space-y-3 border-cyan-500/20 bg-cyan-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-cyan-500/20 bg-cyan-500/5">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-cyan-500/20 rounded-xl text-cyan-400">
                             <ShieldCheck size={20} />
                         </div>
-                        <span className="text-xs text-cyan-400 font-bold">P3-03 Check</span>
+                        <Badge variant="cyan">ATS Scan</Badge>
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">ATS Health Score</p>
-                        <p className="text-2xl font-bold text-white mt-1">
+                        <p className="text-2xl font-extrabold text-white mt-1">
                             {analytics?.ats_health_score !== null ? `${analytics?.ats_health_score}%` : 'N/A'}
                         </p>
                     </div>
                     <p className="text-[11px] text-slate-400">{analytics?.ats_classification || 'Upload resume to check'}</p>
-                </div>
+                </Card>
 
-                <div className="glass-card p-5 space-y-3 border-amber-500/20 bg-amber-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-amber-500/20 bg-amber-500/5">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-amber-500/20 rounded-xl text-amber-400">
                             <History size={20} />
                         </div>
-                        <span className="text-xs text-amber-400 font-bold">Assets Saved</span>
+                        <Badge variant="amber">Assets Saved</Badge>
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Tailored & Letters</p>
-                        <p className="text-2xl font-bold text-white mt-1">
+                        <p className="text-2xl font-extrabold text-white mt-1">
                             {(analytics?.tailored_resumes_count || 0) + (analytics?.cover_letters_count || 0)}
                         </p>
                     </div>
                     <p className="text-[11px] text-slate-400">
                         {analytics?.tailored_resumes_count || 0} Tailored CVs · {analytics?.cover_letters_count || 0} Letters
                     </p>
-                </div>
+                </Card>
             </div>
 
-            {/* Quick Action Launch Bar */}
-            <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60">
+            {/* Action Launchpad Bar */}
+            <Card variant="glass" className="p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                     <Sparkles size={16} className="text-indigo-400" /> Action Launchpad
                 </span>
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 transition-colors flex items-center gap-1.5">
-                        <Upload size={14} /> Resume Hub
+                <div className="flex flex-wrap items-center gap-2">
+                    <a href="/resume-hub">
+                        <Button variant="ghost" size="sm" icon={Upload}>Resume Hub</Button>
                     </a>
-                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors flex items-center gap-1.5">
-                        <Scissors size={14} /> Tailor CV
+                    <a href="/resume-hub">
+                        <Button variant="ghost" size="sm" icon={Scissors}>Tailor CV</Button>
                     </a>
-                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-cyan-600/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-600/30 transition-colors flex items-center gap-1.5">
-                        <Mail size={14} /> Cover Letters
+                    <a href="/resume-hub">
+                        <Button variant="ghost" size="sm" icon={Mail}>Cover Letters</Button>
                     </a>
-                    <a href="/tracker" className="px-3 py-1.5 rounded-lg bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30 transition-colors flex items-center gap-1.5">
-                        <LayoutGrid size={14} /> Kanban Tracker
+                    <a href="/tracker">
+                        <Button variant="ghost" size="sm" icon={LayoutGrid}>Kanban Tracker</Button>
                     </a>
-                    <a href="/jobs-hub" className="px-3 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 transition-colors flex items-center gap-1.5">
-                        <Briefcase size={14} /> Jobs Hub
+                    <a href="/jobs">
+                        <Button variant="ghost" size="sm" icon={Briefcase}>Jobs Hub</Button>
                     </a>
                 </div>
-            </div>
+            </Card>
 
             {/* Search Bar */}
-            <div className="glass-card p-2 flex gap-2">
-                <div className="flex-1 flex items-center px-4 gap-3">
-                    <Search className="text-slate-500" size={20} />
-                    <input
-                        className="bg-transparent border-none outline-none w-full text-white text-sm placeholder-slate-500"
-                        placeholder="Search keywords (React, Python, FastAPI, Docker...)"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-                <div className="w-px h-8 bg-slate-700/50 my-auto"></div>
-                <div className="flex-1 flex items-center px-4 gap-3">
-                    <MapPin className="text-slate-500" size={20} />
-                    <input
-                        className="bg-transparent border-none outline-none w-full text-white text-sm placeholder-slate-500"
-                        placeholder="Location preference"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                    />
-                </div>
-                <button onClick={fetchJobs} className="btn-primary py-2.5 px-6 text-sm font-bold">
-                    Find Jobs
-                </button>
-            </div>
+            <Card variant="flat" className="p-3 bg-slate-900/80">
+                <form onSubmit={(e) => { e.preventDefault(); fetchJobs(); }} className="flex flex-col md:flex-row gap-3">
+                    <div className="flex-1">
+                        <Input
+                            placeholder="Search keywords (React, Python, FastAPI, Docker...)"
+                            icon={Search}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <Input
+                            placeholder="Location preference (e.g. Remote, NYC)"
+                            icon={MapPin}
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                        />
+                    </div>
+                    <Button type="submit" variant="primary" size="md">
+                        Find Jobs
+                    </Button>
+                </form>
+            </Card>
 
-            {/* Main Content Layout */}
+            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Job Discovery & Recommendations Column */}
                 <div className="lg:col-span-2 space-y-4">
@@ -260,9 +266,14 @@ function Dashboard() {
                     </h2>
 
                     {loading ? (
-                        <div className="text-center py-20 text-slate-500">Loading recommendations...</div>
+                        <LoadingSkeleton variant="card" count={3} />
                     ) : jobs.length === 0 ? (
-                        <div className="text-center py-20 text-slate-500">No jobs found matching parameters.</div>
+                        <EmptyState
+                            icon={Search}
+                            title="No jobs matched your parameters"
+                            description="Try clearing keyword or location filters to explore more tech opportunities."
+                            action={<Button variant="secondary" onClick={() => { setSearch(''); setLocation(''); fetchJobs(); }}>Reset Filters</Button>}
+                        />
                     ) : (
                         jobs.map(job => (
                             <JobCard
@@ -279,11 +290,11 @@ function Dashboard() {
                     )}
                 </div>
 
-                {/* Right Sidepanel: Pipeline Stage Activity & Asset History */}
+                {/* Right Column: Pipeline Stage Activity & Assets */}
                 <div className="space-y-6">
                     {/* Pipeline Stage Breakdown */}
-                    <div className="glass-card p-5 space-y-4">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Card variant="glass" className="p-5 space-y-4">
+                        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                             <LayoutGrid size={16} className="text-indigo-400" /> Pipeline Stage Breakdown
                         </h3>
                         <div className="space-y-2 text-xs">
@@ -291,13 +302,13 @@ function Dashboard() {
                             <StageRow label="Applied" count={analytics?.status_counts?.applied || 0} color="bg-indigo-500" />
                             <StageRow label="Offer Received" count={analytics?.status_counts?.offer || 0} color="bg-emerald-500" />
                             <StageRow label="Not Applied" count={analytics?.status_counts?.not_applied || 0} color="bg-slate-500" />
-                            <StageRow label="Rejected" count={analytics?.status_counts?.rejected || 0} color="bg-red-500" />
+                            <StageRow label="Rejected" count={analytics?.status_counts?.rejected || 0} color="bg-rose-500" />
                         </div>
-                    </div>
+                    </Card>
 
-                    {/* Recent Tailored Resumes & Cover Letters Quick Preview */}
-                    <div className="glass-card p-5 space-y-4">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    {/* Recent AI Generated Assets */}
+                    <Card variant="glass" className="p-5 space-y-4">
+                        <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                             <History size={16} className="text-amber-400" /> Recent AI Generated Assets
                         </h3>
                         <div className="space-y-3 text-xs">
@@ -305,12 +316,12 @@ function Dashboard() {
                                 <div key={item.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
                                     <div>
                                         <div className="flex items-center gap-1.5 mb-0.5">
-                                            <span className="badge badge-indigo text-[10px]">CV v{item.version}</span>
-                                            <span className="text-slate-400 font-bold">{item.job_title}</span>
+                                            <Badge variant="indigo" size="sm">CV v{item.version}</Badge>
+                                            <span className="text-slate-300 font-bold">{item.job_title}</span>
                                         </div>
                                         <p className="text-slate-500 text-[10px]">{item.company}</p>
                                     </div>
-                                    <a href="/resume-hub" className="text-indigo-400 hover:underline">View</a>
+                                    <a href="/resume-hub" className="text-indigo-400 hover:underline font-semibold">View</a>
                                 </div>
                             ))}
 
@@ -318,12 +329,12 @@ function Dashboard() {
                                 <div key={letter.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
                                     <div>
                                         <div className="flex items-center gap-1.5 mb-0.5">
-                                            <span className="badge border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 text-[10px]">{letter.tone} v{letter.version}</span>
-                                            <span className="text-slate-400 font-bold">{letter.job_title}</span>
+                                            <Badge variant="cyan" size="sm">{letter.tone} v{letter.version}</Badge>
+                                            <span className="text-slate-300 font-bold">{letter.job_title}</span>
                                         </div>
                                         <p className="text-slate-500 text-[10px]">{letter.company}</p>
                                     </div>
-                                    <a href="/resume-hub" className="text-indigo-400 hover:underline">View</a>
+                                    <a href="/resume-hub" className="text-indigo-400 hover:underline font-semibold">View</a>
                                 </div>
                             ))}
 
@@ -331,7 +342,7 @@ function Dashboard() {
                                 <p className="text-slate-500 text-center py-4">No tailored assets created yet.</p>
                             )}
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </div>
 
@@ -379,11 +390,9 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
     };
 
     return (
-        <div className="glass-card p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
-
+        <Card variant="interactive" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
             {matchResult && (
-                <div className={`absolute top-0 right-0 px-4 py-1 border-b border-l rounded-bl-xl font-bold text-sm ${matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'}`}>
+                <div className={`absolute top-0 right-0 px-3.5 py-1 border-b border-l rounded-bl-xl font-bold text-xs ${matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'}`}>
                     {matchResult.match_percentage}% Match
                 </div>
             )}
@@ -392,30 +401,30 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-xl font-bold text-white transition-colors group-hover:text-indigo-400">{job.title}</h3>
-                        <div className="flex items-center gap-2 text-slate-400 font-medium text-sm">
+                        <div className="flex items-center gap-2 text-slate-400 font-medium text-sm mt-0.5">
                             <Briefcase size={14} className="text-indigo-400" /> {job.company}
                         </div>
                     </div>
-                    <span className="badge badge-indigo">{job.remote_status}</span>
+                    <Badge variant="indigo">{job.remote_status}</Badge>
                 </div>
 
                 <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed">{job.description}</p>
 
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                     {(job.skills_required || "").split(',').filter(s => s.trim()).map(skill => (
-                        <span key={skill} className="badge badge-cyan">{skill.trim()}</span>
+                        <Badge key={skill} variant="slate" size="sm">{skill.trim()}</Badge>
                     ))}
                 </div>
 
                 {matchResult && matchResult.missing_skills.length > 0 && (
-                    <div className="mt-4 space-y-3 animate-fade-in">
-                        <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl">
-                            <p className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <div className="mt-3 space-y-2 animate-fade-in">
+                        <div className="p-3 bg-rose-500/5 border border-rose-500/10 rounded-xl">
+                            <p className="text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                                 <AlertTriangle size={12} /> Missing Skills
                             </p>
                             <div className="flex flex-wrap gap-1">
                                 {matchResult.missing_skills.slice(0, 5).map(skill => (
-                                    <span key={skill} className="text-xs text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded">{skill}</span>
+                                    <span key={skill} className="text-xs text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">{skill}</span>
                                 ))}
                             </div>
                         </div>
@@ -423,34 +432,40 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                 )}
             </div>
 
-            <div className="flex flex-col justify-center gap-3 min-w-[140px]">
-                <button
+            <div className="flex flex-col justify-center gap-2.5 min-w-[140px]">
+                <Button
+                    variant="primary"
+                    size="sm"
                     onClick={onMatch}
-                    disabled={isMatching}
-                    className={`btn-primary w-full py-2.5 text-xs font-bold ${isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    isLoading={isMatching}
                 >
-                    {isMatching ? 'Analyzing...' : matchResult ? 'Re-Analyze' : 'Analyze Match'}
-                </button>
+                    {matchResult ? 'Re-Analyze' : 'Analyze Match'}
+                </Button>
 
                 {matchResult && matchResult.missing_skills.length > 0 && (
-                    <button
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Scissors}
                         onClick={onTailor}
-                        disabled={isTailoring}
-                        className="w-full px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-indigo-400 text-xs font-bold hover:bg-indigo-500/20 transition-all flex items-center justify-center gap-2"
+                        isLoading={isTailoring}
                     >
-                        <Scissors size={14} /> {isTailoring ? 'Tailoring...' : 'Tailor CV'}
-                    </button>
+                        Tailor CV
+                    </Button>
                 )}
 
-                <button
+                <Button
+                    variant={applied ? 'success' : 'secondary'}
+                    size="sm"
+                    icon={applied ? CheckCircle2 : null}
                     onClick={handleApply}
-                    disabled={applying || applied}
-                    className={`px-4 py-2 rounded-xl border ${applied ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-slate-700 hover:border-slate-500 text-slate-300'} text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-inner`}
+                    isLoading={applying}
+                    disabled={applied}
                 >
-                    {applying ? 'Applying...' : applied ? (<><CheckCircle2 size={14} /> Tracked</>) : 'Quick Track'}
-                </button>
+                    {applied ? 'Tracked' : 'Quick Track'}
+                </Button>
             </div>
-        </div>
+        </Card>
     );
 }
 

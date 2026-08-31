@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { User, MapPin, DollarSign, Target, Check, Loader2, Settings as SettingsIcon, Save, Briefcase, AlertCircle } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
+import PageHeader from '../components/ui/PageHeader';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import Button from '../components/ui/Button';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 
 function Settings() {
     const [loading, setLoading] = useState(true);
@@ -45,7 +51,7 @@ function Settings() {
         setMessage({ type: '', text: '' });
         try {
             await authService.updateProfile(formData);
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            setMessage({ type: 'success', text: 'Career preferences saved successfully!' });
         } catch (err) {
             setMessage({ type: 'error', text: getApiErrorMessage(err) });
         } finally {
@@ -54,110 +60,106 @@ function Settings() {
     };
 
     if (loading) {
-        return <div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading settings...</div>;
+        return <div className="max-w-4xl mx-auto space-y-6"><LoadingSkeleton variant="card" count={2} /></div>;
     }
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                    <SettingsIcon className="text-indigo-400" size={28} /> Account Settings
-                </h1>
-                <p className="text-slate-400">Update your career preferences and profile details to improve AI job matching.</p>
-            </div>
+            <PageHeader
+                badgeText="CAREER PREFERENCES"
+                title="Account Settings & Profile"
+                subtitle="Update your technical skills, experience level, and preferred role to optimize AI job matching calculations."
+            />
 
-            <div className="glass-card overflow-hidden">
-                <div className="p-6 border-b border-slate-700/50 bg-slate-800/30 flex justify-between items-center">
-                    <h3 className="font-semibold flex items-center gap-2">
-                        <User className="text-indigo-400" size={18} /> Career Profile
+            <Card variant="glass" className="overflow-hidden">
+                <div className="p-6 border-b border-slate-800 bg-slate-900/60 flex justify-between items-center">
+                    <h3 className="font-bold flex items-center gap-2 text-white">
+                        <User className="text-indigo-400" size={18} /> Candidate Career Profile
                     </h3>
-                    <span className="text-sm text-slate-500">Logged in as <span className="text-indigo-400 font-medium">{currentUser?.full_name}</span></span>
+                    <span className="text-xs text-slate-400">Logged in as <span className="text-indigo-400 font-bold">{currentUser?.full_name}</span></span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Preferred Job Title</label>
-                            <div className="relative">
-                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                                <input
-                                    type="text" required className="input-field pl-12 h-12" placeholder="e.g. Senior Frontend Engineer"
-                                    value={formData.preferred_role} onChange={e => setFormData({ ...formData, preferred_role: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Input
+                            label="Preferred Job Title"
+                            icon={Target}
+                            placeholder="e.g. Senior Frontend Engineer"
+                            required
+                            value={formData.preferred_role}
+                            onChange={e => setFormData({ ...formData, preferred_role: e.target.value })}
+                        />
 
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Experience Level</label>
-                            <div className="relative">
-                                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                                <select
-                                    className="input-field pl-12 h-12 appearance-none bg-slate-800/50"
-                                    value={formData.experience_level} onChange={e => setFormData({ ...formData, experience_level: e.target.value })}
-                                >
-                                    <option>Junior</option>
-                                    <option>Mid-Level</option>
-                                    <option>Senior</option>
-                                    <option>Lead / Architect</option>
-                                </select>
-                            </div>
-                        </div>
+                        <Select
+                            label="Experience Level"
+                            icon={Briefcase}
+                            value={formData.experience_level}
+                            onChange={e => setFormData({ ...formData, experience_level: e.target.value })}
+                            options={[
+                                { value: 'Junior', label: 'Junior' },
+                                { value: 'Mid-Level', label: 'Mid-Level' },
+                                { value: 'Senior', label: 'Senior' },
+                                { value: 'Lead / Architect', label: 'Lead / Architect' }
+                            ]}
+                        />
 
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Location Preference</label>
-                            <div className="relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                                <input
-                                    type="text" required className="input-field pl-12 h-12" placeholder="e.g. Remote, Nairobi, NYC"
-                                    value={formData.location_preference} onChange={e => setFormData({ ...formData, location_preference: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                        <Input
+                            label="Location Preference"
+                            icon={MapPin}
+                            placeholder="e.g. Remote, Nairobi, NYC"
+                            required
+                            value={formData.location_preference}
+                            onChange={e => setFormData({ ...formData, location_preference: e.target.value })}
+                        />
 
-                        <div className="space-y-3">
-                            <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Salary Expectation (Annual)</label>
-                            <div className="relative">
-                                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                                <input
-                                    type="text" required className="input-field pl-12 h-12" placeholder="e.g. $100,000 - $140,000"
-                                    value={formData.salary_expectation} onChange={e => setFormData({ ...formData, salary_expectation: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                        <Input
+                            label="Salary Expectation (Annual)"
+                            icon={DollarSign}
+                            placeholder="e.g. $100,000 - $140,000"
+                            required
+                            value={formData.salary_expectation}
+                            onChange={e => setFormData({ ...formData, salary_expectation: e.target.value })}
+                        />
                     </div>
 
-                    <div className="space-y-3">
-                        <label className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Technical Skills (Comma Separated)</label>
+                    <div className="space-y-1.5">
+                        <label className="block text-xs font-semibold text-slate-300 ml-0.5">
+                            Technical Skills (Comma Separated)
+                        </label>
                         <textarea
-                            className="input-field min-h-[120px] p-4 resize-none" placeholder="React, Node.js, Python, PostgreSQL, AWS..."
-                            value={formData.skills} onChange={e => setFormData({ ...formData, skills: e.target.value })}
+                            className="w-full bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-h-[120px] resize-none"
+                            placeholder="React, Node.js, Python, PostgreSQL, AWS..."
+                            value={formData.skills}
+                            onChange={e => setFormData({ ...formData, skills: e.target.value })}
                         ></textarea>
                     </div>
 
                     {message.text && (
-                        <div className={`p-4 rounded-xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+                        <div className={`p-4 rounded-2xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'}`}>
                             {message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
                             <span className="text-sm font-medium">{message.text}</span>
                         </div>
                     )}
 
                     <div className="flex justify-end pt-4">
-                        <button
-                            type="submit" disabled={saving}
-                            className={`btn-primary px-8 py-3 text-lg font-bold flex items-center gap-2 ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="lg"
+                            icon={Save}
+                            isLoading={saving}
                         >
-                            {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-                            {saving ? 'Saving Changes...' : 'Save Profile'}
-                        </button>
+                            Save Career Profile
+                        </Button>
                     </div>
                 </form>
-            </div>
+            </Card>
 
-            <div className="glass-card p-6 bg-amber-500/5 border-amber-500/10 rounded-2xl">
-                <p className="text-sm text-amber-500/80 leading-relaxed italic">
-                    Note: Updating your skills here will affect how your profile is matched against jobs in the Dashboard. For best results, ensure these match the skills listed in your uploaded Resume.
+            <Card variant="flat" className="p-6 bg-amber-500/5 border-amber-500/10">
+                <p className="text-xs text-amber-400/90 leading-relaxed italic">
+                    Note: Updating your technical skills and preferred role here directly impacts your V2 AI Match Score calculations in the Command Center and Jobs Hub.
                 </p>
-            </div>
+            </Card>
         </div>
     );
 }

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Briefcase, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Sparkles, AlertCircle, Target, CheckCircle } from 'lucide-react';
 import { jobService, trackerService, authService, getApiErrorMessage } from '../services/api';
+import PageHeader from '../components/ui/PageHeader';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 function JobsHub() {
     const [jobs, setJobs] = useState([]);
@@ -8,7 +16,7 @@ function JobsHub() {
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
 
-    // Filters and Pagination state (P3-01)
+    // Filters and Pagination state
     const [search, setSearch] = useState('');
     const [location, setLocation] = useState('');
     const [remoteStatus, setRemoteStatus] = useState('');
@@ -63,7 +71,6 @@ function JobsHub() {
     };
 
     const handleSortChange = (value) => {
-        // Value formats: "posted_at:desc", "posted_at:asc", "title:asc", "title:desc", "company:asc", "company:desc"
         const [field, dir] = value.split(':');
         setSortBy(field);
         setOrder(dir);
@@ -93,117 +100,105 @@ function JobsHub() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                    <Briefcase className="text-indigo-400" size={32} /> Job Discovery Hub
-                </h1>
-                <p className="text-slate-400">Explore open tech roles, filter by work mode, and calculate your real-time AI resume fit.</p>
-            </div>
+            <PageHeader
+                badgeText="JOB DISCOVERY WORKSPACE"
+                title="Find Your Next Opportunity"
+                subtitle="Explore verified tech roles, filter by work mode and experience level, and calculate your real-time AI resume fit."
+            />
 
             {/* Error Notification */}
             {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm">
+                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-400 text-sm">
                     <AlertCircle size={18} />
                     <span>{error}</span>
                 </div>
             )}
 
             {/* Search and Filters Bar */}
-            <div className="glass-card p-4 space-y-4">
+            <Card variant="glass" className="p-5 space-y-4">
                 <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                        <input
-                            type="text"
-                            className="input-field pl-10 py-2.5 text-sm w-full"
+                    <div className="flex-1">
+                        <Input
+                            icon={Search}
                             placeholder="Search by keywords, skills, job title, or company..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-
-                    <div className="w-full md:w-56 relative">
-                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                        <input
-                            type="text"
-                            className="input-field pl-10 py-2.5 text-sm w-full"
+                    <div className="w-full md:w-64">
+                        <Input
+                            icon={MapPin}
                             placeholder="Location (e.g. Remote, NYC)"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                         />
                     </div>
-
-                    <button type="submit" disabled={loading} className="btn-primary py-2.5 px-6 font-semibold flex items-center justify-center gap-2">
-                        {loading ? <Loader2 className="animate-spin" size={18} /> : 'Search Jobs'}
-                    </button>
+                    <Button type="submit" variant="primary" isLoading={loading}>
+                        Search Jobs
+                    </Button>
                 </form>
 
                 {/* Filter Controls Row */}
                 <div className="flex flex-wrap gap-4 items-center justify-between border-t border-slate-800/80 pt-4 text-xs">
                     <div className="flex flex-wrap gap-4 items-center">
-                        <div className="flex items-center gap-2">
-                            <Filter size={14} className="text-slate-500" />
-                            <span className="text-slate-400 font-medium">Work Mode:</span>
-                            <select
-                                className="input-field py-1.5 px-3 text-xs bg-slate-900 border-slate-700 text-slate-200"
+                        <div className="w-44">
+                            <Select
+                                icon={Filter}
                                 value={remoteStatus}
                                 onChange={(e) => { setRemoteStatus(e.target.value); setPage(1); }}
-                            >
-                                <option value="">All Modes</option>
-                                <option value="Remote">Remote</option>
-                                <option value="Hybrid">Hybrid</option>
-                                <option value="On-site">On-site</option>
-                            </select>
+                                options={[
+                                    { value: '', label: 'All Modes' },
+                                    { value: 'Remote', label: 'Remote' },
+                                    { value: 'Hybrid', label: 'Hybrid' },
+                                    { value: 'On-site', label: 'On-site' }
+                                ]}
+                            />
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-slate-400 font-medium">Experience:</span>
-                            <select
-                                className="input-field py-1.5 px-3 text-xs bg-slate-900 border-slate-700 text-slate-200"
+                        <div className="w-48">
+                            <Select
                                 value={experienceLevel}
                                 onChange={(e) => { setExperienceLevel(e.target.value); setPage(1); }}
-                            >
-                                <option value="">All Levels</option>
-                                <option value="Junior">Junior</option>
-                                <option value="Mid-Level">Mid-Level</option>
-                                <option value="Senior">Senior</option>
-                                <option value="Lead / Architect">Lead / Architect</option>
-                            </select>
+                                options={[
+                                    { value: '', label: 'All Levels' },
+                                    { value: 'Junior', label: 'Junior' },
+                                    { value: 'Mid-Level', label: 'Mid-Level' },
+                                    { value: 'Senior', label: 'Senior' },
+                                    { value: 'Lead / Architect', label: 'Lead / Architect' }
+                                ]}
+                            />
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <ArrowUpDown size={14} className="text-slate-500" />
-                        <span className="text-slate-400 font-medium">Sort By:</span>
-                        <select
-                            className="input-field py-1.5 px-3 text-xs bg-slate-900 border-slate-700 text-slate-200"
+                    <div className="w-48">
+                        <Select
+                            icon={ArrowUpDown}
                             value={`${sortBy}:${order}`}
                             onChange={(e) => handleSortChange(e.target.value)}
-                        >
-                            <option value="posted_at:desc">Newest First</option>
-                            <option value="posted_at:asc">Oldest First</option>
-                            <option value="title:asc">Job Title A–Z</option>
-                            <option value="title:desc">Job Title Z–A</option>
-                            <option value="company:asc">Company A–Z</option>
-                            <option value="company:desc">Company Z–A</option>
-                        </select>
+                            options={[
+                                { value: 'posted_at:desc', label: 'Newest First' },
+                                { value: 'posted_at:asc', label: 'Oldest First' },
+                                { value: 'title:asc', label: 'Job Title A–Z' },
+                                { value: 'title:desc', label: 'Job Title Z–A' },
+                                { value: 'company:asc', label: 'Company A–Z' },
+                                { value: 'company:desc', label: 'Company Z–A' }
+                            ]}
+                        />
                     </div>
                 </div>
-            </div>
+            </Card>
 
             {/* Job Listings Grid */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="glass-card p-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
-                        <Loader2 className="animate-spin text-indigo-500" size={32} />
-                        <span>Searching the job repository...</span>
-                    </div>
+                    <LoadingSkeleton variant="card" count={3} />
                 ) : jobs.length === 0 ? (
-                    <div className="glass-card p-12 text-center text-slate-500 space-y-2">
-                        <Briefcase className="mx-auto text-slate-600" size={40} />
-                        <h3 className="text-lg font-bold text-slate-300">No jobs found</h3>
-                        <p className="text-sm text-slate-500">Try adjusting your keyword search, location, or experience filters.</p>
-                    </div>
+                    <EmptyState
+                        icon={Briefcase}
+                        title="No opportunities found"
+                        description="Try adjusting your keyword search, location, or experience filters to find matching open roles."
+                        action={<Button variant="secondary" onClick={() => { setSearch(''); setLocation(''); setRemoteStatus(''); setExperienceLevel(''); fetchJobs(); }}>Reset All Filters</Button>}
+                    />
                 ) : (
                     jobs.map(job => (
                         <JobCardHub
@@ -220,25 +215,28 @@ function JobsHub() {
 
             {/* Pagination Controls */}
             {!loading && jobs.length > 0 && (
-                <div className="glass-card p-4 flex justify-between items-center bg-slate-900/30">
-                    <span className="text-xs text-slate-500">Page {page}</span>
+                <Card variant="flat" className="p-4 flex justify-between items-center bg-slate-900/40">
+                    <span className="text-xs text-slate-400 font-mono">Page {page}</span>
                     <div className="flex gap-2">
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={ChevronLeft}
                             disabled={page <= 1 || loading}
                             onClick={() => setPage(p => Math.max(1, p - 1))}
-                            className="px-3.5 py-1.5 rounded-lg border border-slate-800 text-xs text-slate-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
                         >
-                            <ChevronLeft size={14} /> Previous
-                        </button>
-                        <button
+                            Previous
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
                             disabled={jobs.length < limit || loading}
                             onClick={() => setPage(p => p + 1)}
-                            className="px-3.5 py-1.5 rounded-lg border border-slate-800 text-xs text-slate-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
                         >
                             Next <ChevronRight size={14} />
-                        </button>
+                        </Button>
                     </div>
-                </div>
+                </Card>
             )}
         </div>
     );
@@ -265,9 +263,7 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
     };
 
     return (
-        <div className="glass-card p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
-
+        <Card variant="interactive" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
             {matchResult && (
                 <div className={`absolute top-0 right-0 px-4 py-1 border-b border-l rounded-bl-xl font-bold text-xs ${
                     matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'
@@ -287,39 +283,43 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
                         </div>
                     </div>
                     <div className="flex gap-2">
-                        <span className="badge badge-indigo">{job.remote_status}</span>
-                        <span className="badge badge-cyan">{job.experience_level}</span>
+                        <Badge variant="indigo">{job.remote_status}</Badge>
+                        <Badge variant="cyan">{job.experience_level}</Badge>
                     </div>
                 </div>
 
                 <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed">{job.description}</p>
 
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                     {(job.skills_required || "").split(',').filter(s => s.trim()).map(skill => (
-                        <span key={skill} className="px-2.5 py-1 bg-slate-800/80 text-slate-300 text-xs rounded-lg border border-slate-700/50">{skill.trim()}</span>
+                        <Badge key={skill} variant="slate" size="sm">{skill.trim()}</Badge>
                     ))}
                 </div>
             </div>
 
-            <div className="flex flex-col justify-center gap-3 min-w-[150px]">
-                <button
+            <div className="flex flex-col justify-center gap-2.5 min-w-[150px]">
+                <Button
+                    variant="primary"
+                    size="sm"
                     onClick={onMatch}
-                    disabled={isMatching || !hasResume}
-                    className={`btn-primary w-full py-2.5 text-xs font-bold ${isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={!hasResume ? "Upload a resume first to enable AI matching" : ""}
+                    isLoading={isMatching}
+                    disabled={!hasResume}
                 >
-                    {isMatching ? <><Loader2 className="animate-spin" size={14} /> Analyzing...</> : matchResult ? 'Re-Analyze' : 'Analyze Match'}
-                </button>
+                    {matchResult ? 'Re-Analyze' : 'Analyze Match'}
+                </Button>
 
-                <button
+                <Button
+                    variant={applied ? 'success' : 'secondary'}
+                    size="sm"
+                    icon={applied ? CheckCircle : null}
                     onClick={handleApply}
-                    disabled={applying || applied}
-                    className={`px-4 py-2.5 rounded-xl border ${applied ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-slate-700 hover:border-slate-500 text-slate-300'} text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-inner`}
+                    isLoading={applying}
+                    disabled={applied}
                 >
-                    {applying ? 'Applying...' : applied ? (<><CheckCircle size={14} /> Applied</>) : 'Quick Apply'}
-                </button>
+                    {applied ? 'Applied' : 'Quick Apply'}
+                </Button>
             </div>
-        </div>
+        </Card>
     );
 }
 
