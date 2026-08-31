@@ -117,7 +117,7 @@ function Dashboard() {
                         <span className="badge badge-indigo">Command Center</span>
                         <span className="text-xs text-slate-400 font-mono">Targeting: {user?.profile?.preferred_role || 'General Engineering'}</span>
                     </div>
-                    <h1 className="text-3xl font-extrabold text-white">Welcome back, {user?.full_name?.split(' ')[0] || 'Hunter'} 👋</h1>
+                    <h1 className="text-3xl font-extrabold text-white">Welcome back, {user?.full_name?.split(' ')[0] || 'Candidate'} 👋</h1>
                     <p className="text-xs text-slate-400 mt-1">Real-time intelligence dashboard across your matching scores, application pipeline, and AI assets.</p>
                 </div>
 

@@ -9,7 +9,7 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 - **Total Test Count**: **171 tests** (100% pass rate)
 - **Security Safety Gate Tests**: **90 tests** (`pytest -m security`)
-- **Phase 5 Production Readiness Tests**: Added 5 integration tests in `backend/tests/test_phase5_production_readiness.py`:
+- **Phase 5 & 6 Production & QA Tests**: Added integration tests in `backend/tests/test_phase5_production_readiness.py`:
   - `test_health_liveness_endpoint`
   - `test_health_readiness_endpoint`
   - `test_root_endpoint_job_seer_branding`

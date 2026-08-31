@@ -1,34 +1,30 @@
 # Job Seer
 
-**Job Seer** is an intelligent job search companion that uses Natural Language Processing (NLP) and statistical similarity algorithms to analyze resume fit against job descriptions, evaluate ATS health, generate resume tailoring recommendations, format cover letters, and track job applications in a Kanban workspace.
+**Job Seer** is an intelligent job search companion designed to help candidates evaluate job opportunities, analyze ATS resume health, generate tailored CV versions, format multi-tone cover letters, and manage job application pipelines.
 
 > **Tagline**: *Your intelligent job search companion.*
 
 ---
 
-## Overview
+## Executive Summary
 
-Applying for jobs without understanding how well your resume matches a job description leads to low response rates and wasted effort. Standard job search tools rely on simple string keyword matching that misses skill synonyms and contextual fit.
+Applying for jobs without understanding how well your resume matches a job description leads to low response rates and wasted effort. Standard job search portals rely on simple keyword string matching that misses skill synonyms and contextual fit.
 
-Job Seer addresses this problem by parsing candidate resumes, normalizing technical skill variations, performing TF-IDF statistical vectorization, and computing exact skill overlap metrics. Candidates gain clear visibility into missing requirements, tailored bullet point recommendations, and a centralized application tracking pipeline.
+Job Seer addresses this problem by parsing candidate resumes, normalizing technical skill variations, performing TF-IDF statistical vectorization, computing multi-factor V2 explainable match scores, and organizing application tracking into a Kanban board workspace.
 
 ---
 
-## Key Features
+## Core Capabilities
 
-- **Deployment & Production Readiness (Phase 5)**: Health check probes (`GET /health` liveness, `GET /health/ready` DB readiness), production Docker containerization (`Dockerfile`, `docker-compose.yml`), `.env.example` configuration, and Job Seer rebrand.
-- **Production Security & Performance (Phase 4)**: Dual HttpOnly cookie & Bearer token authentication (SEC-06 resolved), sliding window rate limiting (SEC-07 resolved), production HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`), and database index query optimization.
-- **Authentication & User Profiles**: User registration, JWT bearer token & HttpOnly cookie authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
-- **Intelligent Command Center Dashboard**: Real-time aggregated intelligence workspace (`Dashboard.jsx`) featuring 4 KPI Stat Cards (Average V2 Match %, Active Application Pipeline, ATS Health Score & Status Badge, Saved Tailored Assets Count), pipeline stage breakdown, action launchpad, and job recommendations.
-- **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
-- **Resume Intelligence & ATS Health Check**: Automated ATS readiness scoring (0-100), section completeness detection, contact info presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted recommendations.
+- **Intelligent Command Center Dashboard**: Real-time aggregated workspace (`Dashboard.jsx`) featuring KPI stat cards, application status breakdown, ATS health indicators, action launchpad, and job recommendations.
+- **ATS Health & Resume Intelligence**: Automated ATS readiness scoring (0-100), section completeness detection, contact presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted improvements.
+- **Matching Engine V2 & Explainable Scoring**: Multi-factor explainable scoring breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%) with human-readable score rationale, score weights, matched/missing skill chips, and interactive analytics modal (`MatchBreakdownModal.jsx`).
 - **Resume Tailoring V2 & Persistence**: Persistent versioned resume tailoring (`v1`, `v2`, `v3`) with factual candidate integrity guarantees, `difflib` line-by-line diff comparison modal (`ResumeDiffViewer.jsx`), and version history management.
 - **Intelligent Cover Letters & Multi-Tone Persistence**: Multi-tone cover letter generator (`Professional`, `Enthusiastic`, `Executive`, `Technical`) with per-tone versioning, copy-to-clipboard modal (`CoverLetterViewer.jsx`), and user ownership isolation.
 - **Application Tracker V2 & Kanban Board Workspace**: Complete Kanban pipeline board (`Tracker.jsx`) with HTML5 drag-and-drop status movements across 5 stages (`Not Applied`, `Applied`, `Interview`, `Offer`, `Rejected`), optimistic UI updates with server rollback, date tracking (`applied_date`, `interview_date`, `follow_up_date`), safe URL link handling, detail modal (`ApplicationDetailModal.jsx`), and view switcher (Board/List).
 - **Job Discovery & Repository Hub**: Dedicated job repository (`JobsHub.jsx`) with keyword search, location filtering, work mode filters (`Remote`, `Hybrid`, `On-site`), experience level filters, column sorting (`Newest`, `Oldest`, `Title`, `Company`), and database-level limit/offset pagination.
-- **Matching Engine V2 & Explainable Scoring**: Multi-factor explainable scoring breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%) with human-readable score rationale, score weights, matched/missing skill chips, and interactive analytics modal (`MatchBreakdownModal.jsx`).
-- **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
-- **Hardened React Client**: Centralized Axios API client with `getApiErrorMessage` error parser, `withCredentials: true` cookie support, 401 token cleanup response interceptors, non-blocking notification banners, and robust loading state handling.
+- **Production Security & Performance**: Dual `HttpOnly` `SameSite=Lax` cookies & Bearer tokens, sliding window rate limiting (`RateLimiter`), HTTP security headers (`nosniff`, `DENY`, `strict-origin-when-cross-origin`, `1; mode=block`), and compound database indexes.
+- **Deployment & Production Readiness**: Containerized Docker image (`Dockerfile`, `docker-compose.yml`), liveness (`GET /health`) and readiness (`GET /health/ready`) probes, environment template (`.env.example`), and complete deployment procedures.
 
 ---
 
@@ -48,29 +44,33 @@ Job Seer addresses this problem by parsing candidate resumes, normalizing techni
 - **HTTP Client**: Axios with request & response error interceptors (`withCredentials: true`)
 - **Icons & UI**: Lucide React, Vanilla CSS
 
-### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (171 tests, 90 security tests, 91% coverage)
-- **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
-- **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-
 ---
 
-## Automated Test Suites
+## Verification & Test Metrics
 
 ```bash
-# Backend (171 tests passing)
+# Backend Automated Suite (171 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
-# Backend Security Tests (90 tests passing)
+# Backend Security Suite (90 tests passing)
 ./venv/bin/pytest tests/ -m security -v
 
-# Frontend (6 unit tests passing)
+# Frontend Unit Tests (6 tests passing)
 cd frontend
 npm test
+
+# Production Build
+npm run build
 ```
 
-- **Backend Tests**: **171 tests (100% pass rate, 91% code coverage)**
-- **Security Tests**: **90 tests (100% pass rate)**
-- **Frontend Tests**: **6 unit tests (100% pass rate)**
-- **Production Build**: **Succeeded cleanly (`dist/index.html`)**
+- **Backend Pytest Suite**: **171 tests passing (100% pass rate, 91% code coverage)**
+- **Security Safety Tests**: **90 tests passing (100% pass rate)**
+- **Frontend Unit Tests**: **6 unit tests passing (100% pass rate)**
+- **Production Vite Build**: **Succeeded cleanly (`dist/index.html`)**
+
+---
+
+## Deployment & Documentation
+
+Refer to [docs/DEPLOYMENT.md](file:///home/blueberyy/Documents/SJ/Smart-Job-Hunter/docs/DEPLOYMENT.md) for production deployment procedures, environment variable configuration, Docker container setup, and database backup strategies.

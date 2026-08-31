@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Briefcase, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
 
 function Register() {
@@ -44,10 +44,10 @@ function Register() {
             <div className="glass-card w-full max-w-md p-10">
                 <div className="flex flex-col items-center mb-10">
                     <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-4">
-                        <Briefcase className="text-white" size={24} />
+                        <Sparkles className="text-white" size={24} />
                     </div>
-                    <h1 className="text-2xl font-bold">Join the Hunt</h1>
-                    <p className="text-slate-500 mt-2">Create your professional profile</p>
+                    <h1 className="text-2xl font-bold">Welcome to Job Seer</h1>
+                    <p className="text-slate-500 mt-2">Your intelligent job search companion</p>
                 </div>
 
                 {error && (

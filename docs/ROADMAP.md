@@ -1,6 +1,6 @@
 # ROADMAP.md — Implementation-Ready Engineering Task Plan
 
-This document contains the implementation-ready task breakdown for **Job Seer**. All tasks are prioritized using **P0 (Critical Security & Configuration)**, **P1 (High Stabilization & Refactoring)**, **P2 (Medium Feature & Schema Polish)**, **P3 (Product Intelligence & UX)**, **Phase 4 (Production Security & Performance)**, and **Phase 5 (Deployment & Production Readiness)**.
+This document contains the implementation-ready task breakdown for **Job Seer**. All tasks across Phase 0 through Phase 6 are officially **COMPLETED**.
 
 ---
 
@@ -53,14 +53,23 @@ flowchart TD
         P5-REBRAND[Job Seer Product Rebrand ✓ COMPLETED]
     end
 
-    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P5-DOCKER --> P5-REBRAND
+    subgraph P6 [Phase 6: Final QA, Polish, Documentation & Release Readiness - COMPLETED]
+        P6-QA[Final Systematic QA & User Journeys Audit ✓ COMPLETED]
+        P6-POLISH[UX & Visual Polish & SEO OpenGraph Metadata ✓ COMPLETED]
+        P6-DOCS[Final Documentation & Release Verification ✓ COMPLETED]
+    end
+
+    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P6-QA --> P6-POLISH --> P6-DOCS
 ```
 
 ---
 
-## Completed Phases
+## Completed Roadmap Summary
 
-### Phase 0 through Phase 4 (✓ ALL COMPLETED)
-
-### Phase 5 — Deployment & Production Readiness (✓ COMPLETED)
-- **Result**: Rebranded product to **Job Seer** (*Your intelligent job search companion*), created health check liveness (`GET /health`) and readiness (`GET /health/ready`) probes in `app/routers/health.py`, created production `Dockerfile`, `.dockerignore`, `docker-compose.yml`, environment variable template `.env.example`, and deployment guide in `docs/DEPLOYMENT.md`. Added 5 integration tests in `backend/tests/test_phase5_production_readiness.py`. **171 / 171 backend pytest cases passing** (91% coverage), **90 security tests passing**, **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.
+- **Phase 0 — Security & Baseline**: COMPLETED ✅
+- **Phase 1 — Stabilization & Architectural Refactoring**: COMPLETED ✅
+- **Phase 2 — API & Frontend Engineering Improvements**: COMPLETED ✅
+- **Phase 3 — Core Product Intelligence & UX**: COMPLETED ✅
+- **Phase 4 — Production Security & Performance**: COMPLETED ✅
+- **Phase 5 — Deployment & Production Readiness**: COMPLETED ✅
+- **Phase 6 — Final QA, Polish, Documentation & Release Readiness**: COMPLETED ✅

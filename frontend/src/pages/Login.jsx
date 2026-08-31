@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Briefcase, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
 
 function Login() {
@@ -36,15 +36,15 @@ function Login() {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-8 bg-slate-950">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 blur-[100px] rounded-full -z-10"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full -z-10"></div>
 
             <div className="glass-card w-full max-w-md p-10">
                 <div className="flex flex-col items-center mb-10">
                     <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-4">
-                        <Briefcase className="text-white" size={24} />
+                        <Sparkles className="text-white" size={24} />
                     </div>
                     <h1 className="text-2xl font-bold">Welcome Back</h1>
-                    <p className="text-slate-500 mt-2">Resume your career hunt</p>
+                    <p className="text-slate-500 mt-2">Access your Job Seer companion</p>
                 </div>
 
                 {error && (
@@ -68,7 +68,6 @@ function Login() {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center ml-1">
                             <label className="text-sm font-medium text-slate-400">Password</label>
-                            <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot PWD?</a>
                         </div>
                         <div className="relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />

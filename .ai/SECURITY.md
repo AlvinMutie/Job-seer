@@ -5,18 +5,12 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Production Security & Readiness (Phase 5)
+## Final Security Verification (Phase 6)
 
 - **Product Identity**: **Job Seer** (*Your intelligent job search companion*).
-- **Health Probe Security**: `/health` and `/health/ready` expose only high-level status signals (`ok`, `ready`, `connected`) without leaking database connection credentials, internal file paths, or environment secrets.
-- **Production Config Safety**: Production settings (`ENVIRONMENT=production`) strictly enforce minimum 32-character secret keys and prohibit wildcard CORS origins.
-
----
-
-## Resolved Security Items
-
-### SEC-06 — Authentication Storage Hardening (RESOLVED)
-- **Status**: **RESOLVED & VERIFIED**. `HttpOnly`, `SameSite=Lax` cookies active alongside Bearer headers.
-
-### SEC-07 — Application-Level Rate Limiting (RESOLVED)
-- **Status**: **RESOLVED & VERIFIED**. Sliding window rate limiter active with HTTP 429 response schema.
+- **Authentication**: Dual `HttpOnly` `SameSite=Lax` cookie and OAuth2 Bearer token extraction in `app/auth.py`.
+- **Authorization**: Resource ownership isolation strictly enforced on all user endpoints (`user_id == current_user.id`).
+- **Rate Limiting**: Sliding window rate limiting in `app/core/rate_limiter.py` protecting `/login`, `/register`, `/match`, `/resume/tailor`, and `/generate-cover-letter`.
+- **Security Headers**: Production HTTP security headers active (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection: 1; mode=block`).
+- **Error Sanitization**: Centralized exception handler in `app/core/errors.py` sanitizes 500 server errors, preventing stack trace or internal implementation leakage.
+- **Safety Gate Test Suite**: 90 security pytest cases passing (`pytest -m security`).
