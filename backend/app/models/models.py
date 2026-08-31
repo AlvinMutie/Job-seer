@@ -1,6 +1,6 @@
 import datetime
 import enum
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum, Index
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -23,7 +23,7 @@ class User(Base):
 class Profile(Base):
     __tablename__ = "profiles"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
     preferred_role = Column(String)
     skills = Column(Text)  # Comma separated
     experience_level = Column(String)
@@ -41,21 +41,21 @@ class Job(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     company = Column(String, index=True)
-    location = Column(String)
+    location = Column(String, index=True)
     description = Column(Text)
-    remote_status = Column(String)  # "Remote", "On-site", "Hybrid"
-    experience_level = Column(String)
+    remote_status = Column(String, index=True)  # "Remote", "On-site", "Hybrid"
+    experience_level = Column(String, index=True)
     skills_required = Column(Text)  # Comma separated or JSON
     salary_range = Column(String, nullable=True)
-    posted_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    posted_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
 
 class Resume(Base):
     __tablename__ = "resumes"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     content_text = Column(Text)
     extracted_skills = Column(Text)  # Comma separated
-    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     
     user = relationship("User")
 
@@ -70,39 +70,48 @@ class TailoredResume(Base):
     match_score = Column(Float, nullable=True)
     job_title = Column(String, nullable=True)
     company = Column(String, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User")
     job = relationship("Job")
+
+    __table_args__ = (
+        Index("idx_tailored_resumes_user_job", "user_id", "job_id"),
+    )
 
 class CoverLetter(Base):
     __tablename__ = "cover_letters"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     job_id = Column(Integer, ForeignKey("jobs.id"), index=True)
-    tailored_resume_id = Column(Integer, ForeignKey("tailored_resumes.id"), nullable=True)
+    tailored_resume_id = Column(Integer, ForeignKey("tailored_resumes.id"), nullable=True, index=True)
     content = Column(Text)
     tone = Column(String, default="Professional", index=True)
     version = Column(Integer, default=1)
     job_title = Column(String, nullable=True)
     company = Column(String, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
     updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User")
     job = relationship("Job")
     tailored_resume = relationship("TailoredResume")
 
+    __table_args__ = (
+        Index("idx_cover_letters_user_job", "user_id", "job_id"),
+        Index("idx_cover_letters_user_tone", "user_id", "tone"),
+    )
+
 class ApplicationTracker(Base):
     __tablename__ = "application_tracker"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     job_id = Column(Integer, ForeignKey("jobs.id"), index=True)
-    status = Column(Enum(ApplicationStatus, values_callable=lambda obj: [e.value for e in obj]), default=ApplicationStatus.NOT_APPLIED)
+    status = Column(Enum(ApplicationStatus, values_callable=lambda obj: [e.value for e in obj]), default=ApplicationStatus.NOT_APPLIED, index=True)
     match_score = Column(Float, nullable=True)
-    applied_at = Column(DateTime, nullable=True)
-    applied_date = Column(DateTime, nullable=True)
+    applied_at = Column(DateTime, nullable=True, index=True)
+    applied_date = Column(DateTime, nullable=True, index=True)
     interview_date = Column(DateTime, nullable=True)
     follow_up_date = Column(DateTime, nullable=True)
     application_url = Column(String, nullable=True)
@@ -111,3 +120,8 @@ class ApplicationTracker(Base):
 
     user = relationship("User")
     job = relationship("Job")
+
+    __table_args__ = (
+        Index("idx_app_tracker_user_status", "user_id", "status"),
+        Index("idx_app_tracker_user_job", "user_id", "job_id"),
+    )

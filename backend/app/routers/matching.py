@@ -8,12 +8,13 @@ from app.services.matching_engine import MatchingEngine
 from app.services.job_service import job_service
 from app.services.cover_letter import cover_letter_generator
 from app.services.tailor_service import tailor_service
+from app.core.rate_limiter import rate_limit
 
 router = APIRouter(tags=["Matching"])
 engine = MatchingEngine()
 
 
-@router.post("/match")
+@router.post("/match", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_match"))])
 async def match_resume(
     resume_text: str = Form(...), 
     job_id: int = Form(...), 
@@ -47,7 +48,7 @@ async def match_resume(
     return result
 
 
-@router.post("/generate-cover-letter")
+@router.post("/generate-cover-letter", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_cover_letter"))])
 async def generate_cover_letter_api(
     job_id: int = Form(...),
     candidate_name: str = Form(...),
@@ -69,7 +70,7 @@ async def generate_cover_letter_api(
     return {"cover_letter": letter}
 
 
-@router.post("/tailor-resume")
+@router.post("/tailor-resume", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_tailor"))])
 async def tailor_resume_api(
     job_id: int = Form(...),
     resume_text: str = Form(...),

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: '/api',
+    withCredentials: true, // SEC-06: Enable HttpOnly cookie passing for secure session management
 });
 
 /**
@@ -48,6 +49,7 @@ export const getApiErrorMessage = (error) => {
         case 404: return "Requested resource was not found.";
         case 413: return "File size exceeds maximum allowed limit of 10MB.";
         case 422: return "Validation error. Please check form fields.";
+        case 429: return "Rate limit exceeded. Please wait before retrying.";
         case 500: return "An unexpected server error occurred.";
         default: return `Request failed with status code ${status}`;
     }
@@ -91,6 +93,7 @@ export const authService = {
     login: (formData) => api.post('/login', formData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).then(res => res.data),
+    logout: () => api.post('/logout').then(res => res.data),
     getMe: () => api.get(`/me?t=${Date.now()}`).then(res => res.data),
     updateProfile: (data) => api.post('/profile', data).then(res => res.data),
     uploadResume: (formData) => api.post('/upload-resume', formData).then(res => res.data),

@@ -5,34 +5,33 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. Intelligent Command Center Dashboard (P3-07)
+## 1. Production Security & Performance (Phase 4)
 
-Task **P3-07** introduced the aggregated Intelligent Command Center Dashboard:
+Phase 4 hardened the application for production delivery:
 
-### Endpoints Reference
+### SEC-06 — Authentication Storage Hardening
+- Implemented dual token extraction in `app/auth.py` (`get_current_user`): checks Authorization Bearer header first, and falls back to `access_token` HttpOnly cookie.
+- Updated `POST /login` and `POST /register` in `app/routers/auth.py` to issue an `HttpOnly`, `SameSite=Lax` cookie alongside token response.
+- Added `POST /logout` endpoint to clear access cookies.
+- Configured Axios client with `withCredentials: true` in `frontend/src/services/api.js`.
 
-- `GET /dashboard/analytics`: Computes and retrieves real-time aggregated user analytics:
-  - `total_applications`: Integer count of user's tracked applications.
-  - `status_counts`: Breakdown for `not_applied`, `applied`, `interview`, `offer`, `rejected`.
-  - `average_match_score`: Average V2 AI match score.
-  - `ats_health_score`: Score evaluated via `resume_intelligence_service` if user has resume text, else `None`.
-  - `ats_classification`: Classification string if user has resume text, else `"No Resume Uploaded"`.
-  - `tailored_resumes_count`: Count of saved `TailoredResume` records for user.
-  - `cover_letters_count`: Count of saved `CoverLetter` records for user.
-  - `recent_applications`: Latest 5 tracked applications with title, company, status, score, dates.
-  - `recent_tailored_resumes`: Latest 3 saved tailored resumes.
-  - `recent_cover_letters`: Latest 3 saved cover letters.
+### SEC-07 — Application-Level Rate Limiting
+- Built in-memory sliding window rate limiter in `app/core/rate_limiter.py`.
+- Enforces rate limits on sensitive endpoints: `/login`, `/register` (15-20 req/min), `/match`, `/resume/tailor`, `/generate-cover-letter` (30 req/min).
+- Exceeding limit raises `APIException` HTTP 429 `TOO_MANY_REQUESTS`.
 
-### Frontend Command Center Architecture (`Dashboard.jsx`)
-
-- **Hero Greeting Banner**: User greeting, preferred role target, CV status badge & ATS score.
-- **Command Intelligence KPI Grid**: 4 KPI Stat Cards (Average Match %, Active Applications, ATS Health Score & Badge, Saved Assets Count).
-- **Action Center Launchpad**: Quick launch buttons ("Upload CV", "Tailor CV", "Format Cover Letter", "Kanban Board", "Jobs Hub").
-- **Pipeline Stage Breakdown & Asset History**: Visual stage count cards + recent tailored versions and cover letters.
-- **AI Recommendation Hub**: Keyword search, location filter, job cards with explainable match scores, missing skills, advice, tailoring, and quick tracking.
+### HTTP Security Headers & Database Indexing
+- Configured security middleware in `app/main.py` adding `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-XSS-Protection: 1; mode=block`.
+- Added database indexes and compound indexes in `app/models/models.py` (`idx_app_tracker_user_status`, `idx_app_tracker_user_job`, `idx_tailored_resumes_user_job`, `idx_cover_letters_user_job`, `idx_cover_letters_user_tone`).
 
 ---
 
-## 2. Application Tracker V2 & Kanban Board (P3-06)
+## 2. Intelligent Command Center Dashboard (P3-07)
+
+Task **P3-07** introduced the aggregated Intelligent Command Center Dashboard with `GET /dashboard/analytics`.
+
+---
+
+## 3. Application Tracker V2 & Kanban Board (P3-06)
 
 Task **P3-06** upgraded the application tracking pipeline to a complete Kanban board workspace with HTML5 drag-and-drop.

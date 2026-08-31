@@ -5,15 +5,17 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 1. Backend Pytest Metrics (160 Tests)
+## 1. Backend Pytest Metrics (166 Tests)
 
-- **Total Test Count**: **160 tests** (100% pass rate)
-- **Security Safety Gate Tests**: **84 tests** (`pytest -m security`)
-- **P3-07 Command Center Dashboard Tests**: Added 4 integration and security tests in `backend/tests/test_dashboard.py`:
-  - `test_get_dashboard_analytics_success_with_resume`
-  - `test_get_dashboard_analytics_without_resume`
-  - `test_dashboard_analytics_unauthenticated_rejected`
-  - `test_dashboard_analytics_ownership_isolation`
+- **Total Test Count**: **166 tests** (100% pass rate)
+- **Security Safety Gate Tests**: **90 tests** (`pytest -m security`)
+- **Phase 4 Production Security & Performance Tests**: Added 6 integration and security tests in `backend/tests/test_phase4_security_performance.py`:
+  - `test_sec_06_httponly_cookie_set_on_login`
+  - `test_sec_06_cookie_authenticated_access`
+  - `test_sec_06_logout_clears_cookie`
+  - `test_sec_07_rate_limiter_login`
+  - `test_http_security_headers_present`
+  - `test_database_indexes_query_performance`
 
 ---
 
@@ -38,7 +40,9 @@ Coverage is measured using `pytest-cov` against the `app/` package:
 cd backend
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing
 ```
-- **Overall Code Coverage**: **91% Baseline** (1,263 statements).
-- `app/schemas/dashboard.py`: **100%**
+- **Overall Code Coverage**: **91% Baseline** (1,323 statements).
+- `app/auth.py`: **100%**
 - `app/main.py`: **100%**
-- `app/routers/dashboard.py`: **82%**
+- `app/models/models.py`: **100%**
+- `app/routers/auth.py`: **100%**
+- `app/schemas/dashboard.py`: **100%**

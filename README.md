@@ -14,7 +14,8 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 
 ## Key Features
 
-- **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
+- **Production Security & Performance (Phase 4)**: Dual HttpOnly cookie & Bearer token authentication (SEC-06 resolved), sliding window rate limiting (SEC-07 resolved), production HTTP security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`), and database index query optimization.
+- **Authentication & User Profiles**: User registration, JWT bearer token & HttpOnly cookie authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
 - **Intelligent Command Center Dashboard**: Real-time aggregated intelligence workspace (`Dashboard.jsx`) featuring 4 KPI Stat Cards (Average V2 Match %, Active Application Pipeline, ATS Health Score & Status Badge, Saved Tailored Assets Count), pipeline stage breakdown, action launchpad, and job recommendations.
 - **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
 - **Resume Intelligence & ATS Health Check**: Automated ATS readiness scoring (0-100), section completeness detection, contact info presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted recommendations.
@@ -24,7 +25,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Job Discovery & Repository Hub**: Dedicated job repository (`JobsHub.jsx`) with keyword search, location filtering, work mode filters (`Remote`, `Hybrid`, `On-site`), experience level filters, column sorting (`Newest`, `Oldest`, `Title`, `Company`), and database-level limit/offset pagination.
 - **Matching Engine V2 & Explainable Scoring**: Multi-factor explainable scoring breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%) with human-readable score rationale, score weights, matched/missing skill chips, and interactive analytics modal (`MatchBreakdownModal.jsx`).
 - **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
-- **Hardened React Client**: Centralized Axios API client with `getApiErrorMessage` error parser, dynamic Bearer request interceptors, 401 token cleanup response interceptors, non-blocking notification banners, and robust loading state handling.
+- **Hardened React Client**: Centralized Axios API client with `getApiErrorMessage` error parser, `withCredentials: true` cookie support, 401 token cleanup response interceptors, non-blocking notification banners, and robust loading state handling.
 
 ---
 
@@ -41,11 +42,11 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 
 ### Frontend
 - **Framework**: React 18.2 (Vite)
-- **HTTP Client**: Axios with request & response error interceptors
+- **HTTP Client**: Axios with request & response error interceptors (`withCredentials: true`)
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (160 tests, 91% coverage)
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (166 tests, 90 security tests, 91% coverage)
 - **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
 
@@ -54,15 +55,19 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Automated Test Suites
 
 ```bash
-# Backend (160 tests passing)
+# Backend (166 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
+
+# Backend Security Tests (90 tests passing)
+./venv/bin/pytest tests/ -m security -v
 
 # Frontend (6 unit tests passing)
 cd frontend
 npm test
 ```
 
-- **Backend Tests**: **160 tests (100% pass rate, 91% code coverage)**
+- **Backend Tests**: **166 tests (100% pass rate, 91% code coverage)**
+- **Security Tests**: **90 tests (100% pass rate)**
 - **Frontend Tests**: **6 unit tests (100% pass rate)**
 - **Production Build**: **Succeeded cleanly (`dist/index.html`)**

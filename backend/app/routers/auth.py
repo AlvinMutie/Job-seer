@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -12,12 +12,13 @@ from app.auth import (
     create_access_token,
     get_current_user
 )
+from app.core.rate_limiter import rate_limit
 
 router = APIRouter(tags=["Authentication"])
 
 
-@router.post("/register", response_model=Token)
-async def register(user: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=Token, dependencies=[Depends(rate_limit(max_requests=15, key_prefix="auth_register"))])
+async def register(user: UserCreate, response: Response, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -34,11 +35,22 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     
     access_token = create_access_token(data={"sub": new_user.email})
+
+    # SEC-06: Set HttpOnly Cookie for enhanced browser security alongside Bearer response
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,  # Allowed for local HTTP/HTTPS, set True in production environment
+        max_age=1800
+    )
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@router.post("/login", response_model=Token, dependencies=[Depends(rate_limit(max_requests=20, key_prefix="auth_login"))])
+async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -48,7 +60,27 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         )
     
     access_token = create_access_token(data={"sub": user.email})
+
+    # SEC-06: Set HttpOnly Cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=1800
+    )
+
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    """
+    SEC-06: Logout endpoint clearing HttpOnly access_token cookie.
+    """
+    response.delete_cookie(key="access_token", path="/", httponly=True, samesite="lax")
+    return {"message": "Logged out successfully"}
 
 
 @router.get("/me")
@@ -56,7 +88,6 @@ async def get_me(current_user: User = Depends(get_current_user), db: Session = D
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     logging.info(f"Fetch /me: user_id={current_user.id}, profile_found={profile is not None}")
     
-    # Ensure full_name is at least an empty string
     name = current_user.full_name or "Professional Hunter"
     
     return {
