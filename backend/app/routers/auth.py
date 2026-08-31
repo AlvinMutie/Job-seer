@@ -1,12 +1,11 @@
 import logging
-from typing import Optional
-import pydantic
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import User, Profile
+from app.schemas.auth import UserCreate, Token
 from app.auth import (
     get_password_hash,
     verify_password,
@@ -15,17 +14,6 @@ from app.auth import (
 )
 
 router = APIRouter(tags=["Authentication"])
-
-
-class UserCreate(pydantic.BaseModel):
-    full_name: str
-    email: str
-    password: str
-
-
-class Token(pydantic.BaseModel):
-    access_token: str
-    token_type: str
 
 
 @router.post("/register", response_model=Token)

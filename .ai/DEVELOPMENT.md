@@ -40,17 +40,16 @@ The API server will run at `http://localhost:8000`. Direct API docs available at
 
 ---
 
-## 2. Architecture & Router Organization
+## 2. Architecture & Layer Responsibilities
 
-The backend uses a modular APIRouter structure located in `backend/app/routers/`:
+The backend follows a modular monolith architecture with clear layer separations:
 
-- `app/routers/auth.py` — Registration (`/register`), Login (`/login`), User Info (`/me`).
-- `app/routers/jobs.py` — Job Discovery & Keyword Search (`/jobs`).
-- `app/routers/matching.py` — TF-IDF Match (`/match`), Resume Tailoring (`/tailor-resume`), Cover Letter (`/generate-cover-letter`).
-- `app/routers/profile.py` — Preference Update (`/profile`), Resume File Upload (`/upload-resume`).
-- `app/routers/applications.py` — Kanban Application Tracker (`/applications`).
-
-Entry point `backend/app/main.py` (36 lines) handles application initialization, CORS configuration, and router inclusion.
+- `app/routers/` → API Transport & Routing Layer (`auth.py`, `jobs.py`, `matching.py`, `profile.py`, `applications.py`).
+- `app/schemas/` → Pydantic Data Transfer Objects (DTOs) & Request/Response Validation (`auth.py`, `jobs.py`, `matching.py`, `profile.py`, `applications.py`).
+- `app/models/` → SQLAlchemy ORM Persistent Database Entities (`models.py`).
+- `app/services/` → Core Business Logic & Matching Engines (`matching_engine.py`, `job_service.py`, `tailor_service.py`, `cover_letter.py`).
+- `app/utils/` → Infrastructure utilities and security boundary helpers (`file_handling.py`).
+- `app/core/` → Centralized configuration (`config.py`).
 
 ---
 

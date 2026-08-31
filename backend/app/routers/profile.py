@@ -1,6 +1,5 @@
 import os
 import logging
-import pydantic
 import fitz  # PyMuPDF
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.orm import Session
@@ -8,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import User, Profile
 from app.auth import get_current_user
+from app.schemas.profile import ProfileUpdate
 from app.utils.file_handling import validate_upload_file, save_user_resume
 
 router = APIRouter(tags=["Profile"])
@@ -15,14 +15,6 @@ router = APIRouter(tags=["Profile"])
 UPLOAD_DIR = "uploads"
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
-
-
-class ProfileUpdate(pydantic.BaseModel):
-    preferred_role: str
-    skills: str
-    experience_level: str
-    location_preference: str
-    salary_expectation: str
 
 
 def extract_text(file_path: str) -> str:

@@ -1,10 +1,10 @@
-import pydantic
 from fastapi import APIRouter, Depends, Form
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import User
 from app.auth import get_current_user
+from app.schemas.matching import MatchRequest
 from app.services.matching_engine import MatchingEngine
 from app.services.job_service import job_service
 from app.services.cover_letter import cover_letter_generator
@@ -12,11 +12,6 @@ from app.services.tailor_service import tailor_service
 
 router = APIRouter(tags=["Matching"])
 engine = MatchingEngine()
-
-
-class MatchRequest(pydantic.BaseModel):
-    resume_text: str
-    job_description: str
 
 
 @router.post("/match")

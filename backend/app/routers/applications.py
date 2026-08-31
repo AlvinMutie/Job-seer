@@ -1,21 +1,13 @@
 import datetime
-from typing import Optional
-import pydantic
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import User, Job, ApplicationTracker
 from app.auth import get_current_user
+from app.schemas.applications import ApplicationCreate
 
 router = APIRouter(tags=["Applications"])
-
-
-class ApplicationCreate(pydantic.BaseModel):
-    job_id: int
-    status: str = "Applied"
-    match_score: float
-    notes: Optional[str] = None
 
 
 @router.get("/applications")

@@ -73,17 +73,18 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ┌──────────────────────────▼─────────────────────────────┐
 │                 FastAPI REST Backend                   │
 │  ┌───────────────────┐        ┌─────────────────────┐  │
-│  │   app.core.config │        │    app.auth (JWT)   │  │
-│  └─────────┬─────────┘        └──────────┬──────────┘  │
-│            │                             │             │
-│  ┌─────────▼─────────┐        ┌──────────▼──────────┐  │
-│  │   app/routers/    │        │  File Handling      │  │
-│  │ (auth,jobs,match) │        │  (Upload Boundary)  │  │
-│  └───────────────────┘        └─────────────────────┘  │
+│  │   app.core.config │        │    app/schemas/     │  │
+│  └─────────┬─────────┘        │   (Pydantic DTOs)   │  │
+│            │                  └──────────┬──────────┘  │
+│  ┌─────────▼─────────┐                   │             │
+│  │   app/routers/    │                    │             │
+│  │ (auth,jobs,match) │                    │             │
+│  └─────────┬─────────┘                    │             │
+│            └──────────────────────────────┘             │
 └──────────────────────────┬─────────────────────────────┘
                            │ SQLAlchemy ORM
 ┌──────────────────────────▼─────────────────────────────┐
-│                     SQLite Database                    │
+│              app/models/ (SQLite DB)                   │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -93,7 +94,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 
 ### Backend
 - **Framework**: FastAPI 0.141+
-- **Architecture**: Modular APIRouter Monolith
+- **Architecture**: Layered Modular Monolith (Routers, Schemas, Models, Services)
 - **Database / ORM**: SQLAlchemy 2.0+ with SQLite
 - **NLP & Statistics**: `spacy` 3.8+ (`en_core_web_sm`), `scikit-learn` 1.9+ (`TfidfVectorizer`)
 - **Document Parsers**: PyMuPDF (`fitz`), `docx2txt`
@@ -120,6 +121,7 @@ Smart-Job-Hunter/
 │   │   ├── core/           # Centralized configuration (config.py)
 │   │   ├── models/         # SQLAlchemy ORM database models (models.py)
 │   │   ├── routers/        # APIRouter modules (auth, jobs, matching, profile, applications)
+│   │   ├── schemas/        # Pydantic DTO schemas (auth, profile, matching, applications)
 │   │   ├── services/       # MatchingEngine, JobService, TailorService, CoverLetter
 │   │   ├── utils/          # Upload validation and file handling (file_handling.py)
 │   │   ├── auth.py         # JWT generation and verification
@@ -246,4 +248,5 @@ cd backend
 - **Phase 0 (Security & Baseline — COMPLETED)**: P0-00 through P0-05 completed.
 - **Phase 1 (Modular Monolith Refactoring)**:
   - `P1-01`: Modularize main.py into Routers (**Completed — 58 tests**)
-  - `P1-02`: Separate Schemas & Models (*Pending*)
+  - `P1-02`: Separate Schemas & Models (**Completed — 58 tests**)
+  - `P1-03`: Setup pytest Safety Testing Framework (*Pending*)
