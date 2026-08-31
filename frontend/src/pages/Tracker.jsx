@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle, XCircle, FileText, MoreVertical, Plus, Briefcase, Sparkles, Search, Filter, AlertCircle, ChevronLeft, ChevronRight, Loader2, LayoutGrid, List as ListIcon, Calendar, ExternalLink } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, FileText, MoreVertical, Plus, Briefcase, Sparkles, Search, Filter, AlertCircle, ChevronLeft, ChevronRight, Loader2, LayoutGrid, List as ListIcon, Calendar, ExternalLink, ArrowRight } from 'lucide-react';
 import { trackerService, getApiErrorMessage } from '../services/api';
 import ApplicationDetailModal from '../components/ApplicationDetailModal';
 import PageHeader from '../components/ui/PageHeader';
@@ -105,6 +105,17 @@ function Tracker() {
         }
     };
 
+    const getStageActionLabel = (st) => {
+        switch (st) {
+            case 'Not Applied': return 'Apply & Log Date';
+            case 'Applied': return 'Add Follow-up';
+            case 'Interview': return 'Log Interview';
+            case 'Offer': return 'View Offer Details';
+            case 'Rejected': return 'View Matches';
+            default: return 'Update Details';
+        }
+    };
+
     const avgScore = applications.length > 0
         ? Math.round(applications.reduce((acc, app) => acc + (app.score || 0), 0) / applications.length)
         : 0;
@@ -204,8 +215,9 @@ function Tracker() {
 
                                 <div className="flex-1 space-y-3 overflow-y-auto max-h-[600px] pr-0.5">
                                     {columnApps.length === 0 ? (
-                                        <div className="h-32 flex items-center justify-center text-center text-xs text-slate-600 border-2 border-dashed border-slate-800/60 rounded-xl">
-                                            Drop card here
+                                        <div className="h-32 flex flex-col items-center justify-center text-center p-3 text-xs text-slate-600 border-2 border-dashed border-slate-800/60 rounded-xl space-y-1">
+                                            <span>No {columnStatus.toLowerCase()} roles</span>
+                                            <span className="text-[10px] text-slate-700">Drop cards here to move stage</span>
                                         </div>
                                     ) : (
                                         columnApps.map(app => (
@@ -235,11 +247,10 @@ function Tracker() {
                                                     </div>
                                                 )}
 
-                                                {app.application_url && (
-                                                    <div className="text-[10px] text-slate-500 truncate flex items-center gap-1">
-                                                        <ExternalLink size={10} /> {app.application_url}
-                                                    </div>
-                                                )}
+                                                <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px] text-indigo-400 font-semibold group-hover:underline">
+                                                    <span>{getStageActionLabel(columnStatus)}</span>
+                                                    <ArrowRight size={12} />
+                                                </div>
                                             </Card>
                                         ))
                                     )}

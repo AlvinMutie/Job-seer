@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, TrendingUp, ChevronRight, Sparkles, AlertCircle } from 'lucide-react';
+import { Target, TrendingUp, ChevronRight, Sparkles, AlertCircle, Scissors } from 'lucide-react';
 import { jobService, authService } from '../services/api';
 import MatchBreakdownModal from '../components/MatchBreakdownModal';
 import PageHeader from '../components/ui/PageHeader';
@@ -112,14 +112,26 @@ function Matches() {
                                 )}
                             </div>
 
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="mt-6 w-full text-indigo-400 border-t border-slate-800/50 rounded-none pt-3"
-                                onClick={() => handleOpenAnalytics(match)}
-                            >
-                                View Full Score Analytics <ChevronRight size={16} />
-                            </Button>
+                            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                                <a href={`/resume-hub?jobId=${match.id}`} className="flex-1">
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        icon={Scissors}
+                                        className="w-full"
+                                    >
+                                        Tailor Resume
+                                    </Button>
+                                </a>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenAnalytics(match)}
+                                >
+                                    Analytics <ChevronRight size={14} />
+                                </Button>
+                            </div>
                         </Card>
                     ))
                 )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Sparkles, AlertCircle, Target, CheckCircle } from 'lucide-react';
+import { Search, MapPin, Briefcase, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Sparkles, AlertCircle, Target, CheckCircle, Scissors } from 'lucide-react';
 import { jobService, trackerService, authService, getApiErrorMessage } from '../services/api';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
@@ -307,6 +307,17 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
                 >
                     {matchResult ? 'Re-Analyze' : 'Analyze Match'}
                 </Button>
+
+                <a href={`/resume-hub?jobId=${job.id}`}>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Scissors}
+                        className="w-full"
+                    >
+                        Tailor CV
+                    </Button>
+                </a>
 
                 <Button
                     variant={applied ? 'success' : 'secondary'}

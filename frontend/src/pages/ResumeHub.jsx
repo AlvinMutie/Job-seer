@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool } from 'lucide-react';
+import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target } from 'lucide-react';
 import { authService, jobService, tailoredResumeService, coverLetterService, getApiErrorMessage } from '../services/api';
 import ResumeDiffViewer from '../components/ResumeDiffViewer';
 import CoverLetterViewer from '../components/CoverLetterViewer';
@@ -50,6 +50,13 @@ function ResumeHub() {
             setJobs(jobsData);
             setTailoredResumes(tailoredData);
             setCoverLetters(letterData);
+
+            // Read URL query parameter for pre-selected job ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryJobId = urlParams.get('jobId');
+            if (queryJobId) {
+                setSelectedJobId(queryJobId);
+            }
 
             if (userData.profile?.resume_text) {
                 setHealthLoading(true);
@@ -183,6 +190,8 @@ function ResumeHub() {
         return <div className="space-y-6"><LoadingSkeleton variant="card" count={3} /></div>;
     }
 
+    const currentTargetJob = jobs.find(j => String(j.id) === String(selectedJobId));
+
     return (
         <div className="space-y-8 animate-fade-in">
             <PageHeader
@@ -190,6 +199,22 @@ function ResumeHub() {
                 title="Resume Hub & Application Generator"
                 subtitle="Upload base CVs, run ATS readiness checks, generate versioned tailored resumes, and format multi-tone cover letters."
             />
+
+            {/* Contextual Selected Job Target Banner */}
+            {currentTargetJob && (
+                <Card variant="glass" className="p-4 bg-indigo-950/40 border-indigo-500/30 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-500/20 rounded-xl text-indigo-400">
+                            <Target size={20} />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block">Target Opportunity Context Preserved</span>
+                            <h4 className="text-sm font-bold text-white">{currentTargetJob.title} — <span className="text-slate-300 font-normal">{currentTargetJob.company}</span></h4>
+                        </div>
+                    </div>
+                    <Badge variant="indigo">{currentTargetJob.remote_status}</Badge>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column: Upload & Quick Tailor Generator */}
