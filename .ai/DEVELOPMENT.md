@@ -40,18 +40,31 @@ The API server will run at `http://localhost:8000`. Direct API docs available at
 
 ---
 
-## 2. Environment Configuration
+## 2. Architecture & Router Organization
+
+The backend uses a modular APIRouter structure located in `backend/app/routers/`:
+
+- `app/routers/auth.py` — Registration (`/register`), Login (`/login`), User Info (`/me`).
+- `app/routers/jobs.py` — Job Discovery & Keyword Search (`/jobs`).
+- `app/routers/matching.py` — TF-IDF Match (`/match`), Resume Tailoring (`/tailor-resume`), Cover Letter (`/generate-cover-letter`).
+- `app/routers/profile.py` — Preference Update (`/profile`), Resume File Upload (`/upload-resume`).
+- `app/routers/applications.py` — Kanban Application Tracker (`/applications`).
+
+Entry point `backend/app/main.py` (36 lines) handles application initialization, CORS configuration, and router inclusion.
+
+---
+
+## 3. Environment Configuration
 
 Application configuration is centralized in `backend/app/core/config.py` using `pydantic-settings`:
 
 - **Development**: Reads environment variables from local `backend/.env`.
-  - `CORS_ORIGINS`: Comma-separated list of allowed origins (`http://localhost:5173,http://localhost:3000`).
 - **Testing**: Explicit test fixtures in `tests/conftest.py` supply isolated test settings.
 - **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Wildcard `*` in `CORS_ORIGINS` is prohibited in production.
 
 ---
 
-## 3. Running Automated Tests
+## 4. Running Automated Tests
 
 ```bash
 cd backend
@@ -60,7 +73,7 @@ cd backend
 
 ---
 
-## 4. Mandatory Engineering Workflow
+## 5. Mandatory Engineering Workflow
 
 All development tasks MUST follow the 10-step engineering lifecycle:
 

@@ -18,7 +18,7 @@ flowchart TD
     end
 
     subgraph P1 [P1: High Stabilization & Testing]
-        P1-01[P1-01: Modularize main.py into Routers]
+        P1-01[P1-01: Modularize main.py into Routers ✓ COMPLETED]
         P1-02[P1-02: Separate Schemas & Models]
         P1-03[P1-03: Setup pytest Safety Testing Framework]
         P1-04[P1-04: Add Auth Security Safety Gate Tests]
@@ -34,16 +34,15 @@ flowchart TD
 
 ### P0-00 — Establish Testing Safety Baseline (✓ COMPLETED)
 - **Objective**: Build a 100% isolated, deterministic pytest safety baseline capturing current application behavior and vulnerability baselines before refactoring.
-- **Result**: **35 / 35 tests passing**. Data isolation enforced via `sqlite:///:memory:` with SQLAlchemy `StaticPool`.
-- **Baseline Report**: [docs/TEST_BASELINE.md](file:///home/blueberyy/Documents/SJ/Smart-Job-Hunter/docs/TEST_BASELINE.md).
+- **Result**: **35 / 35 tests passing**.
 
 ### P0-01 — Externalize JWT Secret (✓ COMPLETED)
 - **Objective**: Externalize hardcoded JWT secret from `app/auth.py` to centralized settings model `app/core/config.py` loaded from environment variables.
-- **Result**: Hardcoded secret string completely purged. Centralized settings implemented with fail-safe production validation. 39 / 39 tests passing.
+- **Result**: Hardcoded secret string completely purged. 39 / 39 tests passing.
 
 ### P0-02 — Endpoint Authorization Boundaries (✓ COMPLETED)
-- **Objective**: Protect computational endpoints `/match`, `/tailor-resume`, `/generate-cover-letter` with JWT authentication (`Depends(get_current_user)`) while retaining `GET /jobs` as public discovery.
-- **Result**: Protected all three computational endpoints with JWT authentication dependencies. 46 / 46 tests passing.
+- **Objective**: Protect computational endpoints `/match`, `/tailor-resume`, `/generate-cover-letter` with JWT authentication (`Depends(get_current_user)`).
+- **Result**: Protected all three computational endpoints. 46 / 46 tests passing.
 
 ### P0-03 — Secure Resume Upload Boundary (✓ COMPLETED)
 - **Objective**: Enforce strict 10-layer security boundary on `POST /upload-resume` (extension whitelisting, MIME magic header verification, 10MB size limit, server UUID filenames, old file lifecycle cleanup).
@@ -54,17 +53,21 @@ flowchart TD
 - **Result**: Restricted allowed origins to environment-configurable `settings.ALLOWED_ORIGINS`. Added `backend/tests/test_cors.py`. 55 / 55 tests passing.
 
 ### P0-05 — Resolve Password Hashing Conflict (✓ COMPLETED)
-- **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py` and pin compatible authentication packages.
-- **Result**: Removed monkeypatch completely from `app/main.py`. Pinned `passlib==1.7.4` and `bcrypt==4.0.1` in `requirements.txt`. **58 / 58 tests passing**.
+- **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py` and pin compatible authentication packages (`passlib==1.7.4`, `bcrypt==4.0.1`).
+- **Result**: Removed monkeypatch completely from `app/main.py`. 58 / 58 tests passing.
+
+### P1-01 — Modularize main.py into Routers (✓ COMPLETED)
+- **Objective**: Structural refactoring of monolithic `main.py` (346 lines → 36 lines) into 5 dedicated FastAPI APIRouters under `app/routers/`.
+- **Result**: Created `routers/auth.py`, `routers/jobs.py`, `routers/matching.py`, `routers/profile.py`, and `routers/applications.py`. **58 / 58 tests passing**. Zero side effects.
 
 ---
 
 ## Detailed Pending Task Breakdown (Phase 1)
 
-### P1-01 — Modularize main.py into Routers
+### P1-02 — Separate Schemas & Models
 
-- **Objective**: Refactor monolithic 340-line `main.py` into distinct APIRouter modules (`app/routers/auth.py`, `app/routers/jobs.py`, `app/routers/matching.py`, `app/routers/profile.py`, `app/routers/applications.py`).
-- **Files Likely Affected**: `backend/app/main.py`, `backend/app/routers/` (NEW).
-- **Preconditions**: Phase 0 (P0-00 through P0-05) completed.
-- **Dependencies**: Phase 0 completed.
+- **Objective**: Extract inline Pydantic models from routers into a centralized `app/schemas/` directory (`user.py`, `job.py`, `profile.py`, `application.py`).
+- **Files Likely Affected**: `backend/app/schemas/` (NEW), `backend/app/routers/`.
+- **Preconditions**: P1-01 completed.
+- **Dependencies**: P1-01 completed.
 - **Risk**: Low.

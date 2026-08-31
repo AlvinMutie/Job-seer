@@ -77,8 +77,8 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 │  └─────────┬─────────┘        └──────────┬──────────┘  │
 │            │                             │             │
 │  ┌─────────▼─────────┐        ┌──────────▼──────────┐  │
-│  │   MatchingEngine  │        │  File Handling      │  │
-│  │  (spaCy/scikit)   │        │  (Upload Boundary)  │  │
+│  │   app/routers/    │        │  File Handling      │  │
+│  │ (auth,jobs,match) │        │  (Upload Boundary)  │  │
 │  └───────────────────┘        └─────────────────────┘  │
 └──────────────────────────┬─────────────────────────────┘
                            │ SQLAlchemy ORM
@@ -93,6 +93,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 
 ### Backend
 - **Framework**: FastAPI 0.141+
+- **Architecture**: Modular APIRouter Monolith
 - **Database / ORM**: SQLAlchemy 2.0+ with SQLite
 - **NLP & Statistics**: `spacy` 3.8+ (`en_core_web_sm`), `scikit-learn` 1.9+ (`TfidfVectorizer`)
 - **Document Parsers**: PyMuPDF (`fitz`), `docx2txt`
@@ -118,11 +119,12 @@ Smart-Job-Hunter/
 │   ├── app/
 │   │   ├── core/           # Centralized configuration (config.py)
 │   │   ├── models/         # SQLAlchemy ORM database models (models.py)
+│   │   ├── routers/        # APIRouter modules (auth, jobs, matching, profile, applications)
 │   │   ├── services/       # MatchingEngine, JobService, TailorService, CoverLetter
 │   │   ├── utils/          # Upload validation and file handling (file_handling.py)
 │   │   ├── auth.py         # JWT generation and verification
 │   │   ├── database.py     # Database engine and session management
-│   │   └── main.py         # FastAPI application and route handlers
+│   │   └── main.py         # App entry point & router registration (36 lines)
 │   ├── tests/              # Automated test suite (58 tests)
 │   ├── uploads/            # Server resume upload storage
 │   ├── requirements.txt    # Backend dependencies
@@ -214,9 +216,6 @@ DATABASE_URL=sqlite:///./job_hunter_v3.db
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-> [!WARNING]
-> Do NOT commit real `.env` files or production secrets to version control. `.gitignore` is configured to exclude `.env` files automatically. In `ENVIRONMENT=production`, setting an unconfigured/weak `SECRET_KEY` or wildcard `*` in `CORS_ORIGINS` causes an immediate startup validation failure.
-
 ---
 
 ## API Overview & Security Boundaries
@@ -231,8 +230,6 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 
 ## Automated Test Suite
 
-The project includes an automated safety test suite ensuring complete database isolation and deterministic execution.
-
 ```bash
 cd backend
 ./venv/bin/pytest tests/ -v
@@ -244,23 +241,9 @@ cd backend
 
 ---
 
-## Security Architecture
-
-1. **Centralized Configuration**: All secrets and settings are externalized and loaded dynamically via `pydantic-settings`.
-2. **Endpoint Authorization**: Protected endpoints verify JWT Bearer tokens and reject unauthenticated requests with `401 Unauthorized`.
-3. **10-Layer File Upload Boundary**: `POST /upload-resume` enforces extension whitelisting (`.pdf`, `.docx`, `.txt`), MIME magic header verification (`%PDF-`, `PK\x03\x04`), UTF-8 decodability, 10MB file size limits (returning `413 Content Too Large`), and server-generated UUID filenames.
-4. **Restricted CORS Origins**: Wildcard CORS origin `*` is eliminated in favor of explicit `settings.ALLOWED_ORIGINS` headers.
-5. **Clean Password Hashing**: Passwords are hashed using `passlib==1.7.4` and `bcrypt==4.0.1` natively without runtime monkeypatches.
-
----
-
 ## Engineering Roadmap & Status
 
-- **Phase 0 (Security & Baseline — COMPLETED)**:
-  - `P0-00`: Testing Safety Baseline (**Completed — 35 tests**)
-  - `P0-01`: Externalize JWT Secret (**Completed — 39 tests**)
-  - `P0-02`: Endpoint Authorization Boundaries (**Completed — 46 tests**)
-  - `P0-03`: Secure Resume Upload Boundary (**Completed — 50 tests**)
-  - `P0-04`: Restrict CORS Origins (**Completed — 55 tests**)
-  - `P0-05`: Resolve Password Hashing Conflict (**Completed — 58 tests**)
-- **Phase 1 (Modular Monolith Refactoring)**: Planned router modularization, Pydantic schema separation, and service layer decoupling.
+- **Phase 0 (Security & Baseline — COMPLETED)**: P0-00 through P0-05 completed.
+- **Phase 1 (Modular Monolith Refactoring)**:
+  - `P1-01`: Modularize main.py into Routers (**Completed — 58 tests**)
+  - `P1-02`: Separate Schemas & Models (*Pending*)
