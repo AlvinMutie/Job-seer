@@ -3,54 +3,107 @@
 @tailwind utilities;
 
 :root {
-  --primary: #6366f1;
-  --secondary: #a855f7;
-  --accent: #22d3ee;
-  --bg-dark: #0f172a;
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-blur: blur(12px);
+  /* Brand Colors */
+  --brand-primary: #6366f1;
+  --brand-primary-hover: #4f46e5;
+  --brand-secondary: #a855f7;
+  --brand-cyan: #06b6d4;
+
+  /* Surface & Background Hierarchy */
+  --bg-app: #0b0f19;
+  --bg-surface: rgba(15, 23, 42, 0.75);
+  --bg-surface-hover: rgba(30, 41, 59, 0.85);
+  --bg-elevated: #1e293b;
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(99, 102, 241, 0.3);
+
+  /* Typography Colors */
+  --text-main: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Semantic Feedback Colors */
+  --color-success: #10b981;
+  --color-success-bg: rgba(16, 185, 129, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-info: #06b6d4;
+  --color-info-bg: rgba(6, 182, 212, 0.1);
 }
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100;
+    @apply bg-[#0b0f19] text-slate-100 antialiased font-['Outfit',sans-serif] selection:bg-indigo-500/30;
+  }
+
+  /* Accessibility Focus Rings */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-950;
   }
 }
 
 @layer components {
+  /* Glass Cards */
   .glass-card {
-    @apply bg-[var(--bg-card)] backdrop-blur-md border border-[var(--border-color)] rounded-2xl shadow-xl transition-all duration-300;
+    @apply bg-slate-900/75 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl transition-all duration-200;
   }
   
   .glass-card:hover {
-    @apply border-indigo-500/30 bg-slate-800/80;
+    @apply border-indigo-500/30 bg-slate-900/90;
   }
 
-  .btn-primary {
-    @apply px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 active:scale-95;
-  }
-
+  /* Form Control Base */
   .input-field {
-    @apply w-full bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all;
+    @apply w-full bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  /* Standardized Buttons */
+  .btn-primary {
+    @apply px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50;
+  }
+
+  .btn-destructive {
+    @apply px-5 py-2.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50;
+  }
+
+  /* Badges */
   .badge {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider;
+    @apply px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 border;
   }
 
-  .badge-indigo { @apply bg-indigo-500/10 text-indigo-400 border border-indigo-500/20; }
-  .badge-cyan { @apply bg-cyan-500/10 text-cyan-400 border border-cyan-500/20; }
-  .badge-green { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+  .badge-indigo { @apply bg-indigo-500/10 text-indigo-300 border-indigo-500/25; }
+  .badge-emerald { @apply bg-emerald-500/10 text-emerald-300 border-emerald-500/25; }
+  .badge-amber { @apply bg-amber-500/10 text-amber-300 border-amber-500/25; }
+  .badge-rose { @apply bg-rose-500/10 text-rose-300 border-rose-500/25; }
+  .badge-cyan { @apply bg-cyan-500/10 text-cyan-400 border-cyan-500/25; }
+  .badge-slate { @apply bg-slate-800 text-slate-300 border-slate-700; }
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseSlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
 }
