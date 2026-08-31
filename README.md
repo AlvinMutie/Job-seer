@@ -15,7 +15,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Key Features
 
 - **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
-- **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction.
+- **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
 - **Job Discovery & Search**: Job listing repository with keyword and location filter capabilities.
 - **Resume-to-Job Matching**: Statistical NLP matching engine evaluating technical skill overlap and content similarity.
 - **Resume Tailoring**: Rule-based suggestion engine identifying missing skill requirements for specific job listings.
@@ -85,7 +85,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
                            │ SQLAlchemy ORM
 ┌──────────────────────────▼─────────────────────────────┐
 │              app/models/ (SQLite DB)                   │
-└──────────────────────────┬─────────────────────────────┘
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -109,7 +109,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ### Testing Infrastructure
 - **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-- **Coverage Baseline**: **89% Overall Code Coverage (100% auth.py coverage)**
+- **Coverage Baseline**: **91% Overall Code Coverage (100% auth.py & tailor_service.py coverage)**
 
 ---
 
@@ -128,7 +128,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT generation and verification (100% coverage)
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # App entry point & router registration (36 lines)
-│   ├── tests/              # Automated test suite (71 tests)
+│   ├── tests/              # Automated test suite (92 tests)
 │   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -236,10 +236,10 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 ```bash
 cd backend
 
-# Run full test suite (71 tests)
+# Run full test suite (92 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run with test coverage (89% baseline)
+# Run with test coverage (91% baseline)
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
 
 # Run specific test markers
@@ -249,9 +249,9 @@ cd backend
 ./venv/bin/pytest tests/ -m regression -v
 ```
 
-- **Total Test Count**: **71 tests**
-- **Pass Rate**: **100% (71 / 71)**
-- **Measured Code Coverage**: **89% Baseline (100% auth.py coverage)**
+- **Total Test Count**: **92 tests**
+- **Pass Rate**: **100% (92 / 92)**
+- **Measured Code Coverage**: **91% Baseline**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -259,9 +259,4 @@ cd backend
 ## Engineering Roadmap & Status
 
 - **Phase 0 (Security & Baseline — COMPLETED)**: P0-00 through P0-05 completed.
-- **Phase 1 (Modular Monolith Refactoring)**:
-  - `P1-01`: Modularize main.py into Routers (**Completed — 58 tests**)
-  - `P1-02`: Separate Schemas & Models (**Completed — 58 tests**)
-  - `P1-03`: Setup pytest Safety Testing Framework (**Completed — 88% coverage**)
-  - `P1-04`: Add Auth Security Safety Gate Tests (**Completed — 71 tests, 89% coverage**)
-  - `P1-05`: Add File Upload & Matching Safety Gate Tests (*Pending*)
+- **Phase 1 (Modular Monolith Refactoring — COMPLETED)**: P1-01 through P1-05 completed.
