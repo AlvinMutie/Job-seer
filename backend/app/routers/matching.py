@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -23,7 +23,10 @@ async def match_resume(
 ):
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
-        return {"error": "Job not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
         
     # Combine job skills and description for better matching
     job_content = f"{job.skills_required} {job.description}"
@@ -52,7 +55,10 @@ async def generate_cover_letter_api(
 ):
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
-        return {"error": "Job not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
     
     skills = engine.extract_skills(resume_text)
     letter = cover_letter_generator.generate(
@@ -70,7 +76,10 @@ async def tailor_resume_api(
 ):
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
-        return {"error": "Job not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
     
     # Extract skills for precise tailoring
     job_skills = engine.extract_skills(job.description)

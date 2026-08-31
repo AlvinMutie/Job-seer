@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.errors import register_exception_handlers
 from app.database import init_db
 from app.routers import auth, jobs, matching, profile, applications
 
@@ -14,6 +15,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Smart Job Hunter API", lifespan=lifespan)
+
+# Register Centralized Global Exception Handlers
+register_exception_handlers(app)
 
 # Configure CORS
 app.add_middleware(
