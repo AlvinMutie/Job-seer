@@ -107,3 +107,12 @@
 .animate-pulse-slow {
   animation: pulseSlow 4s ease-in-out infinite;
 }
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-pulse-slow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
