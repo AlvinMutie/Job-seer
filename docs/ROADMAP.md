@@ -13,7 +13,7 @@ flowchart TD
         P0-01[P0-01: Externalize JWT Secret ✓ COMPLETED]
         P0-02[P0-02: Endpoint Authorization Boundaries ✓ COMPLETED]
         P0-03[P0-03: Secure Resume Uploads ✓ COMPLETED]
-        P0-04[P0-04: Restrict CORS Origins]
+        P0-04[P0-04: Restrict CORS Origins ✓ COMPLETED]
         P0-05[P0-05: Resolve Password Hashing Conflict]
     end
 
@@ -47,34 +47,21 @@ flowchart TD
 
 ### P0-03 — Secure Resume Upload Boundary (✓ COMPLETED)
 - **Objective**: Enforce strict 10-layer security boundary on `POST /upload-resume` (extension whitelisting, MIME magic header verification, 10MB size limit, server UUID filenames, old file lifecycle cleanup).
-- **Result**: Implemented `app/utils/file_handling.py` and updated `upload_resume`. Rewrote root `README.md` to provide accurate project documentation. **50 / 50 tests passing**.
+- **Result**: Implemented `app/utils/file_handling.py` and updated `upload_resume`. Rewrote root `README.md`. 50 / 50 tests passing.
+
+### P0-04 — Restrict CORS Origins (✓ COMPLETED)
+- **Objective**: Eliminate wildcard origin (`*`) with credentials enabled in `CORSMiddleware`.
+- **Result**: Restricted allowed origins to environment-configurable `settings.ALLOWED_ORIGINS`. Added `backend/tests/test_cors.py`. **55 / 55 tests passing**.
 
 ---
 
 ## Detailed Pending Task Breakdown
 
-### P0-04 — Restrict CORS Origins
-
-- **Objective**: Eliminate wildcard origin (`*`) with credentials enabled.
-- **Files Likely Affected**: `backend/app/main.py`, `backend/app/core/config.py`.
-- **Preconditions**: P0-00, P0-01, P0-02, P0-03 completed.
-- **Implementation Requirements**:
-  - Update `CORSMiddleware` in `main.py` to use `allow_origins=settings.ALLOWED_ORIGINS` (defaulting to `["http://localhost:5173", "http://localhost:3000"]`).
-- **Security Considerations**: Mitigates cross-origin data theft and unauthorized browser API access.
-- **Tests Required**: Preflight `OPTIONS` request test checking allowed vs rejected origins.
-- **Acceptance Criteria**:
-  - Allowed origin `http://localhost:5173` returns appropriate CORS headers.
-  - Unauthorized origins rejected by browser preflight.
-- **Dependencies**: P0-00, P0-01, P0-02, P0-03.
-- **Risk**: Low.
-
----
-
 ### P0-05 — Resolve Password Hashing Dependency Conflict
 
 - **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py`.
 - **Files Likely Affected**: `backend/app/main.py`, `backend/requirements.txt`, `backend/app/auth.py`.
-- **Preconditions**: P0-00, P0-01, P0-02, P0-03.
+- **Preconditions**: P0-00, P0-01, P0-02, P0-03, P0-04 completed.
 - **Implementation Requirements**:
   - Update `requirements.txt` to pin compatible `passlib` (1.7.4) and `bcrypt` (4.0.1) or migrate to `argon2-cffi`.
   - Remove runtime monkeypatch lines 7–9 in `main.py`.
@@ -83,5 +70,5 @@ flowchart TD
 - **Acceptance Criteria**:
   - Application starts clean without monkeypatching `bcrypt`.
   - Password registration and login verification pass.
-- **Dependencies**: P0-00, P0-01, P0-02, P0-03.
+- **Dependencies**: P0-00, P0-01, P0-02, P0-03, P0-04.
 - **Risk**: Low.

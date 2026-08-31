@@ -11,8 +11,8 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB in bytes
 
 def validate_upload_file(file: UploadFile) -> str:
     """
-    Validates file extension, total size, and MIME magic header bytes.
-    Raises HTTPException 400 Bad Request on validation failure.
+    Validates file extension, total size limit (10MB), and binary signature/UTF-8 encoding.
+    Raises HTTPException 400 Bad Request or 413 Request Entity Too Large on validation failure.
     Returns lowercased extension.
     """
     if not file.filename:
@@ -28,7 +28,7 @@ def validate_upload_file(file: UploadFile) -> str:
             detail=f"Unsupported file extension '{ext}'. Allowed extensions are: .pdf, .docx, .txt"
         )
 
-    # Read header chunk for MIME magic byte verification
+    # Read header chunk for format verification
     header = file.file.read(2048)
 
     # Check file size by seeking to end
@@ -44,11 +44,11 @@ def validate_upload_file(file: UploadFile) -> str:
 
     if size > MAX_FILE_SIZE:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"File size exceeds maximum allowed limit of 10MB ({size} bytes)"
         )
 
-    # Magic byte validation
+    # Format verification: MIME magic bytes for binary formats, UTF-8 decodability for text
     if ext == ".pdf":
         if not header.startswith(b"%PDF-"):
             raise HTTPException(
@@ -67,7 +67,7 @@ def validate_upload_file(file: UploadFile) -> str:
         except UnicodeDecodeError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="File content signature (MIME magic bytes) does not match valid UTF-8 text format"
+                detail="File content does not contain valid text/UTF-8 encoding"
             )
 
     return ext

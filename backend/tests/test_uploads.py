@@ -85,7 +85,7 @@ def test_upload_oversized_file_rejected(client, test_user):
         files={"file": ("large_resume.pdf", file_obj, "application/pdf")},
         headers=test_user["headers"]
     )
-    assert response.status_code == 400
+    assert response.status_code == 413
     assert "File size exceeds maximum allowed limit of 10MB" in response.json()["detail"]
 
 

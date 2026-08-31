@@ -45,8 +45,9 @@ The API server will run at `http://localhost:8000`. Direct API docs available at
 Application configuration is centralized in `backend/app/core/config.py` using `pydantic-settings`:
 
 - **Development**: Reads environment variables from local `backend/.env`.
+  - `CORS_ORIGINS`: Comma-separated list of allowed origins (`http://localhost:5173,http://localhost:3000`).
 - **Testing**: Explicit test fixtures in `tests/conftest.py` supply isolated test settings.
-- **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Missing or default secrets cause startup failure.
+- **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Wildcard `*` in `CORS_ORIGINS` is prohibited in production.
 
 ---
 

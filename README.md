@@ -123,7 +123,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT generation and verification
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # FastAPI application and route handlers
-│   ├── tests/              # Automated test suite (50 tests)
+│   ├── tests/              # Automated test suite (55 tests)
 │   ├── uploads/            # Server resume upload storage
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -209,10 +209,13 @@ ENVIRONMENT=development
 
 # Database Connection
 DATABASE_URL=sqlite:///./job_hunter_v3.db
+
+# CORS Configuration (Comma-separated allowed origins)
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
 > [!WARNING]
-> Do NOT commit real `.env` files or production secrets to version control. `.gitignore` is configured to exclude `.env` files automatically. In `ENVIRONMENT=production`, setting an unconfigured or weak `SECRET_KEY` causes an immediate startup validation failure.
+> Do NOT commit real `.env` files or production secrets to version control. `.gitignore` is configured to exclude `.env` files automatically. In `ENVIRONMENT=production`, setting an unconfigured/weak `SECRET_KEY` or wildcard `*` in `CORS_ORIGINS` causes an immediate startup validation failure.
 
 ---
 
@@ -235,8 +238,8 @@ cd backend
 ./venv/bin/pytest tests/ -v
 ```
 
-- **Total Test Count**: **50 tests**
-- **Pass Rate**: **100% (50 / 50)**
+- **Total Test Count**: **55 tests**
+- **Pass Rate**: **100% (55 / 55)**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -245,7 +248,8 @@ cd backend
 
 1. **Centralized Configuration**: All secrets and settings are externalized and loaded dynamically via `pydantic-settings`.
 2. **Endpoint Authorization**: Protected endpoints verify JWT Bearer tokens and reject unauthenticated requests with `401 Unauthorized`.
-3. **10-Layer File Upload Boundary**: `POST /upload-resume` enforces extension whitelisting (`.pdf`, `.docx`, `.txt`), MIME magic header verification (`%PDF-`, `PK\x03\x04`), 10MB file size limits, and server-generated UUID filenames to prevent path traversal and arbitrary file execution.
+3. **10-Layer File Upload Boundary**: `POST /upload-resume` enforces extension whitelisting (`.pdf`, `.docx`, `.txt`), MIME magic header verification (`%PDF-`, `PK\x03\x04`), UTF-8 decodability, 10MB file size limits (returning `413 Content Too Large`), and server-generated UUID filenames.
+4. **Restricted CORS Origins**: Wildcard CORS origin `*` is eliminated in favor of explicit `settings.ALLOWED_ORIGINS` headers.
 
 ---
 
@@ -256,6 +260,6 @@ cd backend
   - `P0-01`: Externalize JWT Secret (**Completed — 39 tests**)
   - `P0-02`: Endpoint Authorization Boundaries (**Completed — 46 tests**)
   - `P0-03`: Secure Resume Upload Boundary (**Completed — 50 tests**)
-  - `P0-04`: Restrict CORS Origins (*Pending*)
+  - `P0-04`: Restrict CORS Origins (**Completed — 55 tests**)
   - `P0-05`: Resolve Password Hashing Conflict (*Pending*)
 - **Phase 1 (Modular Monolith Refactoring)**: Planned router modularization, Pydantic schema separation, and service layer decoupling.

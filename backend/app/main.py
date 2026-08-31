@@ -22,6 +22,7 @@ from app.services.tailor_service import tailor_service
 from app.database import get_db, init_db
 from app.models.models import User, Profile, Job
 from app.auth import get_password_hash, verify_password, create_access_token, get_current_user
+from app.core.config import settings
 from app.utils.file_handling import validate_upload_file, save_user_resume
 
 app = FastAPI(title="Smart Job Hunter API")
@@ -29,7 +30,7 @@ app = FastAPI(title="Smart Job Hunter API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
