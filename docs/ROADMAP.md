@@ -34,7 +34,7 @@ flowchart TD
     subgraph P3 [P3: Product Intelligence & UX]
         P3-01[P3-01: Enhanced Job Discovery & Repository Hub ✓ COMPLETED]
         P3-02[P3-02: Matching Engine V2 & Explainable Scoring ✓ COMPLETED]
-        P3-03[P3-03: Resume Intelligence & ATS Health Check]
+        P3-03[P3-03: Resume Intelligence & ATS Health Check ✓ COMPLETED]
         P3-04[P3-04: Resume Tailoring V2 & Persistence]
         P3-05[P3-05: Multi-Tone Cover Letters & Management]
         P3-06[P3-06: Application Tracker V2 & Kanban Board]
@@ -48,7 +48,7 @@ flowchart TD
 
 ## Completed Tasks
 
-### P0-00 through P3-01 (✓ ALL COMPLETED)
+### P0-00 through P3-02 (✓ ALL COMPLETED)
 
-### P3-02 — Matching Engine V2 & Explainable Scoring (✓ COMPLETED)
-- **Result**: Upgraded `MatchingEngine` to compute an explainable multi-factor match score breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%). Created `MatchBreakdown`, `MatchWeights`, and `MatchResponse` DTO schemas in `app/schemas/matching.py`. Built `MatchBreakdownModal.jsx` and updated `Matches.jsx` UI to render explainable progress bars, score rationale, and strengths. Added 5 unit/integration tests in `backend/tests/test_matching_v2.py`. **123 / 123 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly. Zero database schema changes required.
+### P3-03 — Resume Intelligence & ATS Health Check (✓ COMPLETED)
+- **Result**: Built `ResumeIntelligenceService` (`app/services/resume_intelligence.py`) evaluating 0-100 ATS health score (Completeness 35%, ATS Text Health 30%, Contact Info 15%, Technical Skills 20%). Added `GET /resume/health` endpoint in `app/routers/profile.py`. Created Pydantic response DTOs in `app/schemas/profile.py`. Updated `ResumeHub.jsx` to render health score, factor metrics, detected sections, contact presence checks, domain skill categorization, and actionable recommendations. Added 8 unit, integration, and security tests in `backend/tests/test_resume_intelligence.py`. **131 / 131 backend pytest cases passing** (92% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly. Zero database schema changes required.

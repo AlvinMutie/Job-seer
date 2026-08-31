@@ -5,10 +5,10 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Matching Engine V2 Security & Numerical Safety (P3-02)
+## Resume Intelligence & Ownership Isolation (P3-03)
 
-`POST /match` enforces strict input sanitization, text normalization, and numerical safety guarantees:
+`GET /resume/health` enforces strict security boundaries and privacy protections:
 
-1. **Numerical Bounds & NaN/Inf Protection**: All factor scores (skills, content, experience, role title) and final match percentage are explicitly checked for finite floats (`isinstance(val, float)`, `not math.isnan(val)`, `not math.isinf(val)`). Invalid values fall back to `0.0`.
-2. **Zero Code Execution**: Resume text and job description inputs are sanitized by spaCy/regex tokenizers. HTML tags (`<script>`), special characters (`!@#$%`), and SQL syntax are treated purely as inert text. No `eval` or dynamic code evaluation occurs.
-3. **Empty Input Safety**: Empty or whitespace-only inputs return `0.0` match percentage cleanly without raising unhandled exceptions or leaking server internals.
+1. **Strict Ownership Isolation**: The endpoint retrieves and analyzes `current_user.profile.resume_text` exclusively using `Depends(get_current_user)`. User A cannot access or trigger ATS analysis on User B's resume data.
+2. **Zero Sensitive Contact Leakage**: Contact information checks detect presence/absence of emails, phone numbers, and URLs via boolean flags (`has_email`, `has_phone`). Private contact values are never dumped, logged, or returned in API responses.
+3. **In-Memory Non-Executable Analysis**: ATS text analysis operates strictly in-memory on extracted plain text. Document text is never evaluated via `eval` or executed as code.

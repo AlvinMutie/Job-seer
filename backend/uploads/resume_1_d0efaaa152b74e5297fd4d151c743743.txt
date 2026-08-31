@@ -1,0 +1,1 @@
+Valid TXT content for path traversal test

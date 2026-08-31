@@ -16,6 +16,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 
 - **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
 - **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
+- **Resume Intelligence & ATS Health Check**: Automated ATS readiness scoring (0-100), section completeness detection, contact info presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted recommendations.
 - **Job Discovery & Repository Hub**: Dedicated job repository (`JobsHub.jsx`) with keyword search, location filtering, work mode filters (`Remote`, `Hybrid`, `On-site`), experience level filters, column sorting (`Newest`, `Oldest`, `Title`, `Company`), and database-level limit/offset pagination.
 - **Matching Engine V2 & Explainable Scoring**: Multi-factor explainable scoring breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%) with human-readable score rationale, score weights, matched/missing skill chips, and interactive analytics modal (`MatchBreakdownModal.jsx`).
 - **Resume Tailoring**: Rule-based suggestion engine identifying missing skill requirements for specific job listings.
@@ -43,7 +44,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (123 tests, 91% coverage)
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (131 tests, 92% coverage)
 - **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
 
@@ -52,7 +53,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Automated Test Suites
 
 ```bash
-# Backend (123 tests passing)
+# Backend (131 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
@@ -61,6 +62,6 @@ cd frontend
 npm test
 ```
 
-- **Backend Tests**: **123 tests (100% pass rate, 91% code coverage)**
+- **Backend Tests**: **131 tests (100% pass rate, 92% code coverage)**
 - **Frontend Tests**: **6 unit tests (100% pass rate)**
 - **Production Build**: **Succeeded cleanly (`dist/index.html`)**

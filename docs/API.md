@@ -14,6 +14,7 @@
 | `/me` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | User Profile Retrieval |
 | `/profile` | `POST` | **RESOURCE_OWNER** | `Depends(get_current_user)` | Career Preferences Update |
 | `/upload-resume` | `POST` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **REMEDIATED (P0-03)** — File Upload Boundary |
+| `/resume/health` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **NEW (P3-03)** — ATS Readiness Health Report |
 | `/applications` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **ENHANCED (P2-02)** — Status Filter, Search, Pagination |
 | `/applications` | `POST` | **RESOURCE_OWNER** | `Depends(get_current_user)` | Track/Update Job Application |
 
@@ -21,30 +22,38 @@
 
 ## Endpoint Specifications
 
-### `POST /match` (P3-02 Upgraded)
+### `GET /resume/health` (P3-03 New)
 
-- **Description**: Calculates V2 multi-factor match percentage (Skills 40%, Content 30%, Experience 15%, Role Title 15%) and provides explainable factor breakdown.
+- **Description**: Generates an ATS readiness health report for the authenticated user's uploaded resume.
 - **Header**: `Authorization: Bearer <token>`
-- **Form Data**: `resume_text` (str, required), `job_id` (int, required)
 - **Response Format**:
   ```json
   {
-    "match_percentage": 82.5,
+    "health_score": 84.5,
+    "classification": "Strong",
     "breakdown": {
-      "skills": 90.0,
-      "content": 80.0,
-      "experience": 75.0,
-      "role_title": 80.0
+      "completeness": 90.0,
+      "ats_health": 82.0,
+      "contact_information": 80.0,
+      "skills": 85.0
     },
-    "weights": {
-      "skills": 0.40,
-      "content": 0.30,
-      "experience": 0.15,
-      "role_title": 0.15
+    "sections_detected": ["summary", "skills", "education", "experience", "projects"],
+    "contact_checks": {
+      "email": true,
+      "phone": true,
+      "linkedin": true,
+      "github": false,
+      "portfolio": true
     },
-    "explanation": "Strong overall match (82.5%). Technical skills alignment: 90.0%, content similarity: 80.0%, experience alignment: 75.0%.",
-    "matched_skills": ["python", "fastapi"],
-    "missing_skills": ["docker"],
-    "tailoring_advice": ["• Highlight past projects..."]
+    "skill_domains": {
+      "programming_languages": ["python", "javascript"],
+      "frontend": ["react"],
+      "backend": ["fastapi", "node.js"],
+      "databases": ["postgresql"],
+      "cloud_devops": ["aws", "docker"],
+      "data_ai": [],
+      "other": []
+    },
+    "recommendations": ["Add a GitHub profile link to showcase your code repositories."]
   }
   ```

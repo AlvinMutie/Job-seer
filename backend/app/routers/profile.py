@@ -9,6 +9,7 @@ from app.models.models import User, Profile
 from app.auth import get_current_user
 from app.schemas.profile import ProfileUpdate
 from app.utils.file_handling import validate_upload_file, save_user_resume
+from app.services.resume_intelligence import resume_intelligence_service
 
 router = APIRouter(tags=["Profile"])
 
@@ -99,3 +100,22 @@ async def upload_resume(
         "filename": file.filename,
         "text_preview": extracted_text[:200] + "..." if extracted_text else "No text extracted"
     }
+
+
+@router.get("/resume/health")
+async def get_resume_health(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves ATS readiness health report for the authenticated user's uploaded resume.
+    """
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile or not profile.resume_text:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No uploaded resume found for user. Please upload a resume first."
+        )
+
+    analysis = resume_intelligence_service.analyze_resume_health(profile.resume_text)
+    return analysis

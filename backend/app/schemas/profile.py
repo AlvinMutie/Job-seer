@@ -1,9 +1,45 @@
-from pydantic import BaseModel
+from typing import List, Dict, Optional
+from pydantic import BaseModel, Field
 
 
 class ProfileUpdate(BaseModel):
-    preferred_role: str
-    skills: str
-    experience_level: str
-    location_preference: str
-    salary_expectation: str
+    preferred_role: Optional[str] = None
+    skills: Optional[str] = None
+    experience_level: Optional[str] = None
+    location_preference: Optional[str] = None
+    salary_expectation: Optional[str] = None
+
+
+class ContactChecks(BaseModel):
+    email: bool = False
+    phone: bool = False
+    linkedin: bool = False
+    github: bool = False
+    portfolio: bool = False
+
+
+class SkillDomains(BaseModel):
+    programming_languages: List[str] = []
+    frontend: List[str] = []
+    backend: List[str] = []
+    databases: List[str] = []
+    cloud_devops: List[str] = []
+    data_ai: List[str] = []
+    other: List[str] = []
+
+
+class ResumeHealthBreakdown(BaseModel):
+    completeness: float = Field(..., ge=0.0, le=100.0)
+    ats_health: float = Field(..., ge=0.0, le=100.0)
+    contact_information: float = Field(..., ge=0.0, le=100.0)
+    skills: float = Field(..., ge=0.0, le=100.0)
+
+
+class ResumeHealthResponse(BaseModel):
+    health_score: float = Field(..., ge=0.0, le=100.0)
+    classification: str
+    breakdown: ResumeHealthBreakdown
+    sections_detected: List[str]
+    contact_checks: ContactChecks
+    skill_domains: SkillDomains
+    recommendations: List[str]

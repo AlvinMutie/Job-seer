@@ -94,6 +94,7 @@ export const authService = {
     getMe: () => api.get(`/me?t=${Date.now()}`).then(res => res.data),
     updateProfile: (data) => api.post('/profile', data).then(res => res.data),
     uploadResume: (formData) => api.post('/upload-resume', formData).then(res => res.data),
+    getResumeHealth: () => api.get(`/resume/health?t=${Date.now()}`).then(res => res.data),
 };
 
 export const jobService = {
