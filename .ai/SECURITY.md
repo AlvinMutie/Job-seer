@@ -1,7 +1,7 @@
 # SECURITY.md — Security Boundary & Hardened Architecture Specification
 
 ## Executive Overview
-This document specifies the security requirements, threat catalog, upload boundary design, and authentication architecture for **Smart Job Hunter**.
+This document specifies the security requirements, threat catalog, upload boundary design, authentication architecture, and JWT safety gate suite for **Smart Job Hunter**.
 
 ---
 
@@ -19,12 +19,15 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Remediated: P0-05 Password Hashing Dependency Conflict Resolution
+## JWT Authentication Safety Gate (P1-04)
 
-- **Monkeypatch Purged**: Fragile `bcrypt.__about__` runtime monkeypatch completely removed from `app/main.py`.
-- **Pinned Dependencies**: `backend/requirements.txt` explicitly pins compatible `passlib==1.7.4` and `bcrypt==4.0.1` versions.
-- **100% Backwards Compatibility**: Retains `bcrypt` password hashing via `passlib.context.CryptContext`, ensuring all existing user password hashes authenticate seamlessly without password invalidation or user lockouts.
-- **Zero Exposure**: Passwords are standardly hashed before database persistence and never logged, returned in API responses, or exposed in exception stack traces.
+The backend enforces strict JWT authentication validation across all protected routes via `app/auth.py` (`get_current_user`):
+
+1. **Secret Key Verification**: Signed using externalized `settings.SECRET_KEY`. Tokens signed with unauthorized keys are rejected with `401 Unauthorized`.
+2. **Algorithm Restriction**: Strictly specifies `algorithms=[settings.ALGORITHM]` (`HS256`). Arbitrary algorithm claims (e.g. `HS512` or `none`) are rejected.
+3. **Signature & Expiration Validation**: Automatically rejects expired (`exp`) or payload-tampered tokens.
+4. **Subject Claim Verification**: Requires valid `sub` claim mapping to an active database user.
+5. **Scheme Enforcement**: Strictly enforces `Authorization: Bearer <token>`. Invalid schemes (Basic, Token) or empty Bearer tokens are rejected.
 
 ---
 

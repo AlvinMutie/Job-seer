@@ -21,7 +21,7 @@ flowchart TD
         P1-01[P1-01: Modularize main.py into Routers ✓ COMPLETED]
         P1-02[P1-02: Separate Schemas & Models ✓ COMPLETED]
         P1-03[P1-03: Setup pytest Safety Testing Framework ✓ COMPLETED]
-        P1-04[P1-04: Add Auth Security Safety Gate Tests]
+        P1-04[P1-04: Add Auth Security Safety Gate Tests ✓ COMPLETED]
         P1-05[P1-05: Add File Upload & Matching Safety Gate Tests]
     end
 
@@ -33,7 +33,7 @@ flowchart TD
 ## Completed Tasks
 
 ### P0-00 — Establish Testing Safety Baseline (✓ COMPLETED)
-- **Result**: **35 / 35 tests passing**. Data isolation enforced via `sqlite:///:memory:` with SQLAlchemy `StaticPool`.
+- **Result**: **35 / 35 tests passing**.
 
 ### P0-01 — Externalize JWT Secret (✓ COMPLETED)
 - **Result**: Hardcoded secret string completely purged. Centralized settings implemented with fail-safe production validation. 39 / 39 tests passing.
@@ -57,15 +57,18 @@ flowchart TD
 - **Result**: Extracted Pydantic DTO models into `app/schemas/`. 58 / 58 tests passing.
 
 ### P1-03 — Setup pytest Safety Testing Framework (✓ COMPLETED)
-- **Result**: Configured `pyproject.toml` with `pytest-cov` (88% code coverage baseline), strict test markers (`unit`, `integration`, `security`, `regression`), and reduced warnings from 75 to 1. **58 / 58 tests passing**.
+- **Result**: Configured `pyproject.toml` with `pytest-cov` (88% code coverage baseline), strict test markers (`unit`, `integration`, `security`, `regression`), and reduced warnings from 75 to 1. 58 / 58 tests passing.
+
+### P1-04 — Add Auth Security Safety Gate Tests (✓ COMPLETED)
+- **Result**: Implemented 13 dedicated JWT authentication safety gate tests covering token expiration, payload tampering, invalid signatures, missing claims, nonexistent users, invalid schemes, and algorithm enforcement. Increased code coverage to **89%** (with **100% coverage on `app/auth.py`**). **71 / 71 tests passing**.
 
 ---
 
 ## Detailed Pending Task Breakdown (Phase 1)
 
-### P1-04 — Add Auth Security Safety Gate Tests
+### P1-05 — Add File Upload & Matching Safety Gate Tests
 
-- **Objective**: Add edge-case safety tests for token expiration, payload tampering, header variations, and invalid user claims.
-- **Files Likely Affected**: `backend/tests/test_auth.py`, `backend/tests/test_authorization.py`.
-- **Preconditions**: P1-01, P1-02, P1-03 completed.
+- **Objective**: Add edge-case safety tests for file upload mime validation, path traversal attempts, malformed PDFs, empty files, and matching engine edge cases.
+- **Files Likely Affected**: `backend/tests/test_uploads.py`, `backend/tests/test_matching.py`.
+- **Preconditions**: P1-01 through P1-04 completed.
 - **Risk**: Low.

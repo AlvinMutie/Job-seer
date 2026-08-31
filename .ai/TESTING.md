@@ -27,10 +27,10 @@ markers = [
 ```bash
 cd backend
 
-# Run full test suite
+# Run full test suite (71 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run security boundary tests only
+# Run security boundary & auth safety gate tests only (55 tests)
 ./venv/bin/pytest tests/ -m security -v
 
 # Run unit tests only
@@ -45,7 +45,29 @@ cd backend
 
 ---
 
-## 2. Measured Coverage Baseline (88%)
+## 2. JWT Authentication Safety Gate Coverage (P1-04)
+
+Task **P1-04** added 13 dedicated authentication safety gate tests verifying JWT rejection properties:
+
+| Test Name | Security Boundary Property | Verification Standard | Result |
+| --------- | -------------------------- | --------------------- | ------ |
+| `test_me_valid_jwt` | Valid JWT Bearer Token | Resolves identity, status `200 OK` | **PASSED** |
+| `test_expired_jwt_rejected` | Expired `exp` claim | Rejected with `401 Unauthorized` | **PASSED** |
+| `test_tampered_jwt_payload_rejected` | Tampered payload string | Signature mismatch `401 Unauthorized` | **PASSED** |
+| `test_invalid_jwt_signature_rejected` | Wrong signing key | Signature failure `401 Unauthorized` | **PASSED** |
+| `test_missing_sub_claim_rejected` | Missing `sub` claim | Identity failure `401 Unauthorized` | **PASSED** |
+| `test_nonexistent_user_claim_rejected` | Non-existent user | User lookup failure `401 Unauthorized` | **PASSED** |
+| `test_me_malformed_jwt` | Malformed JWT string | Decoding failure `401 Unauthorized` | **PASSED** |
+| `test_me_missing_jwt` | Missing Header | Header failure `401 Unauthorized` | **PASSED** |
+| `test_invalid_bearer_schemes_rejected` | Scheme != Bearer | Scheme failure `401 Unauthorized` | **PASSED** |
+| `test_empty_bearer_token_rejected` | Empty `Bearer` / `Bearer ` | Token failure `401 Unauthorized` | **PASSED** |
+| `test_unsupported_jwt_algorithm_rejected` | Algorithm mismatch | Alg failure `401 Unauthorized` | **PASSED** |
+| `test_jwt_with_invalid_exp_claim_rejected` | Invalid `exp` data type | Validation failure `401 Unauthorized` | **PASSED** |
+| `test_user_identity_resolution_isolation` | Identity resolution | Prevents cross-user impersonation | **PASSED** |
+
+---
+
+## 3. Measured Coverage Baseline (89%)
 
 Coverage is measured using `pytest-cov` against the `app/` package:
 
@@ -60,6 +82,7 @@ HTML coverage reports are generated at `backend/htmlcov/index.html`.
 
 | Module | Statements | Misses | Branch Coverage | Coverage % | Status |
 | ------ | ---------- | ------ | --------------- | ---------- | ------ |
+| `app/auth.py` | 38 | 0 | 100% | **100%** | Excellent |
 | `app/main.py` | 20 | 0 | 100% | **100%** | Excellent |
 | `app/models/models.py` | 62 | 0 | 100% | **100%** | Excellent |
 | `app/routers/auth.py` | 34 | 0 | 100% | **100%** | Excellent |
@@ -71,24 +94,11 @@ HTML coverage reports are generated at `backend/htmlcov/index.html`.
 | `app/services/tailor_service.py` | 17 | 1 | 90% | **90%** | Good |
 | `app/services/matching_engine.py` | 102 | 12 | 88% | **88%** | Good |
 | `app/routers/matching.py` | 41 | 3 | 87% | **87%** | Good |
-| `app/auth.py` | 38 | 3 | 86% | **86%** | Good |
 | `app/services/job_service.py` | 28 | 3 | 85% | **85%** | Good |
 | `app/utils/file_handling.py` | 48 | 10 | 76% | **76%** | Acceptable |
 | `app/routers/profile.py` | 66 | 15 | 72% | **72%** | Acceptable |
 | `app/database.py` | 14 | 4 | 71% | **71%** | Acceptable |
-| **TOTAL** | **557** | **52** | **88%** | **88%** | **Baseline Established** |
-
----
-
-## 3. Warning Audit & Deprecation Remediation
-
-| Warning Source | Prior Count | Fixed Count | Classification & Remediation Action |
-| -------------- | ----------- | ----------- | ----------------------------------- |
-| `datetime.utcnow()` | 54 warnings | 0 warnings | **ACTIONABLE & FIXED**: Replaced with `datetime.now(timezone.utc)` across `app/auth.py`, `app/models/models.py`, and `app/routers/applications.py`. |
-| `declarative_base()` | 1 warning | 0 warnings | **ACTIONABLE & FIXED**: Updated import from `sqlalchemy.ext.declarative` to `sqlalchemy.orm`. |
-| `@app.on_event("startup")` | 2 warnings | 0 warnings | **ACTIONABLE & FIXED**: Replaced with FastAPI `lifespan` context manager in `app/main.py`. |
-| `starlette.testclient` deprecation | 1 warning | 1 warning | **THIRD-PARTY DEPENDENCY**: Upstream `starlette`/`httpx` deprecation warning in test runner. Documented and preserved. |
-| **TOTAL** | **75 warnings** | **1 warning** | **98.7% Warning Reduction** |
+| **TOTAL** | **557** | **49** | **89%** | **89%** | **Expanded Baseline** |
 
 ---
 

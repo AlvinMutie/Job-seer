@@ -85,7 +85,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
                            │ SQLAlchemy ORM
 ┌──────────────────────────▼─────────────────────────────┐
 │              app/models/ (SQLite DB)                   │
-└────────────────────────────────────────────────────────┘
+└──────────────────────────┬─────────────────────────────┘
 ```
 
 ---
@@ -109,7 +109,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ### Testing Infrastructure
 - **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-- **Coverage Baseline**: **88% Overall Code Coverage**
+- **Coverage Baseline**: **89% Overall Code Coverage (100% auth.py coverage)**
 
 ---
 
@@ -125,10 +125,10 @@ Smart-Job-Hunter/
 │   │   ├── schemas/        # Pydantic DTO schemas (auth, profile, matching, applications)
 │   │   ├── services/       # MatchingEngine, JobService, TailorService, CoverLetter
 │   │   ├── utils/          # Upload validation and file handling (file_handling.py)
-│   │   ├── auth.py         # JWT generation and verification
+│   │   ├── auth.py         # JWT generation and verification (100% coverage)
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # App entry point & router registration (36 lines)
-│   ├── tests/              # Automated test suite (58 tests)
+│   ├── tests/              # Automated test suite (71 tests)
 │   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -236,10 +236,10 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 ```bash
 cd backend
 
-# Run full test suite
+# Run full test suite (71 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run with test coverage (88% baseline)
+# Run with test coverage (89% baseline)
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
 
 # Run specific test markers
@@ -249,9 +249,9 @@ cd backend
 ./venv/bin/pytest tests/ -m regression -v
 ```
 
-- **Total Test Count**: **58 tests**
-- **Pass Rate**: **100% (58 / 58)**
-- **Measured Code Coverage**: **88% Baseline**
+- **Total Test Count**: **71 tests**
+- **Pass Rate**: **100% (71 / 71)**
+- **Measured Code Coverage**: **89% Baseline (100% auth.py coverage)**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -263,4 +263,5 @@ cd backend
   - `P1-01`: Modularize main.py into Routers (**Completed — 58 tests**)
   - `P1-02`: Separate Schemas & Models (**Completed — 58 tests**)
   - `P1-03`: Setup pytest Safety Testing Framework (**Completed — 88% coverage**)
-  - `P1-04`: Add Auth Security Safety Gate Tests (*Pending*)
+  - `P1-04`: Add Auth Security Safety Gate Tests (**Completed — 71 tests, 89% coverage**)
+  - `P1-05`: Add File Upload & Matching Safety Gate Tests (*Pending*)

@@ -1,6 +1,8 @@
 import pytest
+import io
 
 pytestmark = [pytest.mark.security, pytest.mark.regression]
+
 
 def test_public_root_health_check(client):
     """Verify GET / is accessible publicly without authentication."""
@@ -28,9 +30,8 @@ def test_public_get_jobs_authenticated(client, test_user, seed_test_jobs):
 
 def test_match_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY BOUNDARY VERIFICATION (P0-02):
+    SECURITY BOUNDARY VERIFICATION (P0-02/P1-04):
     Verify that POST /match without Authorization header is rejected with 401 Unauthorized.
-    Payload is valid to distinguish 401 auth failure from 422 schema error.
     """
     payload = {
         "resume_text": "I am a Senior Python developer skilled in FastAPI and AWS.",
@@ -68,7 +69,7 @@ def test_match_authenticated_success(client, test_user, seed_test_jobs):
 
 def test_tailor_resume_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY BOUNDARY VERIFICATION (P0-02):
+    SECURITY BOUNDARY VERIFICATION (P0-02/P1-04):
     Verify that POST /tailor-resume without Authorization header is rejected with 401 Unauthorized.
     """
     payload = {
@@ -107,7 +108,7 @@ def test_tailor_resume_authenticated_success(client, test_user, seed_test_jobs):
 
 def test_generate_cover_letter_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY BOUNDARY VERIFICATION (P0-02):
+    SECURITY BOUNDARY VERIFICATION (P0-02/P1-04):
     Verify that POST /generate-cover-letter without Authorization header is rejected with 401 Unauthorized.
     """
     payload = {
@@ -146,6 +147,48 @@ def test_generate_cover_letter_authenticated_success(client, test_user, seed_tes
     assert "cover_letter" in data
 
 
+def test_profile_unauthenticated_rejected(client):
+    """
+    SECURITY BOUNDARY VERIFICATION (P1-04):
+    Verify that POST /profile without Authorization header returns 401 Unauthorized.
+    """
+    payload = {
+        "preferred_role": "Senior Engineer",
+        "skills": "Python, FastAPI",
+        "experience_level": "Senior",
+        "location_preference": "Remote",
+        "salary_expectation": "$130k"
+    }
+    response = client.post("/profile", json=payload)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_applications_get_unauthenticated_rejected(client):
+    """
+    SECURITY BOUNDARY VERIFICATION (P1-04):
+    Verify that GET /applications without Authorization header returns 401 Unauthorized.
+    """
+    response = client.get("/applications")
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_applications_post_unauthenticated_rejected(client, seed_test_jobs):
+    """
+    SECURITY BOUNDARY VERIFICATION (P1-04):
+    Verify that POST /applications without Authorization header returns 401 Unauthorized.
+    """
+    payload = {
+        "job_id": seed_test_jobs[0].id,
+        "status": "Applied",
+        "match_score": 90.0
+    }
+    response = client.post("/applications", json=payload)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
 def test_resource_owner_profile_isolation(client, test_user, secondary_user):
     """Verify User 1 token fetches User 1 profile and secondary user token fetches secondary user profile."""
     res1 = client.get("/me", headers=test_user["headers"])
@@ -161,7 +204,6 @@ def test_resource_owner_profile_isolation(client, test_user, secondary_user):
 
 def test_resource_owner_applications_isolation(client, test_user, secondary_user, seed_test_jobs):
     """Verify applications created by User 1 are isolated from User 2."""
-    # User 1 creates an application
     app_payload = {
         "job_id": seed_test_jobs[0].id,
         "status": "Applied",
@@ -170,11 +212,9 @@ def test_resource_owner_applications_isolation(client, test_user, secondary_user
     create_res = client.post("/applications", json=app_payload, headers=test_user["headers"])
     assert create_res.status_code == 200
 
-    # User 1 queries /applications -> sees 1 application
     u1_apps = client.get("/applications", headers=test_user["headers"]).json()
     assert len(u1_apps) == 1
     assert u1_apps[0]["title"] == "Senior Python Developer"
 
-    # User 2 queries /applications -> sees 0 applications (Isolation enforced)
     u2_apps = client.get("/applications", headers=secondary_user["headers"]).json()
     assert len(u2_apps) == 0
