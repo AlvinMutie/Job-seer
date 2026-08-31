@@ -1,4 +1,7 @@
+import os
 import pytest
+from app.auth import get_password_hash, verify_password
+from app.models.models import User
 
 def test_register_valid_user(client):
     """Test registering a new user returns 200 OK and Bearer access token."""
@@ -12,6 +15,9 @@ def test_register_valid_user(client):
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
+    # Ensure sensitive data is not returned in response
+    assert "hashed_password" not in data
+    assert "password" not in data
 
 
 def test_register_duplicate_email(client, test_user):
@@ -46,6 +52,7 @@ def test_login_valid_credentials(client, test_user):
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
+    assert "hashed_password" not in data
 
 
 def test_login_incorrect_password(client, test_user):
@@ -94,3 +101,35 @@ def test_me_malformed_jwt(client):
     response = client.get("/me", headers=headers)
     assert response.status_code == 401
     assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_password_stored_as_hash_not_plaintext(db_session, test_user):
+    """Verify user password stored in database is a valid bcrypt hash and not plaintext."""
+    user = db_session.query(User).filter(User.email == test_user["email"]).first()
+    assert user is not None
+    assert user.hashed_password != test_user["password"]
+    assert user.hashed_password.startswith("$2b$") or user.hashed_password.startswith("$2a$")
+
+
+def test_password_hashing_without_monkeypatch():
+    """Verify password hashing and verification APIs function cleanly."""
+    plain = "MySecurePassword123!"
+    hashed = get_password_hash(plain)
+    assert hashed != plain
+    assert verify_password(plain, hashed) is True
+    assert verify_password("WrongPassword!", hashed) is False
+
+
+def test_source_code_contains_no_bcrypt_monkeypatch():
+    """
+    SECURITY BOUNDARY VERIFICATION (P0-05):
+    Programmatically verify that the fragile bcrypt.__about__ monkeypatch is absent from app source code.
+    """
+    app_dir = os.path.join(os.path.dirname(__file__), "..", "app")
+    for root, _, files in os.walk(app_dir):
+        for file in files:
+            if file.endswith(".py"):
+                file_path = os.path.join(root, file)
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    assert "__about__" not in content, f"Monkeypatch string found in {file_path}"

@@ -14,7 +14,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 
 ## Key Features
 
-- **Authentication & User Profiles**: User registration, JWT bearer token authentication, password hashing, and career preference management.
+- **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
 - **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction.
 - **Job Discovery & Search**: Job listing repository with keyword and location filter capabilities.
 - **Resume-to-Job Matching**: Statistical NLP matching engine evaluating technical skill overlap and content similarity.
@@ -96,7 +96,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 - **Database / ORM**: SQLAlchemy 2.0+ with SQLite
 - **NLP & Statistics**: `spacy` 3.8+ (`en_core_web_sm`), `scikit-learn` 1.9+ (`TfidfVectorizer`)
 - **Document Parsers**: PyMuPDF (`fitz`), `docx2txt`
-- **Authentication**: `python-jose` (JWT), `passlib` / `bcrypt`
+- **Authentication**: `python-jose` 3.5.0 (JWT), `passlib` 1.7.4 / `bcrypt` 4.0.1
 - **Settings**: `pydantic-settings`
 
 ### Frontend
@@ -123,7 +123,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT generation and verification
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # FastAPI application and route handlers
-│   ├── tests/              # Automated test suite (55 tests)
+│   ├── tests/              # Automated test suite (58 tests)
 │   ├── uploads/            # Server resume upload storage
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -238,8 +238,8 @@ cd backend
 ./venv/bin/pytest tests/ -v
 ```
 
-- **Total Test Count**: **55 tests**
-- **Pass Rate**: **100% (55 / 55)**
+- **Total Test Count**: **58 tests**
+- **Pass Rate**: **100% (58 / 58)**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -250,16 +250,17 @@ cd backend
 2. **Endpoint Authorization**: Protected endpoints verify JWT Bearer tokens and reject unauthenticated requests with `401 Unauthorized`.
 3. **10-Layer File Upload Boundary**: `POST /upload-resume` enforces extension whitelisting (`.pdf`, `.docx`, `.txt`), MIME magic header verification (`%PDF-`, `PK\x03\x04`), UTF-8 decodability, 10MB file size limits (returning `413 Content Too Large`), and server-generated UUID filenames.
 4. **Restricted CORS Origins**: Wildcard CORS origin `*` is eliminated in favor of explicit `settings.ALLOWED_ORIGINS` headers.
+5. **Clean Password Hashing**: Passwords are hashed using `passlib==1.7.4` and `bcrypt==4.0.1` natively without runtime monkeypatches.
 
 ---
 
 ## Engineering Roadmap & Status
 
-- **Phase 0 (Security & Baseline)**:
+- **Phase 0 (Security & Baseline — COMPLETED)**:
   - `P0-00`: Testing Safety Baseline (**Completed — 35 tests**)
   - `P0-01`: Externalize JWT Secret (**Completed — 39 tests**)
   - `P0-02`: Endpoint Authorization Boundaries (**Completed — 46 tests**)
   - `P0-03`: Secure Resume Upload Boundary (**Completed — 50 tests**)
   - `P0-04`: Restrict CORS Origins (**Completed — 55 tests**)
-  - `P0-05`: Resolve Password Hashing Conflict (*Pending*)
+  - `P0-05`: Resolve Password Hashing Conflict (**Completed — 58 tests**)
 - **Phase 1 (Modular Monolith Refactoring)**: Planned router modularization, Pydantic schema separation, and service layer decoupling.

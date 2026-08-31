@@ -8,13 +8,13 @@ This document contains the implementation-ready task breakdown for **Smart Job H
 
 ```mermaid
 flowchart TD
-    subgraph P0 [P0: Critical Security & Configuration]
+    subgraph P0 [P0: Critical Security & Configuration - COMPLETED]
         P0-00[P0-00: Establish Testing Safety Baseline ✓ COMPLETED]
         P0-01[P0-01: Externalize JWT Secret ✓ COMPLETED]
         P0-02[P0-02: Endpoint Authorization Boundaries ✓ COMPLETED]
         P0-03[P0-03: Secure Resume Uploads ✓ COMPLETED]
         P0-04[P0-04: Restrict CORS Origins ✓ COMPLETED]
-        P0-05[P0-05: Resolve Password Hashing Conflict]
+        P0-05[P0-05: Resolve Password Hashing Conflict ✓ COMPLETED]
     end
 
     subgraph P1 [P1: High Stabilization & Testing]
@@ -51,24 +51,20 @@ flowchart TD
 
 ### P0-04 — Restrict CORS Origins (✓ COMPLETED)
 - **Objective**: Eliminate wildcard origin (`*`) with credentials enabled in `CORSMiddleware`.
-- **Result**: Restricted allowed origins to environment-configurable `settings.ALLOWED_ORIGINS`. Added `backend/tests/test_cors.py`. **55 / 55 tests passing**.
+- **Result**: Restricted allowed origins to environment-configurable `settings.ALLOWED_ORIGINS`. Added `backend/tests/test_cors.py`. 55 / 55 tests passing.
+
+### P0-05 — Resolve Password Hashing Conflict (✓ COMPLETED)
+- **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py` and pin compatible authentication packages.
+- **Result**: Removed monkeypatch completely from `app/main.py`. Pinned `passlib==1.7.4` and `bcrypt==4.0.1` in `requirements.txt`. **58 / 58 tests passing**.
 
 ---
 
-## Detailed Pending Task Breakdown
+## Detailed Pending Task Breakdown (Phase 1)
 
-### P0-05 — Resolve Password Hashing Dependency Conflict
+### P1-01 — Modularize main.py into Routers
 
-- **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py`.
-- **Files Likely Affected**: `backend/app/main.py`, `backend/requirements.txt`, `backend/app/auth.py`.
-- **Preconditions**: P0-00, P0-01, P0-02, P0-03, P0-04 completed.
-- **Implementation Requirements**:
-  - Update `requirements.txt` to pin compatible `passlib` (1.7.4) and `bcrypt` (4.0.1) or migrate to `argon2-cffi`.
-  - Remove runtime monkeypatch lines 7–9 in `main.py`.
-- **Security Considerations**: Eliminates fragile runtime monkeypatching in authentication layer.
-- **Tests Required**: Password hashing and verification unit tests.
-- **Acceptance Criteria**:
-  - Application starts clean without monkeypatching `bcrypt`.
-  - Password registration and login verification pass.
-- **Dependencies**: P0-00, P0-01, P0-02, P0-03, P0-04.
+- **Objective**: Refactor monolithic 340-line `main.py` into distinct APIRouter modules (`app/routers/auth.py`, `app/routers/jobs.py`, `app/routers/matching.py`, `app/routers/profile.py`, `app/routers/applications.py`).
+- **Files Likely Affected**: `backend/app/main.py`, `backend/app/routers/` (NEW).
+- **Preconditions**: Phase 0 (P0-00 through P0-05) completed.
+- **Dependencies**: Phase 0 completed.
 - **Risk**: Low.

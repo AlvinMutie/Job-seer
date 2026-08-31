@@ -3,11 +3,6 @@ import shutil
 import logging
 from typing import List, Optional
 
-# Monkeypatch for passlib/bcrypt version issue
-import bcrypt
-if not hasattr(bcrypt, "__about__"):
-    bcrypt.__about__ = type("about", (object,), {"__version__": bcrypt.__version__})
-
 from fastapi import FastAPI, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm

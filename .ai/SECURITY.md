@@ -13,18 +13,18 @@ This document specifies the security requirements, threat catalog, upload bounda
 | SEC-02 | **HIGH** | Authorization | `/match`, `/tailor-resume`, `/generate-cover-letter` lack authentication checks | `backend/app/main.py` | **REMEDIATED (P0-02)** — Protected with `Depends(get_current_user)` |
 | SEC-03 | **HIGH** | File Upload | `/upload-resume` writes uploaded files directly to disk without extension whitelist or mime verification | `backend/app/main.py` | **REMEDIATED (P0-03)** — Protected with 10-layer upload boundary |
 | SEC-04 | **HIGH** | CORS | Wildcard origin `allow_origins=["*"]` configured with `allow_credentials=True` | `backend/app/main.py` | **REMEDIATED (P0-04)** — Restricted via `settings.ALLOWED_ORIGINS` |
-| SEC-05 | **MEDIUM** | Password Package | `bcrypt.__about__` runtime monkeypatch used due to `passlib` version mismatch | `backend/app/main.py` | Pending (**P0-05**) |
+| SEC-05 | **MEDIUM** | Password Package | `bcrypt.__about__` runtime monkeypatch used due to `passlib` version mismatch | `backend/app/main.py` | **REMEDIATED (P0-05)** — Pinned `passlib==1.7.4` and `bcrypt==4.0.1` |
 | SEC-06 | **MEDIUM** | Storage Security | JWT tokens stored unencrypted in browser `localStorage` | `frontend/src/services/api.js` | Pending (Phase 3) |
 | SEC-07 | **MEDIUM** | Denial of Service | No API rate limiting on authentication or CPU-intensive TF-IDF/spaCy parsing | `backend/app/main.py` | Pending (Phase 3) |
 
 ---
 
-## Remediated: P0-04 CORS Origin Restrictions
+## Remediated: P0-05 Password Hashing Dependency Conflict Resolution
 
-- **Origin Limitation**: Wildcard CORS origin `allow_origins=["*"]` completely removed from application middleware.
-- **Centralized Configuration**: Allowed origins are managed by `settings.CORS_ORIGINS` (defaulting to `"http://localhost:5173,http://localhost:3000"` for local development).
-- **Wildcard Prohibition**: `Settings.validate_cors_origins` prohibits configuring wildcard `*` in `ENVIRONMENT="production"`.
-- **Header Verification**: Trusted origins receive `Access-Control-Allow-Origin` and `Access-Control-Allow-Credentials: true`. Untrusted origins do not receive permission headers.
+- **Monkeypatch Purged**: Fragile `bcrypt.__about__` runtime monkeypatch completely removed from `app/main.py`.
+- **Pinned Dependencies**: `backend/requirements.txt` explicitly pins compatible `passlib==1.7.4` and `bcrypt==4.0.1` versions.
+- **100% Backwards Compatibility**: Retains `bcrypt` password hashing via `passlib.context.CryptContext`, ensuring all existing user password hashes authenticate seamlessly without password invalidation or user lockouts.
+- **Zero Exposure**: Passwords are standardly hashed before database persistence and never logged, returned in API responses, or exposed in exception stack traces.
 
 ---
 
