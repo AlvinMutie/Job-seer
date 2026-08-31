@@ -1,6 +1,6 @@
 # ROADMAP.md — Implementation-Ready Engineering Task Plan
 
-This document contains the implementation-ready task breakdown for **Job Seer**. All tasks across Phase 0 through Phase 6 and UX-01 through UX-05 are officially **COMPLETED**.
+This document contains the implementation-ready task breakdown for **Job Seer**. All tasks across Phase 0 through Phase 6 and UX-01 through UX-06 are officially **COMPLETED**.
 
 ---
 
@@ -65,9 +65,10 @@ flowchart TD
         UX-03[UX-03: Authenticated Workspace Redesign ✓ COMPLETED]
         UX-04[UX-04: Visual Polish & Interaction Refinement ✓ COMPLETED]
         UX-05[UX-05: Product Experience Refinement & UX Validation ✓ COMPLETED]
+        UX-06[UX-06: Final Product Experience Audit & Refinement ✓ COMPLETED]
     end
 
-    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P6-QA --> P6-POLISH --> P6-DOCS --> UX-01 --> UX-02 --> UX-03 --> UX-04 --> UX-05
+    P0-00 --> P1-01 --> P2-01 --> P3-01 --> P4-SEC06 --> P5-HEALTH --> P6-QA --> P6-POLISH --> P6-DOCS --> UX-01 --> UX-02 --> UX-03 --> UX-04 --> UX-05 --> UX-06
 ```
 
 ---
@@ -86,3 +87,4 @@ flowchart TD
 - **UX-03 — Authenticated Workspace Redesign**: COMPLETED ✅
 - **UX-04 — Visual Polish & Interaction Refinement**: COMPLETED ✅
 - **UX-05 — Product Experience Refinement & UX Validation**: COMPLETED ✅
+- **UX-06 — Final Product Experience Audit & Refinement**: COMPLETED ✅

@@ -1,7 +1,7 @@
 # TESTING.md — Pytest & Frontend Safety Testing Framework Specification
 
 ## Executive Overview
-This document specifies the testing strategy, test markers, coverage reporting baseline, warning audit, and database isolation architecture for **Job Seer**.
+This document specifies the testing strategy, test markers, coverage reporting baseline, warning audit, database isolation architecture, and UX verification suites for **Job Seer**.
 
 ---
 
@@ -9,7 +9,7 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 - **Total Test Count**: **171 tests** (100% pass rate)
 - **Security Safety Gate Tests**: **90 tests** (`pytest -m security`)
-- **Phase 5 & 6 Production & QA Tests**: Added integration tests in `backend/tests/test_phase5_production_readiness.py`:
+- **Phase 5 & 6 Production & QA Tests**: Integration tests in `backend/tests/test_phase5_production_readiness.py`:
   - `test_health_liveness_endpoint`
   - `test_health_readiness_endpoint`
   - `test_root_endpoint_job_seer_branding`
@@ -18,7 +18,7 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 2. Frontend Test Suite
+## 2. Frontend Test Suite & UX Verification
 
 Frontend unit testing is executed via Node's native test runner against `frontend/src/services/api.test.js`:
 
@@ -28,6 +28,7 @@ npm test
 ```
 - **Result**: **6 unit tests passing**
 - **Production Build**: **Succeeded cleanly (`npm run build`)**
+- **UX Audit Verification (UX-01 to UX-06)**: Tested across viewports (1440px, 1280px, 1024px, 768px, 390px, 375px, 360px) with 0 horizontal overflow, color-independent badges, accessibility focus rings, and reduced motion override.
 
 ---
 
