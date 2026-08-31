@@ -97,6 +97,10 @@ export const authService = {
     getResumeHealth: () => api.get(`/resume/health?t=${Date.now()}`).then(res => res.data),
 };
 
+export const dashboardService = {
+    getAnalytics: () => api.get(`/dashboard/analytics?t=${Date.now()}`).then(res => res.data),
+};
+
 export const jobService = {
     getJobs: (params) => api.get('/jobs', { params: { ...params, t: Date.now() } }).then(res => res.data),
     matchResume: (formData) => api.post('/match', formData).then(res => res.data),

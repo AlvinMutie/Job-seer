@@ -9,6 +9,7 @@
 | `/login` | `POST` | **PUBLIC** | OAuth2 Form | Obtains JWT Bearer Token |
 | `/jobs` | `GET` | **PUBLIC** | None | **ENHANCED (P3-01)** — Pagination, Sorting, Search, Filtering |
 | `/match` | `POST` | **AUTHENTICATED** | `Depends(get_current_user)` | **UPGRADED (P3-02)** — V2 Multi-Factor Explainable Match |
+| `/dashboard/analytics` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **NEW (P3-07)** — Aggregated Command Center Analytics |
 | `/resume/tailor` | `POST` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **ENHANCED (P3-04)** — Generate & Persist Tailored Version |
 | `/resume/tailored` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **ENHANCED (P3-04)** — List Saved Tailored Versions |
 | `/resume/tailored/{id}` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | **ENHANCED (P3-04)** — Retrieve Tailored Version |
@@ -28,18 +29,27 @@
 
 ## Endpoint Specifications
 
-### `PATCH /applications/{id}` (P3-06 New)
+### `GET /dashboard/analytics` (P3-07 New)
 
-- **Description**: Updates application status (for Kanban drag-and-drop), applied date, interview date, follow-up date, application URL, and notes.
-- **Request Body**:
+- **Description**: Computes and retrieves real-time aggregated Command Center intelligence analytics for the authenticated user.
+- **Response Format**:
   ```json
   {
-    "status": "Interview",
-    "applied_date": "2026-08-30",
-    "interview_date": "2026-09-05",
-    "follow_up_date": "2026-09-01",
-    "application_url": "https://company.com/careers/123",
-    "notes": "Interview scheduled with VP of Engineering."
+    "total_applications": 5,
+    "status_counts": {
+      "not_applied": 1,
+      "applied": 2,
+      "interview": 1,
+      "offer": 1,
+      "rejected": 0
+    },
+    "average_match_score": 88.5,
+    "ats_health_score": 92.0,
+    "ats_classification": "Excellent (ATS Ready)",
+    "tailored_resumes_count": 3,
+    "cover_letters_count": 2,
+    "recent_applications": [],
+    "recent_tailored_resumes": [],
+    "recent_cover_letters": []
   }
   ```
-- **Response Format**: `{"message": "Application updated successfully"}`

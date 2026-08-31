@@ -5,10 +5,10 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Application Tracker V2 & Ownership Isolation (P3-06)
+## Intelligent Command Center Dashboard & Ownership Isolation (P3-07)
 
-`GET /applications`, `GET /applications/{id}`, `POST /applications`, `PATCH /applications/{id}`, and `DELETE /applications/{id}` enforce strict security controls:
+`GET /dashboard/analytics` enforces strict security controls:
 
-1. **Safe URL Scheme Validation**: `application_url` inputs are parsed and validated to enforce `http` or `https` schemes exclusively. Malicious schemes (e.g. `javascript:`) trigger HTTP 422 validation errors.
-2. **Resource Ownership Isolation**: All queries enforce `ApplicationTracker.user_id == current_user.id`. User A cannot view, update, or delete User B's tracked application. Unauthorized requests return HTTP 404 `RESOURCE_NOT_FOUND` to prevent resource enumeration.
-3. **Strict Input & Date Parsing**: Status inputs must match valid `ApplicationStatus` enum values. Date strings are strictly parsed against ISO format (`YYYY-MM-DD`).
+1. **Authentication Gate**: Endpoint requires valid JWT token via `Depends(get_current_user)`. Unauthenticated requests return HTTP 401.
+2. **Resource Ownership Isolation**: All queries (applications, profile resume, tailored resumes, cover letters) enforce `user_id == current_user.id`. User A's analytics metrics do not include User B's resources.
+3. **Safe Aggregation**: Aggregations handle empty lists and null resume texts gracefully without throwing unhandled internal server exceptions.

@@ -15,6 +15,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Key Features
 
 - **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
+- **Intelligent Command Center Dashboard**: Real-time aggregated intelligence workspace (`Dashboard.jsx`) featuring 4 KPI Stat Cards (Average V2 Match %, Active Application Pipeline, ATS Health Score & Status Badge, Saved Tailored Assets Count), pipeline stage breakdown, action launchpad, and job recommendations.
 - **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
 - **Resume Intelligence & ATS Health Check**: Automated ATS readiness scoring (0-100), section completeness detection, contact info presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted recommendations.
 - **Resume Tailoring V2 & Persistence**: Persistent versioned resume tailoring (`v1`, `v2`, `v3`) with factual candidate integrity guarantees, `difflib` line-by-line diff comparison modal (`ResumeDiffViewer.jsx`), and version history management.
@@ -44,7 +45,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (156 tests, 91% coverage)
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (160 tests, 91% coverage)
 - **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
 
@@ -53,7 +54,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 ## Automated Test Suites
 
 ```bash
-# Backend (156 tests passing)
+# Backend (160 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
@@ -62,6 +63,6 @@ cd frontend
 npm test
 ```
 
-- **Backend Tests**: **156 tests (100% pass rate, 91% code coverage)**
+- **Backend Tests**: **160 tests (100% pass rate, 91% code coverage)**
 - **Frontend Tests**: **6 unit tests (100% pass rate)**
 - **Production Build**: **Succeeded cleanly (`dist/index.html`)**

@@ -1,66 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors } from 'lucide-react';
-import { jobService, authService, trackerService } from '../services/api';
+import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2 } from 'lucide-react';
+import { jobService, authService, trackerService, dashboardService } from '../services/api';
 import TailorModal from '../components/TailorModal';
 
 function Dashboard() {
+    const [user, setUser] = useState(null);
+    const [analytics, setAnalytics] = useState(null);
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [search, setSearch] = useState('');
     const [location, setLocation] = useState('');
     const [resumeText, setResumeText] = useState('');
     const [matchingJobId, setMatchingJobId] = useState(null);
     const [matchResults, setMatchResults] = useState({});
-    const [user, setUser] = useState(null);
-    const [applications, setApplications] = useState([]);
 
     // Tailoring State
     const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
     const [tailorData, setTailorData] = useState({ suggestions: [], jobTitle: '', company: '' });
     const [isTailoring, setIsTailoring] = useState(false);
 
-    useEffect(() => {
-        const init = async () => {
-            setLoading(true);
-            try {
-                // Fetch user data FIRST and set it immediately to ensure name/CV status is correct
-                const userData = await authService.getMe();
-                console.log("Dashboard user check:", userData);
-                setUser(userData);
+    const initDashboard = async () => {
+        setLoading(true);
+        try {
+            const [userData, analyticsData, jobsData] = await Promise.all([
+                authService.getMe(),
+                dashboardService.getAnalytics().catch(() => null),
+                jobService.getJobs({ keywords: search, location })
+            ]);
+            setUser(userData);
+            setAnalytics(analyticsData);
+            setJobs(jobsData);
 
-                if (userData.profile?.resume_text) {
-                    setResumeText(userData.profile.resume_text);
-                }
-
-                // Fetch secondary data in parallel
-                const [jobsData, appsData] = await Promise.all([
-                    jobService.getJobs({ keywords: search, location }),
-                    trackerService.getApplications()
-                ]);
-                setJobs(jobsData);
-                setApplications(appsData);
-            } catch (error) {
-                console.error("Dashboard initialization failed:", error);
-
-                // If it might be an auth error, try to get user one more time quietly
-                try {
-                    const retryUser = await authService.getMe();
-                    setUser(retryUser);
-                } catch (e) {
-                    console.error("Critical: User fetch failed twice.");
-                }
+            if (userData.profile?.resume_text) {
+                setResumeText(userData.profile.resume_text);
             }
+        } catch (error) {
+            console.error("Dashboard command center init failed:", error);
+        } finally {
             setLoading(false);
-        };
-        init();
-    }, []); // Only run on mount
+        }
+    };
+
+    useEffect(() => {
+        initDashboard();
+    }, []);
 
     const fetchJobs = async () => {
         setLoading(true);
         try {
             const data = await jobService.getJobs({ keywords: search, location });
             setJobs(data);
-            // Clear match results on new search to force re-analysis
             setMatchResults({});
         } catch (error) {
             console.error("Failed to fetch jobs:", error);
@@ -68,7 +58,6 @@ function Dashboard() {
         setLoading(false);
     };
 
-    // Auto-trigger matching for top jobs when they load
     useEffect(() => {
         if (jobs.length > 0 && resumeText && Object.keys(matchResults).length === 0) {
             const topJobs = jobs.slice(0, 5);
@@ -82,7 +71,7 @@ function Dashboard() {
 
     const handleMatch = async (jobId) => {
         if (!resumeText) {
-            alert("Please enter or upload your resume text first!");
+            alert("Please upload your resume text in the Resume Hub first!");
             return;
         }
         setMatchingJobId(jobId);
@@ -119,82 +108,120 @@ function Dashboard() {
         }
     };
 
-    const avgScore = applications.length > 0
-        ? Math.round(applications.reduce((acc, app) => acc + (app.score || 0), 0) / applications.length)
-        : 0;
-
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Personalized Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            {/* Command Center Hero Greeting */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border-indigo-500/20">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.full_name?.split(' ')[0] || 'Hunter'} 👋</h1>
-                    <p className="text-slate-400">Targeting roles for <span className="text-indigo-400 font-semibold">{user?.profile?.preferred_role || 'General Positions'}</span></p>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="badge badge-indigo">Command Center</span>
+                        <span className="text-xs text-slate-400 font-mono">Targeting: {user?.profile?.preferred_role || 'General Engineering'}</span>
+                    </div>
+                    <h1 className="text-3xl font-extrabold text-white">Welcome back, {user?.full_name?.split(' ')[0] || 'Hunter'} 👋</h1>
+                    <p className="text-xs text-slate-400 mt-1">Real-time intelligence dashboard across your matching scores, application pipeline, and AI assets.</p>
                 </div>
+
                 {!user?.profile?.has_resume ? (
-                    <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-3 text-amber-500 text-sm">
-                        <AlertTriangle size={18} />
-                        <span>No CV detected. <a href="/resume-hub" className="font-bold underline">Upload now</a> for AI matching.</span>
-                    </div>
-                ) : !user?.profile?.resume_text && (
-                    <div className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 text-sm">
-                        <AlertTriangle size={18} />
-                        <span>CV upload detected but content could not be parsed. <a href="/resume-hub" className="font-bold underline">Try re-uploading as a PDF or TXT.</a></span>
-                    </div>
+                    <a href="/resume-hub" className="px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors">
+                        <AlertTriangle size={16} /> Upload CV for AI Match Scoring
+                    </a>
+                ) : (
+                    <a href="/resume-hub" className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-2 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors">
+                        <ShieldCheck size={16} /> ATS Health: {analytics?.ats_health_score ? `${analytics.ats_health_score}% (${analytics.ats_classification})` : 'Active'}
+                    </a>
                 )}
             </div>
 
-            {/* Analytics Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card p-6 bg-indigo-500/5 border-indigo-500/20">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-indigo-500/20 rounded-xl text-indigo-400">
-                            <Target size={24} />
+            {/* Command Intelligence KPI Analytics Grid (P3-07) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="glass-card p-5 space-y-3 border-indigo-500/20 bg-indigo-500/5">
+                    <div className="flex justify-between items-start">
+                        <div className="p-2.5 bg-indigo-500/20 rounded-xl text-indigo-400">
+                            <Target size={20} />
                         </div>
-                        <div>
-                            <p className="text-slate-400 text-sm uppercase tracking-wider font-semibold">Average Match</p>
-                            <p className="text-2xl font-bold text-white">{avgScore}%</p>
-                        </div>
+                        <span className="text-xs text-indigo-400 font-bold">AI V2 Score</span>
                     </div>
-                    <div className="w-full bg-slate-700/50 h-2 rounded-full overflow-hidden">
-                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-1000" style={{ width: `${avgScore}%` }}></div>
+                    <div>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Average Match</p>
+                        <p className="text-2xl font-bold text-white mt-1">{analytics?.average_match_score || 0}%</p>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-indigo-500 h-full rounded-full transition-all duration-1000" style={{ width: `${analytics?.average_match_score || 0}%` }}></div>
                     </div>
                 </div>
 
-                <div className="glass-card p-6 bg-emerald-500/5 border-emerald-500/20">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400">
-                            <TrendingUp size={24} />
+                <div className="glass-card p-5 space-y-3 border-emerald-500/20 bg-emerald-500/5">
+                    <div className="flex justify-between items-start">
+                        <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
+                            <TrendingUp size={20} />
                         </div>
-                        <div>
-                            <p className="text-slate-400 text-sm uppercase tracking-wider font-semibold">Tracked Applications</p>
-                            <p className="text-2xl font-bold text-white">{applications.length}</p>
-                        </div>
+                        <span className="text-xs text-emerald-400 font-bold">Pipeline</span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-4 leading-relaxed">Keep applying to improve your profile's AI memory.</p>
+                    <div>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Total Applications</p>
+                        <p className="text-2xl font-bold text-white mt-1">{analytics?.total_applications || 0}</p>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                        {analytics?.status_counts?.interview || 0} Interviews · {analytics?.status_counts?.applied || 0} Applied
+                    </p>
                 </div>
 
-                <div className="glass-card p-6 border-slate-700/50">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Historical Trend</h3>
-                        <BarChart3 size={18} className="text-slate-600" />
+                <div className="glass-card p-5 space-y-3 border-cyan-500/20 bg-cyan-500/5">
+                    <div className="flex justify-between items-start">
+                        <div className="p-2.5 bg-cyan-500/20 rounded-xl text-cyan-400">
+                            <ShieldCheck size={20} />
+                        </div>
+                        <span className="text-xs text-cyan-400 font-bold">P3-03 Check</span>
                     </div>
-                    <div className="flex items-end gap-1.5 h-12">
-                        {applications.length > 0 ? applications.slice(-10).map((app, i) => (
-                            <div
-                                key={i}
-                                className="flex-1 bg-indigo-500/40 rounded-t-sm hover:bg-indigo-400 transition-all cursor-help relative group"
-                                style={{ height: `${app.score}%` }}
-                                title={`${app.score}% Match - ${app.title}`}
-                            >
-                                <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-[10px] text-white rounded whitespace-nowrap z-50">
-                                    {app.score}% Match
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="text-slate-500 text-xs text-center w-full">Start applying to see trends</div>
-                        )}
+                    <div>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">ATS Health Score</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                            {analytics?.ats_health_score !== null ? `${analytics?.ats_health_score}%` : 'N/A'}
+                        </p>
                     </div>
+                    <p className="text-[11px] text-slate-400">{analytics?.ats_classification || 'Upload resume to check'}</p>
+                </div>
+
+                <div className="glass-card p-5 space-y-3 border-amber-500/20 bg-amber-500/5">
+                    <div className="flex justify-between items-start">
+                        <div className="p-2.5 bg-amber-500/20 rounded-xl text-amber-400">
+                            <History size={20} />
+                        </div>
+                        <span className="text-xs text-amber-400 font-bold">Assets Saved</span>
+                    </div>
+                    <div>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Tailored & Letters</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                            {(analytics?.tailored_resumes_count || 0) + (analytics?.cover_letters_count || 0)}
+                        </p>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                        {analytics?.tailored_resumes_count || 0} Tailored CVs · {analytics?.cover_letters_count || 0} Letters
+                    </p>
+                </div>
+            </div>
+
+            {/* Quick Action Launch Bar */}
+            <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60">
+                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles size={16} className="text-indigo-400" /> Action Launchpad
+                </span>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 transition-colors flex items-center gap-1.5">
+                        <Upload size={14} /> Resume Hub
+                    </a>
+                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors flex items-center gap-1.5">
+                        <Scissors size={14} /> Tailor CV
+                    </a>
+                    <a href="/resume-hub" className="px-3 py-1.5 rounded-lg bg-cyan-600/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-600/30 transition-colors flex items-center gap-1.5">
+                        <Mail size={14} /> Cover Letters
+                    </a>
+                    <a href="/tracker" className="px-3 py-1.5 rounded-lg bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30 transition-colors flex items-center gap-1.5">
+                        <LayoutGrid size={14} /> Kanban Tracker
+                    </a>
+                    <a href="/jobs-hub" className="px-3 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 transition-colors flex items-center gap-1.5">
+                        <Briefcase size={14} /> Jobs Hub
+                    </a>
                 </div>
             </div>
 
@@ -203,8 +230,8 @@ function Dashboard() {
                 <div className="flex-1 flex items-center px-4 gap-3">
                     <Search className="text-slate-500" size={20} />
                     <input
-                        className="bg-transparent border-none outline-none w-full text-white placeholder-slate-500"
-                        placeholder="Search keywords (React, Python, Go...)"
+                        className="bg-transparent border-none outline-none w-full text-white text-sm placeholder-slate-500"
+                        placeholder="Search keywords (React, Python, FastAPI, Docker...)"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -213,31 +240,29 @@ function Dashboard() {
                 <div className="flex-1 flex items-center px-4 gap-3">
                     <MapPin className="text-slate-500" size={20} />
                     <input
-                        className="bg-transparent border-none outline-none w-full text-white placeholder-slate-500"
-                        placeholder="Location"
+                        className="bg-transparent border-none outline-none w-full text-white text-sm placeholder-slate-500"
+                        placeholder="Location preference"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                     />
                 </div>
-                <button
-                    onClick={fetchJobs}
-                    className="btn-primary"
-                >
+                <button onClick={fetchJobs} className="btn-primary py-2.5 px-6 text-sm font-bold">
                     Find Jobs
                 </button>
             </div>
 
+            {/* Main Content Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Job List */}
+                {/* Job Discovery & Recommendations Column */}
                 <div className="lg:col-span-2 space-y-4">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        Recommended for You <Sparkles className="text-amber-400" size={18} />
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        Top AI Recommendations <Sparkles className="text-amber-400" size={18} />
                     </h2>
 
                     {loading ? (
-                        <div className="text-center py-20 text-slate-500">Loading jobs...</div>
+                        <div className="text-center py-20 text-slate-500">Loading recommendations...</div>
                     ) : jobs.length === 0 ? (
-                        <div className="text-center py-20 text-slate-500">No jobs found. Try adjusting your filters.</div>
+                        <div className="text-center py-20 text-slate-500">No jobs found matching parameters.</div>
                     ) : (
                         jobs.map(job => (
                             <JobCard
@@ -248,35 +273,64 @@ function Dashboard() {
                                 isMatching={matchingJobId === job.id}
                                 isTailoring={isTailoring}
                                 matchResult={matchResults[job.id]}
-                                onApplySuccess={() => trackerService.getApplications().then(setApplications)}
+                                onApplySuccess={initDashboard}
                             />
                         ))
                     )}
                 </div>
 
-                {/* Resume Input Sidepanel */}
+                {/* Right Sidepanel: Pipeline Stage Activity & Asset History */}
                 <div className="space-y-6">
-                    <div className="glass-card p-6">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Upload size={18} className="text-indigo-400" /> Resume Intel
+                    {/* Pipeline Stage Breakdown */}
+                    <div className="glass-card p-5 space-y-4">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <LayoutGrid size={16} className="text-indigo-400" /> Pipeline Stage Breakdown
                         </h3>
-                        <p className="text-sm text-slate-400 mb-4">Paste your resume text below to see match scores and missing skills.</p>
-                        <textarea
-                            className="input-field h-48 text-sm resize-none mb-4"
-                            placeholder="Paste your CV text here..."
-                            value={resumeText}
-                            onChange={(e) => setResumeText(e.target.value)}
-                        ></textarea>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 italic">
-                            <Sparkles size={12} /> TF-IDF & Cosine Similarity analysis
+                        <div className="space-y-2 text-xs">
+                            <StageRow label="Interview Scheduled" count={analytics?.status_counts?.interview || 0} color="bg-cyan-400" />
+                            <StageRow label="Applied" count={analytics?.status_counts?.applied || 0} color="bg-indigo-500" />
+                            <StageRow label="Offer Received" count={analytics?.status_counts?.offer || 0} color="bg-emerald-500" />
+                            <StageRow label="Not Applied" count={analytics?.status_counts?.not_applied || 0} color="bg-slate-500" />
+                            <StageRow label="Rejected" count={analytics?.status_counts?.rejected || 0} color="bg-red-500" />
                         </div>
                     </div>
 
-                    <div className="glass-card p-6 border-indigo-500/20 bg-indigo-500/5">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-indigo-400">
-                            <ChevronRight size={18} /> Optimization Tip
+                    {/* Recent Tailored Resumes & Cover Letters Quick Preview */}
+                    <div className="glass-card p-5 space-y-4">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <History size={16} className="text-amber-400" /> Recent AI Generated Assets
                         </h3>
-                        <p className="text-sm text-slate-400">Tailoring your keywords to match the "Missing Skills" section can increase your visibility to recruiters by up to 40%.</p>
+                        <div className="space-y-3 text-xs">
+                            {analytics?.recent_tailored_resumes?.map(item => (
+                                <div key={item.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <div>
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="badge badge-indigo text-[10px]">CV v{item.version}</span>
+                                            <span className="text-slate-400 font-bold">{item.job_title}</span>
+                                        </div>
+                                        <p className="text-slate-500 text-[10px]">{item.company}</p>
+                                    </div>
+                                    <a href="/resume-hub" className="text-indigo-400 hover:underline">View</a>
+                                </div>
+                            ))}
+
+                            {analytics?.recent_cover_letters?.map(letter => (
+                                <div key={letter.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <div>
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="badge border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 text-[10px]">{letter.tone} v{letter.version}</span>
+                                            <span className="text-slate-400 font-bold">{letter.job_title}</span>
+                                        </div>
+                                        <p className="text-slate-500 text-[10px]">{letter.company}</p>
+                                    </div>
+                                    <a href="/resume-hub" className="text-indigo-400 hover:underline">View</a>
+                                </div>
+                            ))}
+
+                            {(!analytics?.recent_tailored_resumes?.length && !analytics?.recent_cover_letters?.length) && (
+                                <p className="text-slate-500 text-center py-4">No tailored assets created yet.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -288,6 +342,18 @@ function Dashboard() {
                 jobTitle={tailorData.jobTitle}
                 company={tailorData.company}
             />
+        </div>
+    );
+}
+
+function StageRow({ label, count, color }) {
+    return (
+        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-900/40">
+            <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${color}`}></span>
+                <span className="text-slate-300 font-medium">{label}</span>
+            </div>
+            <span className="font-bold text-white font-mono">{count}</span>
         </div>
     );
 }
@@ -317,8 +383,7 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
             <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
 
             {matchResult && (
-                <div className={`absolute top-0 right-0 px-4 py-1 border-b border-l rounded-bl-xl font-bold text-sm ${matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'
-                    }`}>
+                <div className={`absolute top-0 right-0 px-4 py-1 border-b border-l rounded-bl-xl font-bold text-sm ${matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'}`}>
                     {matchResult.match_percentage}% Match
                 </div>
             )}
@@ -327,7 +392,7 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                 <div className="flex justify-between items-start">
                     <div>
                         <h3 className="text-xl font-bold text-white transition-colors group-hover:text-indigo-400">{job.title}</h3>
-                        <div className="flex items-center gap-2 text-slate-400 font-medium">
+                        <div className="flex items-center gap-2 text-slate-400 font-medium text-sm">
                             <Briefcase size={14} className="text-indigo-400" /> {job.company}
                         </div>
                     </div>
@@ -350,24 +415,10 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                             </p>
                             <div className="flex flex-wrap gap-1">
                                 {matchResult.missing_skills.slice(0, 5).map(skill => (
-                                    <span key={skill} className="text-xs text-slate-400 decoration-red-500/50 line-through bg-slate-800/50 px-2 py-0.5 rounded">{skill}</span>
+                                    <span key={skill} className="text-xs text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded">{skill}</span>
                                 ))}
-                                {matchResult.missing_skills.length > 5 && <span className="text-xs text-slate-500">+{matchResult.missing_skills.length - 5} more</span>}
                             </div>
                         </div>
-
-                        {matchResult.tailoring_advice && (
-                            <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-                                <p className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                    <Sparkles size={12} /> Tailoring Advice
-                                </p>
-                                <ul className="space-y-1">
-                                    {matchResult.tailoring_advice.map((advice, i) => (
-                                        <li key={i} className="text-xs text-slate-400 border-l-2 border-emerald-500/30 pl-2">{advice}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
@@ -376,7 +427,7 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                 <button
                     onClick={onMatch}
                     disabled={isMatching}
-                    className={`btn-primary w-full ${isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`btn-primary w-full py-2.5 text-xs font-bold ${isMatching ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {isMatching ? 'Analyzing...' : matchResult ? 'Re-Analyze' : 'Analyze Match'}
                 </button>
@@ -394,9 +445,9 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
                 <button
                     onClick={handleApply}
                     disabled={applying || applied}
-                    className={`px-4 py-2 rounded-xl border ${applied ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-slate-700 hover:border-slate-500 text-slate-300'} text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-inner`}
+                    className={`px-4 py-2 rounded-xl border ${applied ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : 'border-slate-700 hover:border-slate-500 text-slate-300'} text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-inner`}
                 >
-                    {applying ? 'Applying...' : applied ? (<><Target size={14} /> Applied</>) : 'Quick Apply'}
+                    {applying ? 'Applying...' : applied ? (<><CheckCircle2 size={14} /> Tracked</>) : 'Quick Track'}
                 </button>
             </div>
         </div>
