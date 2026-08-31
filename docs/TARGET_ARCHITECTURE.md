@@ -1,7 +1,7 @@
 # TARGET_ARCHITECTURE.md — Target State Modular Monolith Architecture
 
 ## Executive Summary
-This document specifies the target architecture for **Smart Job Hunter** post-stabilization. The architecture is designed as a **clean, modular monolith** optimized for clarity, testability, security, and developer maintainability without unnecessary enterprise complexity (no microservices, message queues, or Kubernetes overhead).
+This document specifies the target architecture for **Smart Job Hunter** post-stabilization. The architecture is designed as a **clean, modular monolith** optimized for clarity, testability, security, and developer maintainability without microservice overhead or enterprise bloat.
 
 ---
 
@@ -21,7 +21,7 @@ This document specifies the target architecture for **Smart Job Hunter** post-st
 │  ├── Routers Layer (app/routers/):                          │
 │  │     ├── auth_router (/register, /login, /me)             │
 │  │     ├── profile_router (/profile, /upload-resume)        │
-│  │     ├── jobs_router (/jobs)                              │
+│  │     ├── jobs_router (/jobs - Public Discovery)           │
 │  │     ├── matching_router (/match, /tailor-resume)         │
 │  │     └── applications_router (/applications)              │
 │  │                                                          │
@@ -50,81 +50,61 @@ This document specifies the target architecture for **Smart Job Hunter** post-st
 
 ---
 
-## Target Directory Structure
+## Refactoring Boundary: `main.py` Mapping Table
 
-```text
-backend/
-└── app/
-    ├── main.py                     # App factory, CORS middleware, global exception handlers
-    ├── core/                       # Core configuration & infrastructure
-    │   ├── config.py               # Pydantic BaseSettings loading from .env
-    │   ├── security.py             # Password hashing, JWT encode/decode, bearer dependencies
-    │   ├── database.py             # SQLAlchemy engine, sessionmaker, get_db dependency
-    │   └── exceptions.py           # Custom API exceptions & error handlers
-    ├── models/                     # SQLAlchemy ORM domain models
-    │   ├── user.py                 # User & Profile models
-    │   ├── job.py                  # Job model
-    │   └── application.py          # ApplicationTracker model
-    ├── schemas/                    # Pydantic DTO validation schemas
-    │   ├── auth.py                 # UserCreate, Token, UserResponse
-    │   ├── profile.py              # ProfileUpdate, ProfileResponse
-    │   ├── job.py                  # JobResponse, JobFilter
-    │   ├── matching.py             # MatchRequest, MatchResponse, TailorResponse
-    │   └── application.py          # ApplicationCreate, ApplicationResponse
-    ├── routers/                    # FastAPI APIRouter entry points
-    │   ├── auth.py                 # /register, /login, /me
-    │   ├── profile.py              # /profile, /upload-resume
-    │   ├── jobs.py                 # /jobs
-    │   ├── matching.py             # /match, /tailor-resume, /generate-cover-letter
-    │   └── applications.py         # /applications
-    ├── services/                   # Business domain logic
-    │   ├── matching_engine.py      # TF-IDF + skill overlap calculation
-    │   ├── resume_parser.py        # PyMuPDF & docx2txt text extraction
-    │   ├── tailor_service.py       # Resume tailoring suggestions
-    │   └── job_service.py          # Job query filtering logic
-    └── utils/                      # Helper utilities
-        └── file_handling.py        # Filename sanitization & MIME magic validation
-```
+The current monolithic entry point (`backend/app/main.py` — 333 lines) will be split into modular packages as follows:
 
-### Module Responsibilities & File Migration Plan
-
-| Directory | Responsibility | Existing Code to Move |
-| --------- | -------------- | --------------------- |
-| `app/core/` | Global config, JWT security, DB engine | Config from `auth.py#L12-L14`, `database.py`, `auth.py#L19-L52` |
-| `app/models/` | SQLAlchemy DB tables | ORM classes from `app/models/models.py` |
-| `app/schemas/` | Pydantic request/response validation | Schemas from `main.py#L39-L64` |
-| `app/routers/` | HTTP request routing & status codes | Route handlers from `main.py#L69-L328` |
-| `app/services/` | Core business logic & algorithms | `matching_engine.py`, `job_service.py`, `tailor_service.py`, `cover_letter.py`, `extract_text()` from `main.py` |
-| `app/utils/` | File validation and helper utilities | File upload sanitization logic |
+| `main.py` Source Lines | Current Responsibility | Target Modular Location |
+| ---------------------- | ---------------------- | ----------------------- |
+| Lines 1–10 | Imports & `bcrypt.__about__` monkeypatch | `app/main.py` (Monkeypatch removed once dependencies updated) |
+| Lines 11–16 | FastAPI app initialization & PyMuPDF import | `app/main.py` (App factory) |
+| Lines 28–35 | Middleware (CORS configuration) | `app/main.py` (CORS setup using `app.core.config`) |
+| Lines 37 | MatchingEngine instantiation | `app/services/matching_engine.py` (Singleton service) |
+| Lines 39–64 | Pydantic Request/Response DTOs | `app/schemas/matching.py`, `app/schemas/auth.py`, `app/schemas/profile.py`, `app/schemas/application.py` |
+| Lines 65–67 | Startup event (`init_db()`) | `app/main.py` (Lifespan event using `app.core.database`) |
+| Lines 69–71 | `GET /` Health Check endpoint | `app/main.py` |
+| Lines 73–82 | `GET /jobs` handler | `app/routers/jobs.py` |
+| Lines 84–104 | `POST /match` handler | `app/routers/matching.py` |
+| Lines 106–121 | `POST /generate-cover-letter` handler | `app/routers/matching.py` |
+| Lines 123–147 | `POST /tailor-resume` handler | `app/routers/matching.py` |
+| Lines 151–169 | `POST /register` handler | `app/routers/auth.py` |
+| Lines 171–182 | `POST /login` handler | `app/routers/auth.py` |
+| Lines 184–204 | `GET /me` handler | `app/routers/auth.py` |
+| Lines 206–225 | `POST /profile` handler | `app/routers/profile.py` |
+| Lines 227–250 | `extract_text()` helper function | `app/services/resume_parser.py` |
+| Lines 252–280 | `POST /upload-resume` handler | `app/routers/profile.py` |
+| Lines 282–299 | `GET /applications` handler | `app/routers/applications.py` |
+| Lines 301–327 | `POST /applications` handler | `app/routers/applications.py` |
+| Lines 329–333 | `uvicorn.run()` direct execution block | `backend/app/main.py` |
 
 ---
 
-## Subsystem Target Designs
+## Matching Engine Technical Analysis & Product Classification
 
-### 1. Authentication & Security Subsystem
-- **JWT Storage**: Tokens issued upon `/login` or `/register`.
-- **Protected Dependencies**: All endpoints except `/`, `/register`, `/login`, and `/jobs` enforce `current_user: User = Depends(get_current_user)`.
-- **Password Hashing**: Direct use of modern `bcrypt` or `argon2-cffi` without runtime monkeypatching.
-- **Secrets**: `SECRET_KEY` loaded dynamically from `.env` via `pydantic-settings`.
+### Product Classification & Terminology
+- **Technology Classification**: Rule-based processing (dictionary & alias lookup), classical statistical NLP (TF-IDF vector space modeling), information extraction, POS entity tagging (`spaCy`).
+- **Recommended Product Description**: **"Intelligent job matching platform using NLP and statistical similarity"**.
 
-### 2. Matching Engine Subsystem (Interview-Grade Scoring Architecture)
-- **Problem with Current Engine**: Current implementation uses an arbitrary `max(final_score, content_sim * 2)` multiplier to inflate low scores.
-- **Target Scoring Architecture**:
-  - **Skill Overlap Score ($S_{skill}$)**: Jaccard intersection of candidate skills vs required job skills derived from a standardized tech taxonomy (`TECH_SKILLS_DB` + spaCy PROPN).
-  - **Contextual Similarity Score ($S_{context}$)**: Cosine similarity computed over TF-IDF vector matrices (or dense embeddings).
-  - **Composite Score Formula**:
-    $$\text{Score} = (0.6 \times S_{skill}) + (0.4 \times S_{context})$$
-  - Returns mathematically defensible 0–100% percentage without non-linear floor boosts.
+### Current Algorithm Specification
+1. Line-by-line whitespace normalization (`normalize_spaced_text()`).
+2. Lowercasing, special character preservation (`C++`, `C#`), and `spaCy` token lemmatization + stop word filtering (`preprocess_text()`).
+3. Dictionary skill extraction against `TECH_SKILLS_DB` + hardcoded aliases (`"js"` → `"javascript"`) + spaCy `PROPN`/`NOUN` entity extraction (`extract_skills()`).
+4. TF-IDF vectorization & cosine similarity computation via `TfidfVectorizer(stop_words='english')`.
+5. Skill overlap ratio calculation: $S_{skill} = |R_{skills} \cap J_{skills}| / |J_{skills}|$.
+6. Weighted match score calculation: $\text{Weighted Score} = (0.7 \times S_{skill}) + (0.3 \times S_{context})$.
+7. Non-linear multiplier score floor boost: $\text{Final Score} = \max(\text{Weighted Score}, S_{context} \times 2)$.
 
-### 3. File Processing Subsystem
-- **Validation**: Uploaded files validated against extension whitelist (`.pdf`, `.docx`, `.txt`) and magic byte MIME types.
-- **Storage**: Binary files saved to `uploads/` with UUID names (`uuid4().hex + ext`).
-- **Parsing**: `ResumeParserService` extracts plain text, handles space-normalized lines, and updates `profile.resume_text`.
+### Problems With Current Algorithm
+- **Artificial Score Inflation**: The non-linear multiplier boost distorts true mathematical match precision.
+- **Sparse TF-IDF Vector Limitations**: TF-IDF counts word frequencies and misses semantic equivalents not present in the hardcoded alias dictionary.
+- **Dictionary Static Limitations**: `TECH_SKILLS_DB` is fixed in memory and requires manual maintenance.
+- **Entity Extraction False Positives**: spaCy `PROPN`/`NOUN` tagging extracts non-technical capitalized words.
 
-### 4. Database Subsystem
-- **Engine**: SQLite for dev, PostgreSQL for production.
-- **Migrations**: Managed via Alembic (`alembic/`).
-- **Cleanup**: Remove unused `resumes` ORM class or repurpose for historical resume versions. Add composite index on `application_tracker(user_id, job_id)`.
+### Proposed Algorithm Specification
+- Remove artificial non-linear score floor boosts.
+- Combine technical skill taxonomy overlap ($S_{skill}$) with dense vector embeddings ($S_{context}$).
+- **Weighting Note**:
+  > "The optimal weighting is currently UNKNOWN and should be determined through evaluation against a representative validation dataset."
 
 ---
 
@@ -136,6 +116,6 @@ PUBLIC (No Auth)              AUTHENTICATED (Bearer JWT)         RESOURCE_OWNER 
 GET /                         POST /match                        GET /me
 POST /register                POST /tailor-resume                POST /profile
 POST /login                   POST /generate-cover-letter        POST /upload-resume
-GET /jobs                                                        GET /applications
+GET /jobs (Public Discovery)                                     GET /applications
                                                                  POST /applications
 ```

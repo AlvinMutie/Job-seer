@@ -6,50 +6,51 @@ Welcome AI Agent. This document governs all automated and assisted code modifica
 
 ## 1. Mandatory Development Workflow
 
-Every AI agent working on this codebase MUST follow this explicit 8-step workflow. AI agents must **NEVER independently make large architectural changes or execute code modifications without prior approval**.
+Every AI agent working on this codebase MUST follow this explicit 10-step lifecycle. AI agents must **NEVER independently make large architectural changes or execute code modifications without prior approval**.
 
 ```text
-  1. ANALYSE        -> Inspect authoritative source files; gather empirical facts.
-  2. PLAN           -> Formulate a detailed, modular implementation plan with risk assessment.
-  3. APPROVE        -> Present plan to user; wait for explicit confirmation.
-  4. IMPLEMENT      -> Execute targeted, minimal code modifications.
-  5. TEST           -> Run automated tests and linting to verify runtime correctness.
-  6. SECURITY REVIEW-> Verify security boundaries, input validation, and access control.
-  7. DOCUMENT       -> Update .ai/ and docs/ documentation system reflecting changes.
-  8. REPORT         -> Present concise, technical completion summary to user.
+UNDERSTAND ➔ PLAN ➔ SHOW PLAN ➔ APPROVAL ➔ IMPLEMENT ➔ TEST ➔ SECURITY REVIEW ➔ VERIFY ➔ DOCUMENT ➔ REPORT
 ```
 
 ---
 
-## 2. Core Engineering Principles
+## 2. Fundamental Implementation Rules
 
-1. **Inspect Before Modifying**:
-   - Never assume file locations, schema attributes, or API signatures.
-   - Always view source files completely before attempting code edits.
-   - Do not trust `README.md` or obsolete documentation; treat existing application source code as the sole source of truth.
+### Rule 1 — Inspect Before Editing
+Always inspect the relevant implementation using file viewing and code search tools before modifying it. Never infer function signatures, variable names, or file paths without viewing authoritative source files.
 
-2. **Security-First Development**:
-   - Never commit hardcoded secrets, tokens, or fallback API keys.
-   - Ensure all new API endpoints are protected with valid JWT bearer authentication (`get_current_user`).
-   - Validate and sanitize all user input and file uploads. Sanitization must be enforced at backend entry points.
+### Rule 2 — Minimal Scope
+Only modify files strictly required for the approved task. Keep diffs clean and focused.
 
-3. **Minimal & Targeted Changes**:
-   - Keep pull requests and edits focused strictly on requested bug fixes or features.
-   - Do not perform unrequested refactoring, format rewrites, or aesthetic overhauls.
+### Rule 3 — No Opportunistic Refactoring
+Do not refactor, reformat, or rewrite unrelated code while implementing a task. Unrequested code churn is unacceptable.
 
-4. **No Invented Requirements**:
-   - Build only what is specified in approved implementation plans.
-   - Do not add speculative dependencies or bloated third-party frameworks.
+### Rule 4 — No Unapproved Architecture Changes
+Do not introduce new frameworks, services, databases, third-party libraries, microservices, or architectural patterns without explicit user approval.
 
-5. **Empirical Verification Required**:
-   - Never declare a task resolved without running build, linting, and automated test commands.
-   - Verify both frontend compilation (`npm run build`) and backend syntax/imports before completing a turn.
+### Rule 5 — Preserve Existing Behavior
+Unless the task explicitly specifies a change in behavior, preserve existing API contracts, database schemas, and user-facing functionality.
+
+### Rule 6 — Tests Are Part of Implementation
+A task is NOT complete until its required automated tests pass. Writing code without running build/test verification is incomplete.
+
+### Rule 7 — Security Is a Requirement
+Review security implications for every backend, database, file-handling, and API change. Validate all user inputs and enforce security boundaries.
+
+### Rule 8 — Verify, Don't Assume
+Do not claim that a feature or fix works unless it has been empirically verified by executing verification commands or test scripts.
+
+### Rule 9 — Do Not Hide Failures
+If tests fail, commands timeout, dependencies conflict, or an assumption is wrong, report it immediately and transparently.
+
+### Rule 10 — Stop at Scope Boundary
+When the approved task is complete, stop execution instead of continuing into unrelated follow-up work.
 
 ---
 
-## 3. Proposal Requirements for Complex Tasks
+## 3. Proposal Requirements for Multi-File Tasks
 
-Before executing complex or multi-file tasks, an AI agent MUST explicitly explain:
+Before executing complex tasks affecting multiple files or architectural layers, an AI agent MUST explicitly explain:
 - **What was found** (Empirical facts from code inspection)
 - **What is intended to change** (Target files and specific code chunks)
 - **Why** (Technical justification and problem solved)
