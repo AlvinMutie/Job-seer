@@ -31,51 +31,24 @@ flowchart TD
         P2-03[P2-03: Frontend Client Hardening & State Management ✓ COMPLETED]
     end
 
-    P0-00 --> P0-01 --> P0-02 --> P0-03 --> P0-04 --> P0-05 --> P1-01 --> P1-02 --> P1-03 --> P1-04 --> P1-05 --> P2-01 --> P2-02 --> P2-03
+    subgraph P3 [P3: Product Intelligence & UX]
+        P3-01[P3-01: Enhanced Job Discovery & Repository Hub ✓ COMPLETED]
+        P3-02[P3-02: Matching Engine V2 & Explainable Scoring]
+        P3-03[P3-03: Resume Intelligence & ATS Health Check]
+        P3-04[P3-04: Resume Tailoring V2 & Persistence]
+        P3-05[P3-05: Multi-Tone Cover Letters & Management]
+        P3-06[P3-06: Application Tracker V2 & Kanban Board]
+        P3-07[P3-07: Intelligent Command Center Dashboard]
+    end
+
+    P0-00 --> P0-01 --> P0-02 --> P0-03 --> P0-04 --> P0-05 --> P1-01 --> P1-02 --> P1-03 --> P1-04 --> P1-05 --> P2-01 --> P2-02 --> P2-03 --> P3-01 --> P3-02 --> P3-03 --> P3-04 --> P3-05 --> P3-06 --> P3-07
 ```
 
 ---
 
 ## Completed Tasks
 
-### P0-00 — Establish Testing Safety Baseline (✓ COMPLETED)
-- **Result**: **35 / 35 tests passing**.
+### P0-00 through P2-03 (✓ ALL COMPLETED)
 
-### P0-01 — Externalize JWT Secret (✓ COMPLETED)
-- **Result**: Hardcoded secret string completely purged. 39 / 39 tests passing.
-
-### P0-02 — Endpoint Authorization Boundaries (✓ COMPLETED)
-- **Result**: Protected all three computational endpoints with JWT authentication dependencies. 46 / 46 tests passing.
-
-### P0-03 — Secure Resume Upload Boundary (✓ COMPLETED)
-- **Result**: Implemented `app/utils/file_handling.py` and updated `upload_resume`. 50 / 50 tests passing.
-
-### P0-04 — Restrict CORS Origins (✓ COMPLETED)
-- **Result**: Restricted allowed origins to environment-configurable `settings.ALLOWED_ORIGINS`. Added `backend/tests/test_cors.py`. 55 / 55 tests passing.
-
-### P0-05 — Resolve Password Hashing Conflict (✓ COMPLETED)
-- **Result**: Removed monkeypatch completely from `app/main.py`. Pinned `passlib==1.7.4` and `bcrypt==4.0.1`. 58 / 58 tests passing.
-
-### P1-01 — Modularize main.py into Routers (✓ COMPLETED)
-- **Result**: Structural refactoring of monolithic `main.py` into 5 APIRouters. 58 / 58 tests passing.
-
-### P1-02 — Separate Schemas & Models (✓ COMPLETED)
-- **Result**: Extracted Pydantic DTO models into `app/schemas/`. 58 / 58 tests passing.
-
-### P1-03 — Setup pytest Safety Testing Framework (✓ COMPLETED)
-- **Result**: Configured `pyproject.toml` with `pytest-cov` (88% code coverage baseline), strict test markers, and 1 warning. 58 / 58 tests passing.
-
-### P1-04 — Add Auth Security Safety Gate Tests (✓ COMPLETED)
-- **Result**: Added 13 JWT security safety gate tests. 71 / 71 tests passing (89% coverage).
-
-### P1-05 — Add File Upload & Matching Safety Gate Tests (✓ COMPLETED)
-- **Result**: Added 21 file upload and matching safety gate tests. 92 / 92 tests passing (91% coverage).
-
-### P2-01 — Enhanced Error Handling & Standardized API Responses (✓ COMPLETED)
-- **Result**: Centralized error infrastructure with `ErrorCode` taxonomy, custom `APIException`, and global exception handlers. 103 / 103 tests passing (90% coverage).
-
-### P2-02 — Application Tracker Filtering & Pagination (✓ COMPLETED)
-- **Result**: Enhanced `GET /applications` with status filtering (`status`), partial keyword search (`search`), limit (`ge=1, le=100`), offset (`ge=0`), and single-query `joinedload` performance optimization. 110 / 110 tests passing (91% coverage).
-
-### P2-03 — Frontend Client Hardening & State Management (✓ COMPLETED)
-- **Result**: Hardened frontend API client (`frontend/src/services/api.js`) with `getApiErrorMessage` helper, Bearer request interceptors, and 401 token cleanup response interceptors. Enhanced `Tracker.jsx` with search, status dropdown filter, pagination controls, and error notifications. Added 6 frontend unit tests (`npm test` passed) and verified clean Vite production build (`npm run build` passed in 5.17s). **All 110 backend pytest and 6 frontend unit tests passing**.
+### P3-01 — Enhanced Job Discovery & Repository Hub (✓ COMPLETED)
+- **Result**: Extended `GET /jobs` with database-level `limit`/`offset` pagination, safe `sort_by`/`order` mapping, and unified keyword `search`. Created `frontend/src/pages/JobsHub.jsx` with search bar, location filter, work mode/experience level dropdowns, sorting options, pagination controls, loading skeletons, and AI match triggers. Added 8 tests in `backend/tests/test_jobs_enhanced.py`. **118 / 118 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.

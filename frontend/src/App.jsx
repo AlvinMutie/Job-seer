@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
 import ResumeHub from './pages/ResumeHub';
 import Settings from './pages/Settings';
+import JobsHub from './pages/JobsHub';
 import { authService } from './services/api';
 
 import Lenis from 'lenis'
@@ -38,6 +39,12 @@ function App() {
                 <Route path="/dashboard" element={
                     <ProtectedRoute>
                         <DashboardLayout><Dashboard /></DashboardLayout>
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/jobs" element={
+                    <ProtectedRoute>
+                        <DashboardLayout><JobsHub /></DashboardLayout>
                     </ProtectedRoute>
                 } />
 
@@ -115,6 +122,7 @@ function DashboardLayout({ children }) {
 
     const navItems = [
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: '/dashboard' },
+        { icon: <Briefcase size={20} />, label: 'Jobs Hub', path: '/jobs' },
         { icon: <Trophy size={20} />, label: 'Matches', path: '/matches' },
         { icon: <Clock size={20} />, label: 'Tracker', path: '/tracker' },
         { icon: <FileText size={20} />, label: 'Resume Hub', path: '/resume-hub' },

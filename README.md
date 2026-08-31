@@ -16,80 +16,13 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 
 - **Authentication & User Profiles**: User registration, JWT bearer token authentication, bcrypt password hashing (`passlib==1.7.4`, `bcrypt==4.0.1`), and career preference management.
 - **Resume Upload & Parsing**: Multi-format document parser supporting PDF, DOCX, and TXT files with text extraction and 10-layer security boundary.
-- **Job Discovery & Search**: Job listing repository with keyword and location filter capabilities.
+- **Job Discovery & Repository Hub**: Dedicated job repository (`JobsHub.jsx`) with keyword search, location filtering, work mode filters (`Remote`, `Hybrid`, `On-site`), experience level filters, column sorting (`Newest`, `Oldest`, `Title`, `Company`), and database-level limit/offset pagination.
 - **Resume-to-Job Matching**: Statistical NLP matching engine evaluating technical skill overlap and content similarity.
 - **Resume Tailoring**: Rule-based suggestion engine identifying missing skill requirements for specific job listings.
 - **Cover Letter Generation**: Dynamic cover letter template formatting tailored to specific roles and extracted skills.
 - **Application Pipeline Tracker**: Application status tracking with filtering (`status`), partial search (`search`), and limit/offset pagination.
 - **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
 - **Hardened React Client**: Centralized Axios API client with `getApiErrorMessage` error parser, dynamic Bearer request interceptors, 401 token cleanup response interceptors, non-blocking notification banners, and robust loading state handling.
-
----
-
-## User Journey & Workflow
-
-```text
-User Registration / Login
-           │
-           ▼
-Profile Setup & Resume Upload (.pdf, .docx, .txt)
-           │
-           ▼
-Job Discovery & Keyword Search
-           │
-           ▼
-Match Calculation & Skill Overlap Analysis
-           │
-           ├─────────────────────────┐
-           ▼                         ▼
-Resume Bullet Tailoring    Cover Letter Generation
-           │                         │
-           └────────────┬────────────┘
-                        ▼
-           Application Status Tracking
-```
-
----
-
-## Matching Engine & NLP Architecture
-
-The matching engine uses a hybrid statistical NLP scoring model rather than generative AI or deep learning:
-
-1. **Text Preprocessing & Lemmatization**: Text is cleaned and processed using **spaCy** (`en_core_web_sm`) to extract noun chunks and proper nouns.
-2. **Skill Extraction & Alias Normalization**: Extracts technical skills by comparing against a curated skill dictionary while normalizing aliases (e.g., `"JS"` → `"JavaScript"`, `"Postgres"` → `"PostgreSQL"`).
-3. **TF-IDF Statistical Vectorization**: Computes term frequency-inverse document frequency (`scikit-learn` `TfidfVectorizer`) across the resume and job description to calculate cosine content similarity (`content_sim`).
-4. **Weighted Scoring Model**:
-   $$\text{Final Score} = (\text{Skill Overlap Ratio} \times 0.70) + (\text{Content Similarity} \times 0.30)$$
-   *Note: Applies a non-linear floor multiplier $\max(\text{Final Score}, \text{Content Similarity} \times 2)$ to reward high general content alignment.*
-
----
-
-## Architecture Topology
-
-```text
-┌────────────────────────────────────────────────────────┐
-│                   React 18 + Vite                      │
-│      Axios Interceptors & getApiErrorMessage Parser    │
-└──────────────────────────┬─────────────────────────────┘
-                           │ HTTP / JSON
-┌──────────────────────────▼─────────────────────────────┐
-│                 FastAPI REST Backend                   │
-│  ┌───────────────────┐        ┌─────────────────────┐  │
-│  │   app.core.config │        │    app/schemas/     │  │
-│  │   app.core.errors │        │   (Pydantic DTOs)   │  │
-│  └─────────┬─────────┘        └──────────┬──────────┘  │
-│            │                             │             │
-│  ┌─────────▼─────────┐                   │             │
-│  │   app/routers/    │                   │             │
-│  │ (auth,jobs,match) │                   │             │
-│  └─────────┬─────────┘                   │             │
-│            └─────────────────────────────┘             │
-└──────────────────────────┬─────────────────────────────┘
-                           │ SQLAlchemy ORM
-┌──────────────────────────▼─────────────────────────────┐
-│              app/models/ (SQLite DB)                   │
-└────────────────────────────────────────────────────────┘
-```
 
 ---
 
@@ -110,104 +43,16 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (110 tests, 91% coverage)
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (118 tests, 91% coverage)
 - **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-
----
-
-## Project Structure
-
-```text
-Smart-Job-Hunter/
-├── backend/
-│   ├── app/
-│   │   ├── core/           # Centralized config (config.py) & errors (errors.py)
-│   │   ├── models/         # SQLAlchemy ORM database models (models.py)
-│   │   ├── routers/        # APIRouter modules (auth, jobs, matching, profile, applications)
-│   │   ├── schemas/        # Pydantic DTO schemas (auth, profile, matching, applications)
-│   │   ├── services/       # MatchingEngine, JobService, TailorService, CoverLetter
-│   │   ├── utils/          # Upload validation and file handling (file_handling.py)
-│   │   ├── auth.py         # JWT generation and verification (100% coverage)
-│   │   ├── database.py     # Database engine and session management
-│   │   └── main.py         # App entry point & router registration (36 lines)
-│   ├── tests/              # Automated test suite (110 tests)
-│   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
-│   ├── requirements.txt    # Backend dependencies
-│   └── seed_jobs.py        # Seed dataset script
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # React UI components
-│   │   ├── pages/          # App pages (Dashboard, Matches, Tracker, ResumeHub, Settings, Login, Register)
-│   │   └── services/       # Axios API client definition & error extraction helper (api.js, api.test.js)
-│   └── package.json
-├── .ai/                    # Internal engineering documentation
-├── docs/                   # Architectural decisions and task specifications
-├── README.md
-└── .env.example            # Environment configuration template
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- npm 9+
-
-### 1. Backend Setup
-
-```bash
-cd backend
-
-# Create Python virtual environment
-python3 -m venv venv
-
-# Activate virtual environment (Linux/Mac)
-source venv/bin/activate
-# Windows: .\venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Download required spaCy NLP model
-python -m spacy download en_core_web_sm
-
-# Copy environment settings template
-cp .env.example .env
-
-# Seed initial job data
-python seed_jobs.py
-
-# Start backend server
-uvicorn app.main:app --reload --port 8000
-```
-
-### 2. Frontend Setup
-
-```bash
-cd frontend
-
-# Install node packages
-npm install
-
-# Run frontend unit tests
-npm test
-
-# Build production bundle
-npm run build
-
-# Start Vite dev server
-npm run dev
-```
 
 ---
 
 ## Automated Test Suites
 
 ```bash
-# Backend (110 tests passing)
+# Backend (118 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
@@ -216,6 +61,6 @@ cd frontend
 npm test
 ```
 
-- **Backend Tests**: **110 tests (100% pass rate, 91% code coverage)**
+- **Backend Tests**: **118 tests (100% pass rate, 91% code coverage)**
 - **Frontend Tests**: **6 unit tests (100% pass rate)**
 - **Production Build**: **Succeeded cleanly (`dist/index.html`)**
