@@ -104,6 +104,18 @@ export const jobService = {
     generateCoverLetter: (formData) => api.post('/generate-cover-letter', formData).then(res => res.data),
 };
 
+export const tailoredResumeService = {
+    generate: (job_id) => {
+        const params = new URLSearchParams();
+        params.append('job_id', job_id);
+        return api.post('/resume/tailor', params).then(res => res.data);
+    },
+    list: () => api.get(`/resume/tailored?t=${Date.now()}`).then(res => res.data),
+    get: (id) => api.get(`/resume/tailored/${id}?t=${Date.now()}`).then(res => res.data),
+    compare: (id) => api.get(`/resume/tailored/${id}/compare?t=${Date.now()}`).then(res => res.data),
+    delete: (id) => api.delete(`/resume/tailored/${id}`).then(res => res.data),
+};
+
 export const trackerService = {
     getApplications: (params = {}) => api.get('/applications', { params: { ...params, t: Date.now() } }).then(res => res.data),
     addApplication: (data) => api.post('/applications', data).then(res => res.data),

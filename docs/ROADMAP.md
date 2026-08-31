@@ -35,7 +35,7 @@ flowchart TD
         P3-01[P3-01: Enhanced Job Discovery & Repository Hub ✓ COMPLETED]
         P3-02[P3-02: Matching Engine V2 & Explainable Scoring ✓ COMPLETED]
         P3-03[P3-03: Resume Intelligence & ATS Health Check ✓ COMPLETED]
-        P3-04[P3-04: Resume Tailoring V2 & Persistence]
+        P3-04[P3-04: Resume Tailoring V2 & Persistence ✓ COMPLETED]
         P3-05[P3-05: Multi-Tone Cover Letters & Management]
         P3-06[P3-06: Application Tracker V2 & Kanban Board]
         P3-07[P3-07: Intelligent Command Center Dashboard]
@@ -48,7 +48,7 @@ flowchart TD
 
 ## Completed Tasks
 
-### P0-00 through P3-02 (✓ ALL COMPLETED)
+### P0-00 through P3-03 (✓ ALL COMPLETED)
 
-### P3-03 — Resume Intelligence & ATS Health Check (✓ COMPLETED)
-- **Result**: Built `ResumeIntelligenceService` (`app/services/resume_intelligence.py`) evaluating 0-100 ATS health score (Completeness 35%, ATS Text Health 30%, Contact Info 15%, Technical Skills 20%). Added `GET /resume/health` endpoint in `app/routers/profile.py`. Created Pydantic response DTOs in `app/schemas/profile.py`. Updated `ResumeHub.jsx` to render health score, factor metrics, detected sections, contact presence checks, domain skill categorization, and actionable recommendations. Added 8 unit, integration, and security tests in `backend/tests/test_resume_intelligence.py`. **131 / 131 backend pytest cases passing** (92% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly. Zero database schema changes required.
+### P3-04 — Resume Tailoring V2 & Persistence (✓ COMPLETED)
+- **Result**: Created `TailoredResume` model in `app/models/models.py`. Implemented deterministic per-user/job versioning (`v1`, `v2`, `v3`). Implemented `difflib`-based text comparison diff engine in `app/services/tailor_service.py`. Added endpoints `POST /resume/tailor`, `GET /resume/tailored`, `GET /resume/tailored/{id}`, `GET /resume/tailored/{id}/compare`, `DELETE /resume/tailored/{id}` in `app/routers/profile.py`. Created `ResumeDiffViewer.jsx` and updated `ResumeHub.jsx` to render saved tailored versions history, target job selection, version badges, diff comparison modal, and version deletion with confirmation. Added 8 integration and security tests in `backend/tests/test_tailored_resume.py`. **139 / 139 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.

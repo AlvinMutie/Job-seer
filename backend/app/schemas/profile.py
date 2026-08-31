@@ -1,5 +1,6 @@
+import datetime
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ProfileUpdate(BaseModel):
@@ -43,3 +44,35 @@ class ResumeHealthResponse(BaseModel):
     contact_checks: ContactChecks
     skill_domains: SkillDomains
     recommendations: List[str]
+
+
+class TailoredResumeResponse(BaseModel):
+    id: int
+    user_id: int
+    job_id: int
+    version: int
+    original_resume_text: str
+    tailored_resume_text: str
+    match_score: Optional[float] = None
+    job_title: Optional[str] = None
+    company: Optional[str] = None
+    created_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DiffLineItem(BaseModel):
+    line: str
+    type: str  # "added" | "removed" | "unchanged"
+
+
+class TailoredResumeCompareResponse(BaseModel):
+    id: int
+    job_id: int
+    version: int
+    job_title: Optional[str] = None
+    company: Optional[str] = None
+    diff_lines: List[DiffLineItem]
+    added_count: int
+    removed_count: int
+    unchanged_count: int

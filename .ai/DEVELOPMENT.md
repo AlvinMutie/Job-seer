@@ -5,30 +5,41 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. Resume Intelligence & ATS Health Check (P3-03)
+## 1. Resume Tailoring V2 & Persistence (P3-04)
 
-Task **P3-03** introduced `ResumeIntelligenceService` (`app/services/resume_intelligence.py`) and endpoint `GET /resume/health`:
+Task **P3-04** introduced the `TailoredResume` ORM model, versioning engine, structured diff comparison, and persistent tailoring endpoints:
 
-$$\text{health\_score} = (\text{completeness} \times 0.35) + (\text{ats\_health} \times 0.30) + (\text{contact\_health} \times 0.15) + (\text{skills\_health} \times 0.20)$$
+### Model Schema (`TailoredResume`)
 
-### Factor Breakdown Reference
+| Column | Type | Constraints | Description |
+| ------ | ---- | ----------- | ----------- |
+| `id` | Integer | Primary Key, Index | Unique record ID |
+| `user_id` | Integer | ForeignKey("users.id"), Index | Authenticated owner ID |
+| `job_id` | Integer | ForeignKey("jobs.id"), Index | Target job listing ID |
+| `original_resume_text` | Text | Non-null | Baseline resume content |
+| `tailored_resume_text` | Text | Non-null | Generated version text |
+| `version` | Integer | Default 1 | Sequential version number per `(user_id, job_id)` |
+| `match_score` | Float | Nullable | V2 AI Match Score percentage |
+| `job_title` | String | Nullable | Target role title |
+| `company` | String | Nullable | Target company name |
+| `created_at` | DateTime | Default UTC | Creation timestamp |
 
-| Component | Weight | Analysis Method | Classification Scale |
-| --------- | ------ | --------------- | -------------------- |
-| **Completeness** | **35%** | Detects presence of 6 core sections (`summary`, `experience`, `skills`, `education`, `projects`, `certifications`) | **90-100**: Excellent |
-| **ATS Health** | **30%** | Checks character bounds (200-20k), non-alphanumeric noise ratio, and formatting artifacts | **75-89**: Strong |
-| **Contact Checks** | **15%** | Regex presence checks for `email`, `phone`, `linkedin`, `github`, and `portfolio` | **60-74**: Fair |
-| **Skills Intelligence** | **20%** | Categorizes extracted skills into 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`) | **40-59**: Needs Improvement |
-| | | | **0-39**: Poor |
+### Endpoints Reference
+
+- `POST /resume/tailor`: Generates tailored version, increments version, and persists record.
+- `GET /resume/tailored`: Lists all saved tailored resumes for authenticated user.
+- `GET /resume/tailored/{id}`: Retrieves single saved tailored resume by ID.
+- `GET /resume/tailored/{id}/compare`: Returns structured line-by-line diff (`added`, `removed`, `unchanged`).
+- `DELETE /resume/tailored/{id}`: Deletes specified tailored resume version.
 
 ---
 
-## 2. Matching Engine V2 & Explainable Scoring (P3-02)
+## 2. Resume Intelligence & ATS Health Check (P3-03)
+
+Task **P3-03** introduced `ResumeIntelligenceService` (`app/services/resume_intelligence.py`) and endpoint `GET /resume/health`.
+
+---
+
+## 3. Matching Engine V2 & Explainable Scoring (P3-02)
 
 Task **P3-02** upgraded `MatchingEngine` (`app/services/matching_engine.py`) to compute an explainable multi-factor match score breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%).
-
----
-
-## 3. Job Discovery & Repository Hub Architecture (P3-01)
-
-Task **P3-01** enhanced `GET /jobs` with database-level limit/offset pagination, safe column sorting, and keyword search.

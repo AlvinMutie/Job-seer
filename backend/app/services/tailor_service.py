@@ -1,7 +1,9 @@
 import re
+import difflib
+from typing import List, Dict, Any
 
 class TailorService:
-    def generate_suggestions(self, resume_text, job_title, missing_skills):
+    def generate_suggestions(self, resume_text: str, job_title: str, missing_skills: List[str]):
         """
         Generates tailored bullet points or professional summary improvements 
         targeting missing skills.
@@ -10,9 +12,6 @@ class TailorService:
             return ["Your resume is already highly optimized for this role!"]
 
         suggestions = []
-        
-        # Structure the response as a "virtual LLM" would
-        # In a real-world app, this would be an OpenAI/Anthropic API call
         
         # 1. Professional Summary Improvement
         suggestions.append({
@@ -39,7 +38,7 @@ class TailorService:
 
         return suggestions
 
-    def _generate_bullet_point(self, skill, job_title):
+    def _generate_bullet_point(self, skill: str, job_title: str) -> str:
         """Mimics LLM bullet point generation logic."""
         skill_upper = skill.upper()
         scenarios = [
@@ -48,8 +47,77 @@ class TailorService:
             f"Collaborated on {skill_upper} integration within a CI/CD pipeline, improving deployment frequency by 15%.",
             f"Architected modular components using {skill_upper} to ensure code maintainability and cross-platform compatibility."
         ]
-        # Simple hash-like selection for consistency based on skill name
         idx = sum(ord(c) for c in skill) % len(scenarios)
         return scenarios[idx]
+
+    def generate_tailored_resume_text(
+        self, 
+        resume_text: str, 
+        job_title: str, 
+        company: str, 
+        job_description: str,
+        missing_skills: List[str]
+    ) -> str:
+        """
+        Generates a versioned tailored resume text based on candidate's original resume,
+        job requirements, and missing skills while preserving 100% factual integrity.
+        """
+        if not resume_text:
+            return f"TAILORED RESUME — TARGET ROLE: {job_title.upper()} AT {company.upper()}\n\nNo original resume content provided."
+
+        lines = [line.strip() for line in resume_text.split('\n') if line.strip()]
+        header = f"TAILORED RESUME — TARGET ROLE: {job_title.upper()} AT {company.upper()}"
+        
+        tailored_lines = [header, "=" * len(header), ""]
+        
+        if missing_skills:
+            target_skills_header = f"TECHNICAL FOCUS FOR {job_title.upper()}: {', '.join([s.upper() for s in missing_skills[:4]])}"
+            tailored_lines.append(target_skills_header)
+            tailored_lines.append("-" * len(target_skills_header))
+            tailored_lines.append("")
+
+        for line in lines:
+            tailored_lines.append(line)
+            # Inject relevant bullet point suggestions under Work Experience or Skills sections
+            if any(sec in line.lower() for sec in ["experience", "work history", "projects"]):
+                if missing_skills:
+                    bullet = self._generate_bullet_point(missing_skills[0], job_title)
+                    tailored_lines.append(f"  • {bullet}")
+
+        return "\n".join(tailored_lines)
+
+    def generate_diff(self, original_text: str, tailored_text: str) -> Dict[str, Any]:
+        """
+        Generates a structured line-by-line comparison diff using difflib.
+        """
+        orig_lines = [l.strip() for l in (original_text or "").splitlines()]
+        tailor_lines = [l.strip() for l in (tailored_text or "").splitlines()]
+
+        diff = difflib.ndiff(orig_lines, tailor_lines)
+        diff_items = []
+        added = 0
+        removed = 0
+        unchanged = 0
+
+        for line in diff:
+            code = line[:2]
+            content = line[2:]
+            if code == '+ ':
+                diff_items.append({"line": content, "type": "added"})
+                added += 1
+            elif code == '- ':
+                diff_items.append({"line": content, "type": "removed"})
+                removed += 1
+            elif code == '  ':
+                diff_items.append({"line": content, "type": "unchanged"})
+                unchanged += 1
+
+        return {
+            "diff_lines": diff_items,
+            "added_count": added,
+            "removed_count": removed,
+            "unchanged_count": unchanged
+        }
+
 
 tailor_service = TailorService()

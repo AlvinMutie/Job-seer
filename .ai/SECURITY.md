@@ -5,10 +5,10 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Resume Intelligence & Ownership Isolation (P3-03)
+## Persistent Tailoring & Resource Ownership Isolation (P3-04)
 
-`GET /resume/health` enforces strict security boundaries and privacy protections:
+`POST /resume/tailor`, `GET /resume/tailored`, `GET /resume/tailored/{id}`, `GET /resume/tailored/{id}/compare`, and `DELETE /resume/tailored/{id}` enforce strict security controls:
 
-1. **Strict Ownership Isolation**: The endpoint retrieves and analyzes `current_user.profile.resume_text` exclusively using `Depends(get_current_user)`. User A cannot access or trigger ATS analysis on User B's resume data.
-2. **Zero Sensitive Contact Leakage**: Contact information checks detect presence/absence of emails, phone numbers, and URLs via boolean flags (`has_email`, `has_phone`). Private contact values are never dumped, logged, or returned in API responses.
-3. **In-Memory Non-Executable Analysis**: ATS text analysis operates strictly in-memory on extracted plain text. Document text is never evaluated via `eval` or executed as code.
+1. **Strict Resource Ownership Isolation**: Every query filters by `TailoredResume.user_id == current_user.id`. User A cannot view, compare, list, or delete User B's tailored resume versions. Attempting unauthorized access returns HTTP 404 `RESOURCE_NOT_FOUND` to prevent resource enumeration.
+2. **Parameterized ORM Execution**: Version lookup and database persistence execute via SQLAlchemy parameterized ORM queries. Raw SQL string interpolation is prohibited.
+3. **Non-Executable Diffing**: `difflib.ndiff` comparison treats resume texts strictly as inert data. Zero code or template evaluation occurs.
