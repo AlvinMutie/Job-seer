@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles } from 'lucide-react';
-import { authService } from '../services/api';
+import { authService, getApiErrorMessage } from '../services/api';
 
 function ResumeHub() {
     const [user, setUser] = useState(null);
@@ -36,6 +36,7 @@ function ResumeHub() {
         if (!file) return;
 
         setUploading(true);
+        setMessage({ type: '', text: '' });
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -45,7 +46,7 @@ function ResumeHub() {
             fetchUser(); // Refresh user data to get updated resume text
         } catch (error) {
             console.error("Upload failed:", error);
-            setMessage({ type: 'error', text: 'Failed to upload resume. Please try again.' });
+            setMessage({ type: 'error', text: getApiErrorMessage(error) });
         } finally {
             setUploading(false);
         }

@@ -19,38 +19,9 @@
 
 ---
 
-## Detailed Endpoint Specifications
+## Standard Error Response Format & Frontend Consumption (P2-01 / P2-03)
 
-### `GET /applications` (P2-02 Enhanced)
-
-- **Description**: Retrieves tracked job applications for the authenticated user with status filtering, keyword search, and limit/offset pagination.
-- **Header**: `Authorization: Bearer <token>`
-- **Query Parameters**:
-  - `status` (string, optional): Filter by status (`Not Applied`, `Applied`, `Interview`, `Rejected`, `Offer`). Case-insensitive.
-  - `search` (string, optional): Partial keyword search matching job title, company name, or application notes.
-  - `limit` (integer, optional, default: 50, min: 1, max: 100): Maximum records returned.
-  - `offset` (integer, optional, default: 0, min: 0): Records to skip.
-- **Response Format**: Plain JSON array of Application objects:
-  ```json
-  [
-    {
-      "id": 1,
-      "job_id": 10,
-      "title": "Senior Python Developer",
-      "company": "TechCorp",
-      "status": "Applied",
-      "score": 88.5,
-      "date": "2026-08-31",
-      "notes": "Applied via referral"
-    }
-  ]
-  ```
-
----
-
-## Standard Error Response Format (P2-01)
-
-All HTTP error responses return a standardized JSON structure:
+All HTTP error responses return a standardized JSON structure consumed by `getApiErrorMessage(error)` in `frontend/src/services/api.js`:
 
 ```json
 {

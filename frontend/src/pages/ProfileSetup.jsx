@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { User, MapPin, DollarSign, Target, Upload, Check, Loader2 } from 'lucide-react';
-import { authService } from '../services/api';
+import { User, MapPin, DollarSign, Target, Upload, Check, Loader2, AlertCircle } from 'lucide-react';
+import { authService, getApiErrorMessage } from '../services/api';
 
 function ProfileSetup() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         preferred_role: '',
         skills: '',
@@ -17,12 +18,14 @@ function ProfileSetup() {
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
+            setError('');
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         try {
             await authService.updateProfile(formData);
             if (file) {
@@ -32,10 +35,10 @@ function ProfileSetup() {
             }
             window.location.href = '/dashboard';
         } catch (err) {
-            const errorMsg = err.response?.data?.detail || err.message || "Failed to save profile. Please try again.";
-            alert(errorMsg);
+            setError(getApiErrorMessage(err));
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -52,6 +55,12 @@ function ProfileSetup() {
                         ))}
                     </div>
                 </div>
+
+                {error && (
+                    <div className="mb-6 p-4 bg-red-500/5 border border-red-500/20 rounded-xl flex gap-3 text-red-400 text-sm">
+                        <AlertCircle size={18} /> {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {step === 1 && (

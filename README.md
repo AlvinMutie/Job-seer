@@ -22,6 +22,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Cover Letter Generation**: Dynamic cover letter template formatting tailored to specific roles and extracted skills.
 - **Application Pipeline Tracker**: Application status tracking with filtering (`status`), partial search (`search`), and limit/offset pagination.
 - **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
+- **Hardened React Client**: Centralized Axios API client with `getApiErrorMessage` error parser, dynamic Bearer request interceptors, 401 token cleanup response interceptors, non-blocking notification banners, and robust loading state handling.
 
 ---
 
@@ -68,7 +69,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ```text
 ┌────────────────────────────────────────────────────────┐
 │                   React 18 + Vite                      │
-│            Axios (JWT Bearer Interceptor)              │
+│      Axios Interceptors & getApiErrorMessage Parser    │
 └──────────────────────────┬─────────────────────────────┘
                            │ HTTP / JSON
 ┌──────────────────────────▼─────────────────────────────┐
@@ -105,13 +106,13 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 
 ### Frontend
 - **Framework**: React 18.2 (Vite)
-- **HTTP Client**: Axios with request interceptors
+- **HTTP Client**: Axios with request & response error interceptors
 - **Icons & UI**: Lucide React, Vanilla CSS
 
 ### Testing Infrastructure
-- **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
+- **Backend Tests**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient` (110 tests, 91% coverage)
+- **Frontend Tests**: Node native test runner (`node --test src/services/api.test.js`, 6 unit tests passing)
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-- **Coverage Baseline**: **91% Overall Code Coverage (100% auth.py, main.py, applications.py coverage)**
 
 ---
 
@@ -137,8 +138,8 @@ Smart-Job-Hunter/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/     # React UI components
-│   │   ├── pages/          # App pages (Dashboard, Matches, Tracker)
-│   │   └── services/       # Axios API client definition
+│   │   ├── pages/          # App pages (Dashboard, Matches, Tracker, ResumeHub, Settings, Login, Register)
+│   │   └── services/       # Axios API client definition & error extraction helper (api.js, api.test.js)
 │   └── package.json
 ├── .ai/                    # Internal engineering documentation
 ├── docs/                   # Architectural decisions and task specifications
@@ -182,7 +183,6 @@ python seed_jobs.py
 # Start backend server
 uvicorn app.main:app --reload --port 8000
 ```
-Backend API will be running at `http://localhost:8000`. Interactive API documentation available at `http://localhost:8000/docs`.
 
 ### 2. Frontend Setup
 
@@ -192,77 +192,30 @@ cd frontend
 # Install node packages
 npm install
 
+# Run frontend unit tests
+npm test
+
+# Build production bundle
+npm run build
+
 # Start Vite dev server
 npm run dev
 ```
-Frontend client will be running at `http://localhost:5173`.
 
 ---
 
-## Environment Variables
-
-Environment configuration is managed centrally via `backend/app/core/config.py` using `pydantic-settings`.
-
-Copy `backend/.env.example` to `backend/.env`:
-
-```env
-# Security Configuration
-SECRET_KEY=dev-secret-key-change-in-production-min-32-chars
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-
-# Application Environment (development, testing, production)
-ENVIRONMENT=development
-
-# Database Connection
-DATABASE_URL=sqlite:///./job_hunter_v3.db
-
-# CORS Configuration (Comma-separated allowed origins)
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-```
-
----
-
-## API Overview & Security Boundaries
-
-For full endpoint definitions and payload contracts, consult [docs/API.md](file:///home/blueberyy/Documents/SJ/Smart-Job-Hunter/docs/API.md).
-
-- **Public Endpoints**: `GET /`, `POST /register`, `POST /login`, `GET /jobs`
-- **Authenticated Endpoints**: `POST /match`, `POST /tailor-resume`, `POST /generate-cover-letter` (Protected by `Depends(get_current_user)`)
-- **Resource Owner Endpoints**: `GET /me`, `POST /profile`, `POST /upload-resume`, `GET /applications` (Enhanced P2-02), `POST /applications`
-
----
-
-## Automated Test Suite
+## Automated Test Suites
 
 ```bash
+# Backend (110 tests passing)
 cd backend
-
-# Run full test suite (110 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run with test coverage (91% baseline)
-./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
-
-# Run specific test markers
-./venv/bin/pytest tests/ -m security -v
-./venv/bin/pytest tests/ -m unit -v
-./venv/bin/pytest tests/ -m integration -v
-./venv/bin/pytest tests/ -m regression -v
+# Frontend (6 unit tests passing)
+cd frontend
+npm test
 ```
 
-- **Total Test Count**: **110 tests**
-- **Pass Rate**: **100% (110 / 110)**
-- **Measured Code Coverage**: **91% Baseline**
-- **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
-
----
-
-## Engineering Roadmap & Status
-
-- **Phase 0 (Security & Baseline — COMPLETED)**: P0-00 through P0-05 completed.
-- **Phase 1 (Modular Monolith Refactoring — COMPLETED)**: P1-01 through P1-05 completed.
-- **Phase 2 (Feature & Schema Polish)**:
-  - `P2-01`: Enhanced Error Handling & Standardized API Responses (**Completed — 103 tests**)
-  - `P2-02`: Application Tracker Filtering & Pagination (**Completed — 110 tests**)
-  - `P2-03`: Frontend Client Hardening & State Management (*Pending*)
+- **Backend Tests**: **110 tests (100% pass rate, 91% code coverage)**
+- **Frontend Tests**: **6 unit tests (100% pass rate)**
+- **Production Build**: **Succeeded cleanly (`dist/index.html`)**

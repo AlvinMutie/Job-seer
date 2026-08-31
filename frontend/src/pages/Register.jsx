@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Briefcase, AlertCircle, Loader2 } from 'lucide-react';
-import { authService } from '../services/api';
+import { authService, getApiErrorMessage } from '../services/api';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -31,9 +31,10 @@ function Register() {
             localStorage.setItem('token', access_token);
             window.location.href = '/profile-setup';
         } catch (err) {
-            setError(err.response?.data?.detail || "Registration failed");
+            setError(getApiErrorMessage(err));
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (

@@ -5,7 +5,24 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. Application Tracker Parameters (`GET /applications`)
+## 1. Frontend Client Architecture & Error Handling (P2-03)
+
+The React frontend client relies on a centralized Axios API client in `frontend/src/services/api.js`.
+
+### Key Features
+1. **Centralized Error Extraction (`getApiErrorMessage(error)`)**:
+   - Parses standardized backend P2-01 error payloads (`error.response.data.error.message`).
+   - Extracts structured field-level validation details (`error.response.data.error.details`).
+   - Falls back to legacy detail strings (`error.response.data.detail`).
+   - Handles server offline / network connection failures (`"Unable to connect to the server. Please check your connection and try again."`).
+   - Maps status codes (400, 401, 403, 404, 413, 422, 500) to safe user-friendly fallbacks.
+2. **Request Interceptor**: Dynamically retrieves JWT from `localStorage` and attaches `Authorization: Bearer <token>` to outgoing HTTP requests.
+3. **Response Interceptor**: Intercepts HTTP 401 Unauthorized responses (except during login attempts) to clear stale local storage tokens and attach standardized `.userMessage` properties onto error exceptions.
+4. **Loading & Button State Safety**: All asynchronous UI operations utilize `try / catch / finally` blocks to ensure loading spinners always reset and submit buttons are disabled during active requests to prevent double submissions.
+
+---
+
+## 2. Application Tracker Parameters (`GET /applications`)
 
 Task **P2-02** enhanced `GET /applications` with optional query parameters:
 
@@ -24,7 +41,7 @@ GET /applications?status=Interview&search=Python&limit=20&offset=0
 
 ---
 
-## 2. Centralized Error Infrastructure
+## 3. Centralized Backend Error Infrastructure
 
 Error handling is centralized in `backend/app/core/errors.py`. The framework provides standardized API error structures, error code taxonomies, custom exceptions, and global exception handlers.
 
@@ -47,20 +64,3 @@ from app.core.errors import ErrorCode
 | `INVALID_FILE_CONTENT` | 400 | File header signature / MIME magic byte mismatch |
 | `UPLOAD_TOO_LARGE` | 413 | File size exceeds 10MB limit |
 | `INTERNAL_SERVER_ERROR` | 500 | Unhandled server exception (sanitized output) |
-
----
-
-## 3. Standardized Error Response Structure
-
-All error responses returned by the API adhere to the dual-compatible JSON format:
-
-```json
-{
-  "detail": "The requested job was not found.",
-  "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "The requested job was not found.",
-    "details": null
-  }
-}
-```

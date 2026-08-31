@@ -19,21 +19,19 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
+## Frontend Security & Information Disclosure Prevention (P2-03)
+
+1. **Token Handling**: JWT bearer tokens are attached dynamically via Axios request interceptors. Authorization headers are stripped when no token exists.
+2. **Expired Token Cleanup**: On HTTP 401 Unauthorized responses (excluding login credential attempts), the response interceptor automatically removes stale tokens from `localStorage` to prevent infinite auth loops.
+3. **Backend as Authoritative Boundary**: Frontend route protection (`ProtectedRoute`) provides UX flow navigation only. Backend API dependencies (`Depends(get_current_user)`) remain the sole authoritative security boundary.
+4. **Information Disclosure Prevention**: Error objects are sanitized through `getApiErrorMessage(error)` before display. Stack traces, raw exception objects, or SQL tracebacks are never rendered in the UI or printed to browser logs.
+
+---
+
 ## Application Tracker Query Security & User Isolation (P2-02)
 
 `GET /applications` enforces strict query parameter validation and resource-owner isolation:
 
 1. **User Ownership Isolation**: The query condition `ApplicationTracker.user_id == current_user.id` is applied as the base constraint before status filtering, keyword search, or pagination. Filtering or searching can never leak another user's application records.
-2. **SQL Injection Prevention**: All search queries use SQLAlchemy parameterized expressions (`Job.title.ilike(term)`). Raw SQL string concatenation is prohibited. Attacks using `' OR 1=1; --` or wildcard characters are safely escaped and parameterized.
-3. **Limit & Offset Boundaries**: `limit` is bounded between `1` and `100` (`Query(default=50, ge=1, le=100)`). `offset` is bounded to non-negative integers (`ge=0`). Invalid or negative pagination parameters return HTTP 422 `VALIDATION_ERROR`.
-4. **Status Filter Validation**: Unrecognized status strings are rejected with HTTP 422 `VALIDATION_ERROR`, preventing arbitrary parameter injection.
-
----
-
-## Error Handling & Information Disclosure Prevention (P2-01)
-
-The backend enforces centralized exception handling (`app/core/errors.py`) to prevent sensitive implementation detail leakage:
-
-1. **Sanitized 500 Responses**: Unhandled internal exceptions return a generic safe message `"An unexpected server error occurred."` with zero raw tracebacks or exception internals exposed to the client.
-2. **Secrets Protection**: Exception responses never reveal database connection strings, passwords, JWT secrets, or filesystem paths.
-3. **Structured Error Codes**: Standardizes error codes (`VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `TOKEN_INVALID`, `UPLOAD_TOO_LARGE`) while preserving backward-compatible top-level `detail` fields.
+2. **SQL Injection Prevention**: All search queries use SQLAlchemy parameterized expressions (`Job.title.ilike(term)`). Raw SQL string concatenation is prohibited.
+3. **Limit & Offset Boundaries**: `limit` is bounded between `1` and `100`. `offset` is bounded to non-negative integers (`ge=0`). Invalid pagination parameters return HTTP 422 `VALIDATION_ERROR`.

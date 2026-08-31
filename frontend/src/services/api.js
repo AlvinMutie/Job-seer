@@ -4,14 +4,87 @@ const api = axios.create({
     baseURL: '/api',
 });
 
-// Add interceptor to attach JWT token
+/**
+ * Extracts a clean, human-readable error message from an API error response, network failure, or exception.
+ * Supports P2-01 standardized error objects ({ error: { code, message, details } }), 
+ * legacy FastAPI detail strings ({ detail: "..." }), status code fallbacks, and network offline errors.
+ */
+export const getApiErrorMessage = (error) => {
+    if (!error) return "An unknown error occurred.";
+
+    // Network / Server Offline Error
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+        return "Unable to connect to the server. Please check your connection and try again.";
+    }
+
+    const res = error.response;
+    const status = res.status;
+    const data = res.data;
+
+    // 1. P2-01 Standardized error object structure
+    if (data?.error?.message) {
+        return data.error.message;
+    }
+
+    // 2. Structured field-level validation errors
+    if (data?.error?.details && Array.isArray(data.error.details) && data.error.details.length > 0) {
+        return data.error.details.map(d => `${d.field ? d.field + ': ' : ''}${d.message}`).join(', ');
+    }
+
+    // 3. FastAPI detail string fallback
+    if (typeof data?.detail === 'string') {
+        return data.detail;
+    }
+
+    if (Array.isArray(data?.detail) && data.detail.length > 0) {
+        return data.detail.map(d => d.msg || d.message || JSON.stringify(d)).join(', ');
+    }
+
+    // 4. HTTP Status Code Fallbacks
+    switch (status) {
+        case 400: return "Bad request. Please verify your input.";
+        case 401: return "Authentication required. Please log in again.";
+        case 403: return "Access forbidden.";
+        case 404: return "Requested resource was not found.";
+        case 413: return "File size exceeds maximum allowed limit of 10MB.";
+        case 422: return "Validation error. Please check form fields.";
+        case 500: return "An unexpected server error occurred.";
+        default: return `Request failed with status code ${status}`;
+    }
+};
+
+// Request Interceptor: Dynamically attach Bearer token if present
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        delete config.headers.Authorization;
     }
     return config;
+}, (error) => {
+    return Promise.reject(error);
 });
+
+// Response Interceptor: Handle 401 unauthenticated errors & attach standardized userMessage
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const userMsg = getApiErrorMessage(error);
+        if (error) {
+            error.userMessage = userMsg;
+        }
+
+        // Handle 401 Unauthorized globally (exclude /login endpoint to allow login error feedback)
+        const isLoginRequest = error.config && error.config.url && error.config.url.includes('/login');
+        if (error.response && error.response.status === 401 && !isLoginRequest) {
+            console.warn("Authentication session expired or invalid. Clearing token.");
+            localStorage.removeItem('token');
+        }
+
+        return Promise.reject(error);
+    }
+);
 
 export const authService = {
     register: (data) => api.post('/register', data).then(res => res.data),
@@ -31,7 +104,7 @@ export const jobService = {
 };
 
 export const trackerService = {
-    getApplications: () => api.get(`/applications?t=${Date.now()}`).then(res => res.data),
+    getApplications: (params = {}) => api.get('/applications', { params: { ...params, t: Date.now() } }).then(res => res.data),
     addApplication: (data) => api.post('/applications', data).then(res => res.data),
 };
 

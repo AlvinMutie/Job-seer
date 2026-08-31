@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, DollarSign, Target, Check, Loader2, Settings as SettingsIcon, Save, Briefcase } from 'lucide-react';
-import { authService } from '../services/api';
+import { User, MapPin, DollarSign, Target, Check, Loader2, Settings as SettingsIcon, Save, Briefcase, AlertCircle } from 'lucide-react';
+import { authService, getApiErrorMessage } from '../services/api';
 
 function Settings() {
     const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ function Settings() {
                 }
             } catch (error) {
                 console.error("Failed to fetch profile:", error);
-                setMessage({ type: 'error', text: 'Failed to load profile data.' });
+                setMessage({ type: 'error', text: getApiErrorMessage(error) });
             } finally {
                 setLoading(false);
             }
@@ -47,8 +47,7 @@ function Settings() {
             await authService.updateProfile(formData);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (err) {
-            const errorMsg = err.response?.data?.detail || err.message || "Failed to update profile.";
-            setMessage({ type: 'error', text: errorMsg });
+            setMessage({ type: 'error', text: getApiErrorMessage(err) });
         } finally {
             setSaving(false);
         }

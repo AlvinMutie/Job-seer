@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Briefcase, AlertCircle, Loader2 } from 'lucide-react';
-import { authService } from '../services/api';
+import { authService, getApiErrorMessage } from '../services/api';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -14,7 +14,6 @@ function Login() {
         setLoading(true);
 
         try {
-            // Backend expects form-encoded for OAuth2PasswordRequestForm
             const params = new URLSearchParams();
             params.append('username', email);
             params.append('password', password);
@@ -22,7 +21,6 @@ function Login() {
             const { access_token } = await authService.login(params);
             localStorage.setItem('token', access_token);
 
-            // Check user profile status
             const user = await authService.getMe();
             if (!user.is_profile_complete) {
                 window.location.href = '/profile-setup';
@@ -30,9 +28,10 @@ function Login() {
                 window.location.href = '/dashboard';
             }
         } catch (err) {
-            setError(err.response?.data?.detail || "Invalid email or password");
+            setError(getApiErrorMessage(err));
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
