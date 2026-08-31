@@ -11,7 +11,7 @@ This document specifies the security requirements, threat catalog, upload bounda
 | -- | -------- | -------- | ------------------------- | --------------- | ------------------ |
 | SEC-01 | **CRITICAL** | Secrets Management | Secret key for signing JWT tokens was hardcoded in source code (`"super-secret-key-change-me-in-production"`) | `backend/app/auth.py` | **REMEDIATED (P0-01)** — Externalized to `app/core/config.py` |
 | SEC-02 | **HIGH** | Authorization | `/match`, `/tailor-resume`, `/generate-cover-letter` lack authentication checks | `backend/app/main.py` | **REMEDIATED (P0-02)** — Protected with `Depends(get_current_user)` |
-| SEC-03 | **HIGH** | File Upload | `/upload-resume` writes uploaded files directly to disk without extension whitelist or mime verification | `backend/app/main.py` | Pending (**P0-03**) |
+| SEC-03 | **HIGH** | File Upload | `/upload-resume` writes uploaded files directly to disk without extension whitelist or mime verification | `backend/app/main.py` | **REMEDIATED (P0-03)** — Protected with 10-layer upload boundary |
 | SEC-04 | **HIGH** | CORS | Wildcard origin `allow_origins=["*"]` configured with `allow_credentials=True` | `backend/app/main.py` | Pending (**P0-04**) |
 | SEC-05 | **MEDIUM** | Password Package | `bcrypt.__about__` runtime monkeypatch used due to `passlib` version mismatch | `backend/app/main.py` | Pending (**P0-05**) |
 | SEC-06 | **MEDIUM** | Storage Security | JWT tokens stored unencrypted in browser `localStorage` | `frontend/src/services/api.js` | Pending (Phase 3) |
@@ -19,30 +19,14 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Remediated: P0-02 Endpoint Authorization Boundaries
+## Remediated: P0-03 Secure Resume Upload Boundary
 
-- **Boundary Protection**: Added `current_user: User = Depends(get_current_user)` to computational endpoints `POST /match`, `POST /tailor-resume`, and `POST /generate-cover-letter`.
-- **Public Access Protection**: Retained `GET /jobs` as an unauthenticated `PUBLIC` endpoint for job discovery.
-- **Unauthenticated Protection**: Unauthenticated requests to computational endpoints are rejected with `401 Unauthorized` (`"Not authenticated"`). Malformed/expired JWTs return `401 Unauthorized` (`"Could not validate credentials"`). Valid Bearer tokens execute endpoint logic normally (`200 OK`).
+`POST /upload-resume` enforces a 10-layer security boundary in `app/utils/file_handling.py`:
 
----
-
-## Complete File Upload Security Boundary Design
-
-To prevent arbitrary code execution, disk exhaustion, path traversal, and document parsing exploits, `POST /upload-resume` MUST enforce the following 10-layer upload boundary:
-
-```text
-Incoming File Upload -> Size Check (<=10MB) -> Extension Whitelist (.pdf,.docx,.txt)
-        │
-        ▼
-MIME Magic Byte Validation (%PDF-, PK\x03\x04) -> Path Traversal Check (No slashes/null bytes)
-        │
-        ▼
-Server UUID Filename Generation (uploads/uuid4.pdf) -> Disk Write Outside Web Root
-        │
-        ▼
-Try/Except Document Text Extraction (PyMuPDF/docx2txt) -> Malformed Document Fallback
-        │
-        ▼
-Old Resume Lifecycle Cleanup -> Sanitized Response Preview
-```
+1. **Authentication Gate**: Enforces JWT bearer token via `Depends(get_current_user)`. Unauthenticated requests return `401 Unauthorized`.
+2. **Extension Whitelist**: Only `.pdf`, `.docx`, and `.txt` extensions are accepted. Unsupported extensions (e.g. `.exe`, `.py`) are rejected with `400 Bad Request`.
+3. **MIME Magic Byte Verification**: Validates file content headers (`%PDF-` for PDF, `PK\x03\x04` for DOCX, valid UTF-8 for TXT). Renamed binary executables are rejected with `400 Bad Request`.
+4. **File Size Limit**: Maximum file size strictly capped at 10MB (10,485,760 bytes). Oversized files return `400 Bad Request`.
+5. **Path Traversal Protection**: Files are saved using server-side UUID filenames (`uploads/resume_{user_id}_{uuid4.hex}{ext}`). User-supplied filenames are never used for disk storage.
+6. **Old File Lifecycle Cleanup**: Automatically deletes previous user resume files upon uploading a new one.
+7. **Document Parser Protection**: Document text extraction is wrapped in error handling. Corrupted/encrypted files return `400 Bad Request` and clean up transient disk files.

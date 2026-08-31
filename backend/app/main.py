@@ -22,6 +22,7 @@ from app.services.tailor_service import tailor_service
 from app.database import get_db, init_db
 from app.models.models import User, Profile, Job
 from app.auth import get_password_hash, verify_password, create_access_token, get_current_user
+from app.utils.file_handling import validate_upload_file, save_user_resume
 
 app = FastAPI(title="Smart Job Hunter API")
 
@@ -262,28 +263,37 @@ async def upload_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # 1. Validate file extension, size limit (10MB), and MIME magic bytes
+    validate_upload_file(file)
+
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile:
         profile = Profile(user_id=current_user.id)
         db.add(profile)
     
-    safe_filename = "".join([c for c in file.filename if c.isalnum() or c in "._-"])
-    file_path = os.path.join(UPLOAD_DIR, f"resume_{current_user.id}_{safe_filename}")
+    # 2. Save file using server-side UUID filename and clean up old resume
+    file_path = save_user_resume(file, current_user.id, profile.resume_path, UPLOAD_DIR)
     
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Extract text from the uploaded file
-    extracted_text = extract_text(file_path)
-    
+    # 3. Extract text from the uploaded file safely
+    try:
+        extracted_text = extract_text(file_path)
+    except Exception as e:
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not extract text from document. File may be corrupt or encrypted."
+        )
+
     profile.resume_path = file_path
     profile.resume_text = extracted_text
+    profile.has_resume = True
     db.commit()
     
     return {
         "message": "Resume uploaded and parsed successfully", 
         "filename": file.filename,
-        "text_preview": extracted_text[:100] + "..." if extracted_text else "No text extracted"
+        "text_preview": extracted_text[:200] + "..." if extracted_text else "No text extracted"
     }
 
 @app.get("/applications")
