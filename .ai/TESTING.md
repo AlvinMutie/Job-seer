@@ -5,19 +5,16 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 1. Backend Pytest Metrics (118 Tests)
+## 1. Backend Pytest Metrics (123 Tests)
 
-- **Total Test Count**: **118 tests** (100% pass rate)
+- **Total Test Count**: **123 tests** (100% pass rate)
 - **Security Safety Gate Tests**: **84 tests** (`pytest -m security`)
-- **P3-01 Job Discovery Tests**: Added 8 integration/security tests in `backend/tests/test_jobs_enhanced.py`:
-  - `test_get_jobs_default_pagination_and_sorting`
-  - `test_get_jobs_custom_limit_and_offset`
-  - `test_get_jobs_invalid_limit_and_offset_boundaries`
-  - `test_get_jobs_sorting_by_title_and_company`
-  - `test_get_jobs_invalid_sort_by_and_order`
-  - `test_get_jobs_search_and_keyword_matching`
-  - `test_get_jobs_combined_query_parameters`
-  - `test_get_jobs_sql_injection_and_wildcard_safety`
+- **P3-02 V2 Matching Tests**: Added 5 dedicated unit and integration tests in `backend/tests/test_matching_v2.py`:
+  - `test_v2_scoring_weights_and_breakdown`
+  - `test_v2_experience_scoring`
+  - `test_v2_role_title_scoring`
+  - `test_v2_score_bounds_and_safety`
+  - `test_v2_match_api_endpoint_integration`
 
 ---
 
@@ -42,6 +39,7 @@ Coverage is measured using `pytest-cov` against the `app/` package:
 cd backend
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing
 ```
-- **Overall Code Coverage**: **91% Baseline** (688 statements).
-- `app/routers/jobs.py`: **100%**
-- `app/services/job_service.py`: **89%**
+- **Overall Code Coverage**: **91% Baseline** (758 statements).
+- `app/schemas/matching.py`: **100%**
+- `app/routers/matching.py`: **91%**
+- `app/services/matching_engine.py`: **89%**

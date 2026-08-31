@@ -33,7 +33,7 @@ flowchart TD
 
     subgraph P3 [P3: Product Intelligence & UX]
         P3-01[P3-01: Enhanced Job Discovery & Repository Hub ✓ COMPLETED]
-        P3-02[P3-02: Matching Engine V2 & Explainable Scoring]
+        P3-02[P3-02: Matching Engine V2 & Explainable Scoring ✓ COMPLETED]
         P3-03[P3-03: Resume Intelligence & ATS Health Check]
         P3-04[P3-04: Resume Tailoring V2 & Persistence]
         P3-05[P3-05: Multi-Tone Cover Letters & Management]
@@ -48,7 +48,7 @@ flowchart TD
 
 ## Completed Tasks
 
-### P0-00 through P2-03 (✓ ALL COMPLETED)
+### P0-00 through P3-01 (✓ ALL COMPLETED)
 
-### P3-01 — Enhanced Job Discovery & Repository Hub (✓ COMPLETED)
-- **Result**: Extended `GET /jobs` with database-level `limit`/`offset` pagination, safe `sort_by`/`order` mapping, and unified keyword `search`. Created `frontend/src/pages/JobsHub.jsx` with search bar, location filter, work mode/experience level dropdowns, sorting options, pagination controls, loading skeletons, and AI match triggers. Added 8 tests in `backend/tests/test_jobs_enhanced.py`. **118 / 118 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.
+### P3-02 — Matching Engine V2 & Explainable Scoring (✓ COMPLETED)
+- **Result**: Upgraded `MatchingEngine` to compute an explainable multi-factor match score breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%). Created `MatchBreakdown`, `MatchWeights`, and `MatchResponse` DTO schemas in `app/schemas/matching.py`. Built `MatchBreakdownModal.jsx` and updated `Matches.jsx` UI to render explainable progress bars, score rationale, and strengths. Added 5 unit/integration tests in `backend/tests/test_matching_v2.py`. **123 / 123 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly. Zero database schema changes required.

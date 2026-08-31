@@ -5,11 +5,10 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Job Discovery Query Security & SQL Injection Prevention (P3-01)
+## Matching Engine V2 Security & Numerical Safety (P3-02)
 
-`GET /jobs` enforces strict query parameter validation and parameterized execution:
+`POST /match` enforces strict input sanitization, text normalization, and numerical safety guarantees:
 
-1. **Safe Column Mapping**: `sort_by` parameters are mapped strictly against an internal dictionary of allowed model attributes (`posted_at`, `title`, `company`, `location`, `remote_status`, `experience_level`). Dynamic string interpolation into SQL `ORDER BY` clauses is prohibited.
-2. **Order Direction Validation**: `order` values are sanitized and restricted to `asc` or `desc`. Unrecognized values return HTTP 422 `VALIDATION_ERROR`.
-3. **Parameterized Search**: Keyword search across job title, company, description, and required skills uses SQLAlchemy parameterized `ilike` expressions. Payloads containing SQL injection syntax (`' OR 1=1; --`, `DROP TABLE`) are safely escaped.
-4. **Pagination Boundaries**: Enforces `limit` between 1 and 100 (`ge=1, le=100`) and non-negative `offset` (`ge=0`).
+1. **Numerical Bounds & NaN/Inf Protection**: All factor scores (skills, content, experience, role title) and final match percentage are explicitly checked for finite floats (`isinstance(val, float)`, `not math.isnan(val)`, `not math.isinf(val)`). Invalid values fall back to `0.0`.
+2. **Zero Code Execution**: Resume text and job description inputs are sanitized by spaCy/regex tokenizers. HTML tags (`<script>`), special characters (`!@#$%`), and SQL syntax are treated purely as inert text. No `eval` or dynamic code evaluation occurs.
+3. **Empty Input Safety**: Empty or whitespace-only inputs return `0.0` match percentage cleanly without raising unhandled exceptions or leaking server internals.

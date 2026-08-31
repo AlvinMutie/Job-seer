@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import User
 from app.auth import get_current_user
-from app.schemas.matching import MatchRequest
 from app.services.matching_engine import MatchingEngine
 from app.services.job_service import job_service
 from app.services.cover_letter import cover_letter_generator
@@ -21,6 +20,9 @@ async def match_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """
+    Calculates multi-factor explainable match score between candidate resume and target job listing.
+    """
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
         raise HTTPException(
@@ -28,21 +30,21 @@ async def match_resume(
             detail="Job not found"
         )
         
-    # Combine job skills and description for better matching
     job_content = f"{job.skills_required} {job.description}"
     
-    score = engine.calculate_match_score(resume_text, job_content)
-    resume_skills = engine.extract_skills(resume_text)
-    job_skills = engine.extract_skills(job_content)
+    candidate_role = current_user.profile.preferred_role if (current_user.profile and current_user.profile.preferred_role) else None
+    candidate_experience = current_user.profile.experience_level if (current_user.profile and current_user.profile.experience_level) else None
     
-    comparison = engine.compare_skills(resume_skills, job_skills)
+    result = engine.calculate_v2_match_score(
+        resume_text=resume_text,
+        job_description=job_content,
+        candidate_role=candidate_role,
+        candidate_experience=candidate_experience,
+        job_title=job.title,
+        job_experience=job.experience_level
+    )
     
-    return {
-        "match_percentage": score,
-        "matched_skills": comparison["matched"],
-        "missing_skills": comparison["missing"],
-        "tailoring_advice": comparison["tailoring_advice"]
-    }
+    return result
 
 
 @router.post("/generate-cover-letter")
@@ -81,7 +83,6 @@ async def tailor_resume_api(
             detail="Job not found"
         )
     
-    # Extract skills for precise tailoring
     job_skills = engine.extract_skills(job.description)
     resume_skills = engine.extract_skills(resume_text)
     

@@ -5,48 +5,51 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. Job Discovery & Repository Hub Architecture (P3-01)
+## 1. Matching Engine V2 & Explainable Scoring (P3-02)
+
+Task **P3-02** upgraded `MatchingEngine` (`app/services/matching_engine.py`) to compute an explainable multi-factor match score breakdown:
+
+$$\text{Overall Score} = (\text{Skills Score} \times 0.40) + (\text{Content Score} \times 0.30) + (\text{Experience Score} \times 0.15) + (\text{Role Title Score} \times 0.15)$$
+
+### Factor Breakdown Reference
+
+| Factor | Weight | Calculation Method | Normalized Range |
+| ------ | ------ | ------------------ | ---------------- |
+| **Skills Score** | **40%** | Matched required tech skills / Total job required tech skills | `0.0` – `100.0` |
+| **Content Score** | **30%** | TF-IDF term frequency-inverse document frequency cosine similarity | `0.0` – `100.0` |
+| **Experience Score** | **15%** | Candidate experience level vs job experience level comparison | `0.0` – `100.0` |
+| **Role Title Score** | **15%** | Target candidate role title vs job title token overlap & match ratio | `0.0` – `100.0` |
+
+### Response Schema (`POST /match`)
+
+```json
+{
+  "match_percentage": 82.5,
+  "breakdown": {
+    "skills": 90.0,
+    "content": 80.0,
+    "experience": 75.0,
+    "role_title": 80.0
+  },
+  "weights": {
+    "skills": 0.40,
+    "content": 0.30,
+    "experience": 0.15,
+    "role_title": 0.15
+  },
+  "explanation": "Strong overall match (82.5%). Technical skills alignment: 90.0%, content similarity: 80.0%, experience alignment: 75.0%.",
+  "matched_skills": ["python", "fastapi"],
+  "missing_skills": ["docker"],
+  "tailoring_advice": ["• Highlight past projects..."]
+}
+```
+
+---
+
+## 2. Job Discovery & Repository Hub Architecture (P3-01)
 
 Task **P3-01** enhanced `GET /jobs` and introduced the dedicated frontend `JobsHub.jsx` page:
 
 ```text
 GET /jobs?search=Python&location=Remote&remote_status=Remote&experience_level=Senior&sort_by=posted_at&order=desc&limit=20&offset=0
 ```
-
-### Parameter Reference
-
-| Parameter | Type | Default | Description | Validation Constraints |
-| --------- | ---- | ------- | ----------- | ---------------------- |
-| `search` | string | `None` | Keyword search matching title, company, description, or skills | Parameterized `ilike` search |
-| `location` | string | `None` | Location search (matches 'Remote' in remote_status if specified) | Case-insensitive filter |
-| `remote_status` | string | `None` | Work mode filter (`Remote`, `Hybrid`, `On-site`) | Case-insensitive filter |
-| `experience_level` | string | `None` | Level filter (`Junior`, `Mid-Level`, `Senior`, `Lead / Architect`) | Case-insensitive filter |
-| `sort_by` | string | `posted_at` | Field sorting (`posted_at`, `title`, `company`, `location`, `remote_status`, `experience_level`) | Validated dictionary mapping or HTTP 422 |
-| `order` | string | `desc` | Direction (`asc`, `desc`) | `asc` / `desc` or HTTP 422 |
-| `limit` | integer | `20` | Maximum records returned per page | `ge=1, le=100` |
-| `offset` | integer | `0` | Number of records to skip | `ge=0` |
-
----
-
-## 2. Application Tracker Parameters (`GET /applications`)
-
-Task **P2-02** enhanced `GET /applications` with optional query parameters:
-
-```text
-GET /applications?status=Interview&search=Python&limit=20&offset=0
-```
-
-### Parameter Reference
-
-| Parameter | Type | Default | Description | Validation Constraints |
-| --------- | ---- | ------- | ----------- | ---------------------- |
-| `status` | string | `None` | Filter by application status (case-insensitive: `Applied`, `Interview`, `Rejected`, `Offer`, `Not Applied`) | Valid enum string or HTTP 422 |
-| `search` | string | `None` | Partial keyword search matching job title, company name, or application notes | Sanitized & parameterized `ilike` search |
-| `limit` | integer | `50` | Maximum records returned per page | `ge=1, le=100` |
-| `offset` | integer | `0` | Number of records to skip | `ge=0` |
-
----
-
-## 3. Centralized Backend Error Infrastructure
-
-Error handling is centralized in `backend/app/core/errors.py`. The framework provides standardized API error structures, error code taxonomies, custom exceptions, and global exception handlers.

@@ -8,7 +8,7 @@
 | `/register` | `POST` | **PUBLIC** | None | User Registration |
 | `/login` | `POST` | **PUBLIC** | OAuth2 Form | Obtains JWT Bearer Token |
 | `/jobs` | `GET` | **PUBLIC** | None | **ENHANCED (P3-01)** — Pagination, Sorting, Search, Filtering |
-| `/match` | `POST` | **AUTHENTICATED** | `Depends(get_current_user)` | **REMEDIATED (P0-02)** — TF-IDF & Skill Match |
+| `/match` | `POST` | **AUTHENTICATED** | `Depends(get_current_user)` | **UPGRADED (P3-02)** — V2 Multi-Factor Explainable Match |
 | `/tailor-resume` | `POST` | **AUTHENTICATED** | `Depends(get_current_user)` | **REMEDIATED (P0-02)** — Resume Tailoring Advice |
 | `/generate-cover-letter` | `POST` | **AUTHENTICATED** | `Depends(get_current_user)` | **REMEDIATED (P0-02)** — Cover Letter Generation |
 | `/me` | `GET` | **RESOURCE_OWNER** | `Depends(get_current_user)` | User Profile Retrieval |
@@ -21,16 +21,30 @@
 
 ## Endpoint Specifications
 
-### `GET /jobs` (P3-01 Enhanced)
+### `POST /match` (P3-02 Upgraded)
 
-- **Description**: Retrieves job repository listings with optional keyword search, field filters, safe sorting, and database-level limit/offset pagination.
-- **Query Parameters**:
-  - `search` (string, optional): Keyword search matching job title, company, description, or skills.
-  - `location` (string, optional): Location keyword.
-  - `remote_status` (string, optional): Work mode (`Remote`, `Hybrid`, `On-site`).
-  - `experience_level` (string, optional): Level (`Junior`, `Mid-Level`, `Senior`, `Lead / Architect`).
-  - `sort_by` (string, optional, default: `posted_at`): Sort field (`posted_at`, `title`, `company`, `location`, `remote_status`, `experience_level`).
-  - `order` (string, optional, default: `desc`): Direction (`asc`, `desc`).
-  - `limit` (integer, optional, default: 20, min: 1, max: 100): Maximum records returned.
-  - `offset` (integer, optional, default: 0, min: 0): Records to skip.
-- **Response Format**: Plain JSON array of Job objects (`Job[]`).
+- **Description**: Calculates V2 multi-factor match percentage (Skills 40%, Content 30%, Experience 15%, Role Title 15%) and provides explainable factor breakdown.
+- **Header**: `Authorization: Bearer <token>`
+- **Form Data**: `resume_text` (str, required), `job_id` (int, required)
+- **Response Format**:
+  ```json
+  {
+    "match_percentage": 82.5,
+    "breakdown": {
+      "skills": 90.0,
+      "content": 80.0,
+      "experience": 75.0,
+      "role_title": 80.0
+    },
+    "weights": {
+      "skills": 0.40,
+      "content": 0.30,
+      "experience": 0.15,
+      "role_title": 0.15
+    },
+    "explanation": "Strong overall match (82.5%). Technical skills alignment: 90.0%, content similarity: 80.0%, experience alignment: 75.0%.",
+    "matched_skills": ["python", "fastapi"],
+    "missing_skills": ["docker"],
+    "tailoring_advice": ["• Highlight past projects..."]
+  }
+  ```
