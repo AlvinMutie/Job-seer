@@ -5,19 +5,20 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 1. Backend Pytest Metrics (147 Tests)
+## 1. Backend Pytest Metrics (156 Tests)
 
-- **Total Test Count**: **147 tests** (100% pass rate)
-- **Security Safety Gate Tests**: **78 tests** (`pytest -m security`)
-- **P3-05 Cover Letter Tests**: Added 8 integration and security tests in `backend/tests/test_cover_letter.py`:
-  - `test_generate_and_persist_cover_letter`
-  - `test_cover_letter_version_increment_same_tone`
-  - `test_independent_versions_per_tone`
-  - `test_list_and_filter_cover_letters`
-  - `test_get_and_delete_cover_letter`
-  - `test_invalid_tone_rejected`
-  - `test_cover_letter_unauthenticated_rejected`
-  - `test_cover_letter_ownership_isolation`
+- **Total Test Count**: **156 tests** (100% pass rate)
+- **Security Safety Gate Tests**: **82 tests** (`pytest -m security`)
+- **P3-06 Application Tracker V2 Tests**: Added 9 integration and security tests in `backend/tests/test_application_tracker_v2.py`:
+  - `test_create_and_get_application_v2`
+  - `test_patch_application_status_and_kanban_persistence`
+  - `test_patch_application_dates_and_url`
+  - `test_delete_application`
+  - `test_invalid_status_rejected`
+  - `test_invalid_date_format_rejected`
+  - `test_unsafe_url_scheme_rejected`
+  - `test_tracker_unauthenticated_rejected`
+  - `test_tracker_ownership_isolation`
 
 ---
 
@@ -44,6 +45,5 @@ cd backend
 ```
 - **Overall Code Coverage**: **91% Baseline** (1,096 statements).
 - `app/models/models.py`: **100%**
-- `app/schemas/profile.py`: **100%**
-- `app/services/cover_letter.py`: **94%**
-- `app/routers/profile.py`: **84%**
+- `app/schemas/applications.py`: **100%**
+- `app/routers/applications.py`: **100%**

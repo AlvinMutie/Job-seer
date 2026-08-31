@@ -97,12 +97,17 @@ class CoverLetter(Base):
 class ApplicationTracker(Base):
     __tablename__ = "application_tracker"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    job_id = Column(Integer, ForeignKey("jobs.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), index=True)
     status = Column(Enum(ApplicationStatus, values_callable=lambda obj: [e.value for e in obj]), default=ApplicationStatus.NOT_APPLIED)
-    match_score = Column(Float)
+    match_score = Column(Float, nullable=True)
     applied_at = Column(DateTime, nullable=True)
+    applied_date = Column(DateTime, nullable=True)
+    interview_date = Column(DateTime, nullable=True)
+    follow_up_date = Column(DateTime, nullable=True)
+    application_url = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
 
     user = relationship("User")
     job = relationship("Job")

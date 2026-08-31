@@ -133,7 +133,10 @@ export const coverLetterService = {
 
 export const trackerService = {
     getApplications: (params = {}) => api.get('/applications', { params: { ...params, t: Date.now() } }).then(res => res.data),
+    getApplication: (id) => api.get(`/applications/${id}?t=${Date.now()}`).then(res => res.data),
     addApplication: (data) => api.post('/applications', data).then(res => res.data),
+    updateApplication: (id, data) => api.patch(`/applications/${id}`, data).then(res => res.data),
+    deleteApplication: (id) => api.delete(`/applications/${id}`).then(res => res.data),
 };
 
 export default api;

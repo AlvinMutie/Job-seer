@@ -5,47 +5,48 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. Intelligent Cover Letters & Multi-Tone Persistence (P3-05)
+## 1. Application Tracker V2 & Kanban Board (P3-06)
 
-Task **P3-05** introduced the `CoverLetter` ORM model, multi-tone versioning engine, and persistent cover letter management:
+Task **P3-06** upgraded the application tracking pipeline to a complete Kanban board workspace with HTML5 drag-and-drop:
 
-### Model Schema (`CoverLetter`)
+### Extended Model Schema (`ApplicationTracker`)
 
 | Column | Type | Constraints | Description |
 | ------ | ---- | ----------- | ----------- |
-| `id` | Integer | Primary Key, Index | Unique record ID |
+| `id` | Integer | Primary Key, Index | Unique tracking record ID |
 | `user_id` | Integer | ForeignKey("users.id"), Index | Authenticated owner ID |
 | `job_id` | Integer | ForeignKey("jobs.id"), Index | Target job listing ID |
-| `tailored_resume_id` | Integer | ForeignKey("tailored_resumes.id"), Nullable | Optional tailored resume link |
-| `content` | Text | Non-null | Formatted cover letter body |
-| `tone` | String | Index, Default "Professional" | Communication tone (`Professional`, `Enthusiastic`, `Executive`, `Technical`) |
-| `version` | Integer | Default 1 | Sequential version number per `(user_id, job_id, tone)` |
-| `job_title` | String | Nullable | Target role title |
-| `company` | String | Nullable | Target company name |
-| `created_at` | DateTime | Default UTC | Creation timestamp |
+| `status` | Enum | Values: `Not Applied`, `Applied`, `Interview`, `Offer`, `Rejected` | Pipeline column stage |
+| `match_score` | Float | Nullable | AI Match Score |
+| `applied_at` | DateTime | Nullable | Creation timestamp |
+| `applied_date` | DateTime | Nullable | Formal application date |
+| `interview_date` | DateTime | Nullable | Scheduled interview date |
+| `follow_up_date` | DateTime | Nullable | Scheduled follow-up date |
+| `application_url` | String | Nullable | Job portal link (`http://` or `https://` only) |
+| `notes` | Text | Nullable | Custom application notes |
+| `updated_at` | DateTime | Default UTC | Update timestamp |
 
-### Supported Communication Tones
+### Kanban Drag & Drop Architecture
 
-- **`Professional`**: Conventional, polished business communication style.
-- **`Enthusiastic`**: Energetic, passionate, optimistic style.
-- **`Executive`**: Strategic, outcome-oriented leadership style highlighting business ROI.
-- **`Technical`**: Engineering principles, architecture, and technology stack focus.
+- **Frontend (`Tracker.jsx`)**: Native HTML5 Drag and Drop (`onDragStart`, `onDragOver`, `onDrop`). Optimistically updates UI state and sends `PATCH /applications/{id}` status payload. Automatically rolls back UI state if server request fails.
+- **Detail View (`ApplicationDetailModal.jsx`)**: Comprehensive modal for editing status, dates, application URLs, notes, and deletion.
 
 ### Endpoints Reference
 
-- `POST /cover-letters`: Generates multi-tone cover letter, calculates version number, and persists record.
-- `GET /cover-letters`: Lists saved cover letters for authenticated user (supports optional `job_id` & `tone` filters).
-- `GET /cover-letters/{id}`: Retrieves single saved cover letter by ID.
-- `DELETE /cover-letters/{id}`: Deletes specified cover letter version.
+- `GET /applications`: Lists tracked applications (supports search, status filter, limit, offset pagination).
+- `GET /applications/{id}`: Retrieves single tracked application by ID.
+- `POST /applications`: Tracks new application or updates existing job status.
+- `PATCH /applications/{id}`: Updates status, dates, application URL, and notes.
+- `DELETE /applications/{id}`: Deletes tracked application.
 
 ---
 
-## 2. Resume Tailoring V2 & Persistence (P3-04)
+## 2. Intelligent Cover Letters & Multi-Tone Persistence (P3-05)
+
+Task **P3-05** introduced `CoverLetter` model, multi-tone versioning engine, and persistent cover letter management.
+
+---
+
+## 3. Resume Tailoring V2 & Persistence (P3-04)
 
 Task **P3-04** introduced `TailoredResume` model, versioning engine, structured diff comparison, and persistent tailoring endpoints.
-
----
-
-## 3. Resume Intelligence & ATS Health Check (P3-03)
-
-Task **P3-03** introduced `ResumeIntelligenceService` (`app/services/resume_intelligence.py`) and endpoint `GET /resume/health`.
