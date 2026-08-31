@@ -26,6 +26,9 @@ pip install -r requirements.txt
 # Download required spaCy NLP model
 python -m spacy download en_core_web_sm
 
+# Copy environment template to .env (do NOT commit .env to Git)
+cp .env.example .env
+
 # Seed database with sample jobs
 python seed_jobs.py
 
@@ -37,31 +40,29 @@ The API server will run at `http://localhost:8000`. Direct API docs available at
 
 ---
 
-## 2. Frontend Setup
+## 2. Environment Configuration
 
-```bash
-cd frontend
+Application configuration is centralized in `backend/app/core/config.py` using `pydantic-settings`:
 
-# Install Node dependencies
-npm install
-
-# Start Vite development server
-npm run dev
-```
-
-The React SPA will run at `http://localhost:5173` (or `http://localhost:3000` per `vite.config.js` default port setting). Requests to `/api/*` are proxied to `http://localhost:8000/*`.
+- **Development**: Reads environment variables from local `backend/.env`.
+- **Testing**: Explicit test fixtures in `tests/conftest.py` supply isolated test settings.
+- **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Missing or default secrets cause startup failure.
 
 ---
 
-## 3. Mandatory Engineering Workflow
+## 3. Running Automated Tests
 
-All development tasks MUST follow the 8-step engineering lifecycle:
-
-```text
-ANALYSE ➔ PLAN ➔ APPROVE ➔ IMPLEMENT ➔ TEST ➔ SECURITY REVIEW ➔ DOCUMENT ➔ REPORT
+```bash
+cd backend
+./venv/bin/pytest tests/ -v
 ```
 
-### Standards Summary
-- **Backend**: FastAPI, SQLAlchemy ORM, Pydantic v2 schemas. Routes MUST be placed in `backend/app/routers/` when refactoring `main.py`.
-- **Frontend**: React 18, Vite, Tailwind CSS v3 dark glassmorphism system.
-- **Testing**: Run `pytest` before requesting completion.
+---
+
+## 4. Mandatory Engineering Workflow
+
+All development tasks MUST follow the 10-step engineering lifecycle:
+
+```text
+UNDERSTAND ➔ PLAN ➔ SHOW PLAN ➔ APPROVAL ➔ IMPLEMENT ➔ TEST ➔ SECURITY REVIEW ➔ VERIFY ➔ DOCUMENT ➔ REPORT
+```

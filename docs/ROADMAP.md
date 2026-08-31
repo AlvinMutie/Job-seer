@@ -10,7 +10,7 @@ This document contains the implementation-ready task breakdown for **Smart Job H
 flowchart TD
     subgraph P0 [P0: Critical Security & Configuration]
         P0-00[P0-00: Establish Testing Safety Baseline ✓ COMPLETED]
-        P0-01[P0-01: Externalize JWT Secret]
+        P0-01[P0-01: Externalize JWT Secret ✓ COMPLETED]
         P0-02[P0-02: Endpoint Authorization Boundaries]
         P0-03[P0-03: Secure Resume Uploads]
         P0-04[P0-04: Restrict CORS Origins]
@@ -37,29 +37,13 @@ flowchart TD
 - **Result**: **35 / 35 tests passing**. Data isolation enforced via `sqlite:///:memory:` with SQLAlchemy `StaticPool`.
 - **Baseline Report**: [docs/TEST_BASELINE.md](file:///home/blueberyy/Documents/SJ/Smart-Job-Hunter/docs/TEST_BASELINE.md).
 
+### P0-01 — Externalize JWT Secret (✓ COMPLETED)
+- **Objective**: Externalize hardcoded JWT secret from `app/auth.py` to centralized settings model `app/core/config.py` loaded from environment variables.
+- **Result**: Hardcoded secret string completely purged. Centralized settings implemented with fail-safe production validation. 39 / 39 tests passing (35 baseline + 4 config tests).
+
 ---
 
 ## Detailed Pending Task Breakdown
-
-### P0-01 — Externalize JWT Secret
-
-- **Objective**: Remove hardcoded JWT signing key and load it dynamically from environment variables.
-- **Files Likely Affected**: `backend/app/auth.py`, `backend/app/core/config.py` (NEW), `backend/.env.example` (NEW).
-- **Preconditions**: P0-00 completed.
-- **Implementation Requirements**:
-  - Create `app/core/config.py` using Pydantic `BaseSettings`.
-  - Load `SECRET_KEY` from `os.getenv("SECRET_KEY")`.
-  - Enforce minimum length check (32+ chars) and raise runtime error if unconfigured in non-dev environment.
-- **Security Considerations**: Ensures JWT tokens cannot be forged by reading repository source code.
-- **Tests Required**: Unit test validating application fails to sign tokens if `SECRET_KEY` is missing/empty.
-- **Acceptance Criteria**:
-  - Zero hardcoded JWT secret strings in source code.
-  - `SECRET_KEY` successfully loaded from `.env`.
-  - Registration and login tokens sign and verify correctly.
-- **Dependencies**: P0-00.
-- **Risk**: Low.
-
----
 
 ### P0-02 — Endpoint Authorization Boundaries
 
@@ -122,7 +106,7 @@ flowchart TD
 
 - **Objective**: Eliminate runtime monkeypatch `bcrypt.__about__` in `main.py`.
 - **Files Likely Affected**: `backend/app/main.py`, `backend/requirements.txt`, `backend/app/auth.py`.
-- **Preconditions**: P0-00.
+- **Preconditions**: P0-00, P0-01.
 - **Implementation Requirements**:
   - Update `requirements.txt` to pin compatible `passlib` (1.7.4) and `bcrypt` (4.0.1) or migrate to `argon2-cffi`.
   - Remove runtime monkeypatch lines 7–9 in `main.py`.
@@ -131,5 +115,5 @@ flowchart TD
 - **Acceptance Criteria**:
   - Application starts clean without monkeypatching `bcrypt`.
   - Password registration and login verification pass.
-- **Dependencies**: P0-00.
+- **Dependencies**: P0-00, P0-01.
 - **Risk**: Low.
