@@ -6,19 +6,21 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, s
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import User, Profile, Job, TailoredResume
+from app.models.models import User, Profile, Job, TailoredResume, CoverLetter
 from app.auth import get_current_user
 from app.schemas.profile import (
     ProfileUpdate, 
     ResumeHealthResponse, 
     TailoredResumeResponse, 
-    TailoredResumeCompareResponse
+    TailoredResumeCompareResponse,
+    CoverLetterResponse
 )
 from app.utils.file_handling import validate_upload_file, save_user_resume
 from app.services.resume_intelligence import resume_intelligence_service
 from app.services.matching_engine import MatchingEngine
 from app.services.job_service import job_service
 from app.services.tailor_service import tailor_service
+from app.services.cover_letter import cover_letter_generator, VALID_TONES
 
 router = APIRouter(tags=["Profile"])
 engine = MatchingEngine()
@@ -135,9 +137,6 @@ async def generate_and_save_tailored_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Generates a tailored resume for a target job, computes deterministic version number, and persists the result.
-    """
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     if not profile or not profile.resume_text:
         raise HTTPException(
@@ -152,7 +151,6 @@ async def generate_and_save_tailored_resume(
             detail="Target job listing not found."
         )
 
-    # Determine next version for this user & job combination
     latest = (
         db.query(TailoredResume)
         .filter(TailoredResume.user_id == current_user.id, TailoredResume.job_id == job_id)
@@ -161,7 +159,6 @@ async def generate_and_save_tailored_resume(
     )
     next_version = (latest.version + 1) if latest else 1
 
-    # Extract missing skills and calculate match score
     job_skills = engine.extract_skills(job.description)
     resume_skills = engine.extract_skills(profile.resume_text)
     missing_skills = list(set(job_skills) - set(resume_skills))
@@ -176,7 +173,6 @@ async def generate_and_save_tailored_resume(
     )
     match_score = float(match_result["match_percentage"])
 
-    # Generate tailored resume text
     tailored_text = tailor_service.generate_tailored_resume_text(
         resume_text=profile.resume_text,
         job_title=job.title,
@@ -208,9 +204,6 @@ async def list_tailored_resumes(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Retrieves all saved tailored resumes for the authenticated user ordered by created_at desc.
-    """
     records = (
         db.query(TailoredResume)
         .filter(TailoredResume.user_id == current_user.id)
@@ -226,9 +219,6 @@ async def get_tailored_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Retrieves a single saved tailored resume by ID for the authenticated user.
-    """
     record = (
         db.query(TailoredResume)
         .filter(TailoredResume.id == tailored_id, TailoredResume.user_id == current_user.id)
@@ -248,9 +238,6 @@ async def compare_tailored_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Generates structured side-by-side text diff comparison for a saved tailored resume.
-    """
     record = (
         db.query(TailoredResume)
         .filter(TailoredResume.id == tailored_id, TailoredResume.user_id == current_user.id)
@@ -283,9 +270,6 @@ async def delete_tailored_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Deletes a saved tailored resume record belonging to the authenticated user.
-    """
     record = (
         db.query(TailoredResume)
         .filter(TailoredResume.id == tailored_id, TailoredResume.user_id == current_user.id)
@@ -301,3 +285,160 @@ async def delete_tailored_resume(
     db.commit()
 
     return {"message": "Tailored resume version deleted successfully"}
+
+
+# ==========================================
+# INTELLIGENT COVER LETTERS V2 (P3-05)
+# ==========================================
+
+@router.post("/cover-letters", response_model=CoverLetterResponse)
+async def generate_and_save_cover_letter(
+    job_id: int = Form(...),
+    tone: str = Form("Professional"),
+    tailored_resume_id: Optional[int] = Form(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Generates a multi-tone cover letter, calculates version number, and persists record in database.
+    """
+    if tone not in VALID_TONES:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid tone '{tone}'. Supported tones are: {', '.join(sorted(VALID_TONES))}."
+        )
+
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile or not profile.resume_text:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No uploaded resume found for user. Please upload a resume first."
+        )
+
+    job = await job_service.get_job_by_id(db, job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Target job listing not found."
+        )
+
+    if tailored_resume_id:
+        t_res = db.query(TailoredResume).filter(
+            TailoredResume.id == tailored_resume_id,
+            TailoredResume.user_id == current_user.id
+        ).first()
+        if not t_res:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tailored resume record not found or does not belong to user."
+            )
+
+    # Determine next version per user + job + tone combination
+    latest = (
+        db.query(CoverLetter)
+        .filter(
+            CoverLetter.user_id == current_user.id,
+            CoverLetter.job_id == job_id,
+            CoverLetter.tone == tone
+        )
+        .order_by(CoverLetter.version.desc())
+        .first()
+    )
+    next_version = (latest.version + 1) if latest else 1
+
+    extracted_skills = engine.extract_skills(profile.resume_text)
+    candidate_name = current_user.full_name or "Candidate"
+
+    content = cover_letter_generator.generate(
+        job_title=job.title,
+        company=job.company,
+        job_description=job.description,
+        candidate_name=candidate_name,
+        candidate_skills=extracted_skills,
+        tone=tone
+    )
+
+    cover_letter_record = CoverLetter(
+        user_id=current_user.id,
+        job_id=job.id,
+        tailored_resume_id=tailored_resume_id,
+        content=content,
+        tone=tone,
+        version=next_version,
+        job_title=job.title,
+        company=job.company
+    )
+
+    db.add(cover_letter_record)
+    db.commit()
+    db.refresh(cover_letter_record)
+
+    return cover_letter_record
+
+
+@router.get("/cover-letters", response_model=List[CoverLetterResponse])
+async def list_cover_letters(
+    job_id: Optional[int] = None,
+    tone: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves all saved cover letters for the authenticated user, optionally filtered by job_id or tone.
+    """
+    query = db.query(CoverLetter).filter(CoverLetter.user_id == current_user.id)
+    if job_id:
+        query = query.filter(CoverLetter.job_id == job_id)
+    if tone:
+        query = query.filter(CoverLetter.tone == tone)
+
+    records = query.order_by(CoverLetter.created_at.desc()).all()
+    return records
+
+
+@router.get("/cover-letters/{cover_letter_id}", response_model=CoverLetterResponse)
+async def get_cover_letter(
+    cover_letter_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves a single saved cover letter by ID for the authenticated user.
+    """
+    record = (
+        db.query(CoverLetter)
+        .filter(CoverLetter.id == cover_letter_id, CoverLetter.user_id == current_user.id)
+        .first()
+    )
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cover letter record not found."
+        )
+    return record
+
+
+@router.delete("/cover-letters/{cover_letter_id}")
+async def delete_cover_letter(
+    cover_letter_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Deletes a saved cover letter record belonging to the authenticated user.
+    """
+    record = (
+        db.query(CoverLetter)
+        .filter(CoverLetter.id == cover_letter_id, CoverLetter.user_id == current_user.id)
+        .first()
+    )
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cover letter record not found."
+        )
+
+    db.delete(record)
+    db.commit()
+
+    return {"message": "Cover letter version deleted successfully"}

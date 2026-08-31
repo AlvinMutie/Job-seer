@@ -5,19 +5,19 @@ This document specifies the testing strategy, test markers, coverage reporting b
 
 ---
 
-## 1. Backend Pytest Metrics (139 Tests)
+## 1. Backend Pytest Metrics (147 Tests)
 
-- **Total Test Count**: **139 tests** (100% pass rate)
-- **Security Safety Gate Tests**: **84 tests** (`pytest -m security`)
-- **P3-04 Tailoring V2 Tests**: Added 8 integration and security tests in `backend/tests/test_tailored_resume.py`:
-  - `test_generate_and_persist_tailored_resume`
-  - `test_tailored_resume_version_increment`
-  - `test_independent_versions_per_job`
-  - `test_list_and_get_tailored_resumes`
-  - `test_compare_tailored_resume_diff`
-  - `test_delete_tailored_resume`
-  - `test_tailoring_unauthenticated_rejected`
-  - `test_tailoring_ownership_isolation`
+- **Total Test Count**: **147 tests** (100% pass rate)
+- **Security Safety Gate Tests**: **78 tests** (`pytest -m security`)
+- **P3-05 Cover Letter Tests**: Added 8 integration and security tests in `backend/tests/test_cover_letter.py`:
+  - `test_generate_and_persist_cover_letter`
+  - `test_cover_letter_version_increment_same_tone`
+  - `test_independent_versions_per_tone`
+  - `test_list_and_filter_cover_letters`
+  - `test_get_and_delete_cover_letter`
+  - `test_invalid_tone_rejected`
+  - `test_cover_letter_unauthenticated_rejected`
+  - `test_cover_letter_ownership_isolation`
 
 ---
 
@@ -42,8 +42,8 @@ Coverage is measured using `pytest-cov` against the `app/` package:
 cd backend
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing
 ```
-- **Overall Code Coverage**: **91% Baseline** (1,005 statements).
+- **Overall Code Coverage**: **91% Baseline** (1,096 statements).
 - `app/models/models.py`: **100%**
 - `app/schemas/profile.py`: **100%**
-- `app/services/tailor_service.py`: **84%**
+- `app/services/cover_letter.py`: **94%**
 - `app/routers/profile.py`: **84%**

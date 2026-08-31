@@ -116,6 +116,21 @@ export const tailoredResumeService = {
     delete: (id) => api.delete(`/resume/tailored/${id}`).then(res => res.data),
 };
 
+export const coverLetterService = {
+    generate: (job_id, tone = "Professional", tailored_resume_id = null) => {
+        const params = new URLSearchParams();
+        params.append('job_id', job_id);
+        params.append('tone', tone);
+        if (tailored_resume_id) {
+            params.append('tailored_resume_id', tailored_resume_id);
+        }
+        return api.post('/cover-letters', params).then(res => res.data);
+    },
+    list: (params = {}) => api.get('/cover-letters', { params: { ...params, t: Date.now() } }).then(res => res.data),
+    get: (id) => api.get(`/cover-letters/${id}?t=${Date.now()}`).then(res => res.data),
+    delete: (id) => api.delete(`/cover-letters/${id}`).then(res => res.data),
+};
+
 export const trackerService = {
     getApplications: (params = {}) => api.get('/applications', { params: { ...params, t: Date.now() } }).then(res => res.data),
     addApplication: (data) => api.post('/applications', data).then(res => res.data),

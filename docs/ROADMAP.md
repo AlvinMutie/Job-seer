@@ -36,7 +36,7 @@ flowchart TD
         P3-02[P3-02: Matching Engine V2 & Explainable Scoring ✓ COMPLETED]
         P3-03[P3-03: Resume Intelligence & ATS Health Check ✓ COMPLETED]
         P3-04[P3-04: Resume Tailoring V2 & Persistence ✓ COMPLETED]
-        P3-05[P3-05: Multi-Tone Cover Letters & Management]
+        P3-05[P3-05: Multi-Tone Cover Letters & Management ✓ COMPLETED]
         P3-06[P3-06: Application Tracker V2 & Kanban Board]
         P3-07[P3-07: Intelligent Command Center Dashboard]
     end
@@ -48,7 +48,7 @@ flowchart TD
 
 ## Completed Tasks
 
-### P0-00 through P3-03 (✓ ALL COMPLETED)
+### P0-00 through P3-04 (✓ ALL COMPLETED)
 
-### P3-04 — Resume Tailoring V2 & Persistence (✓ COMPLETED)
-- **Result**: Created `TailoredResume` model in `app/models/models.py`. Implemented deterministic per-user/job versioning (`v1`, `v2`, `v3`). Implemented `difflib`-based text comparison diff engine in `app/services/tailor_service.py`. Added endpoints `POST /resume/tailor`, `GET /resume/tailored`, `GET /resume/tailored/{id}`, `GET /resume/tailored/{id}/compare`, `DELETE /resume/tailored/{id}` in `app/routers/profile.py`. Created `ResumeDiffViewer.jsx` and updated `ResumeHub.jsx` to render saved tailored versions history, target job selection, version badges, diff comparison modal, and version deletion with confirmation. Added 8 integration and security tests in `backend/tests/test_tailored_resume.py`. **139 / 139 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.
+### P3-05 — Intelligent Cover Letters & Multi-Tone Persistence (✓ COMPLETED)
+- **Result**: Created `CoverLetter` model in `app/models/models.py`. Implemented multi-tone generator (`Professional`, `Enthusiastic`, `Executive`, `Technical`) in `app/services/cover_letter.py` with strict candidate factual integrity. Implemented deterministic per-user/job/tone versioning (`v1`, `v2`, `v3`). Added endpoints `POST /cover-letters`, `GET /cover-letters`, `GET /cover-letters/{id}`, `DELETE /cover-letters/{id}` in `app/routers/profile.py`. Created `CoverLetterViewer.jsx` and updated `ResumeHub.jsx` to render cover letters history list, tone radio selector, copy to clipboard, and version deletion with confirmation. Added 8 integration and security tests in `backend/tests/test_cover_letter.py`. **147 / 147 backend pytest cases passing** (91% coverage), **6 / 6 frontend unit tests passing**, production Vite build succeeded cleanly.

@@ -5,10 +5,10 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
-## Persistent Tailoring & Resource Ownership Isolation (P3-04)
+## Multi-Tone Cover Letters & Ownership Isolation (P3-05)
 
-`POST /resume/tailor`, `GET /resume/tailored`, `GET /resume/tailored/{id}`, `GET /resume/tailored/{id}/compare`, and `DELETE /resume/tailored/{id}` enforce strict security controls:
+`POST /cover-letters`, `GET /cover-letters`, `GET /cover-letters/{id}`, and `DELETE /cover-letters/{id}` enforce strict security boundaries:
 
-1. **Strict Resource Ownership Isolation**: Every query filters by `TailoredResume.user_id == current_user.id`. User A cannot view, compare, list, or delete User B's tailored resume versions. Attempting unauthorized access returns HTTP 404 `RESOURCE_NOT_FOUND` to prevent resource enumeration.
-2. **Parameterized ORM Execution**: Version lookup and database persistence execute via SQLAlchemy parameterized ORM queries. Raw SQL string interpolation is prohibited.
-3. **Non-Executable Diffing**: `difflib.ndiff` comparison treats resume texts strictly as inert data. Zero code or template evaluation occurs.
+1. **Tone Allowlist Validation**: The backend validates `tone` against an immutable allowlist (`{"Professional", "Enthusiastic", "Executive", "Technical"}`). Invalid values trigger HTTP 422 validation errors and cannot alter execution flow.
+2. **Resource Ownership Isolation**: All database queries enforce `CoverLetter.user_id == current_user.id`. User A cannot retrieve or delete User B's cover letters. Unauthorized requests return HTTP 404 `RESOURCE_NOT_FOUND` to prevent resource enumeration.
+3. **Factual Integrity Safeguards**: Cover letter generation strictly utilizes candidate skills and profile attributes parsed from the original resume. Zero fabricated degrees, false employers, or false titles are introduced.

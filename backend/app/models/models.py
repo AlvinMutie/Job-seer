@@ -76,6 +76,24 @@ class TailoredResume(Base):
     user = relationship("User")
     job = relationship("Job")
 
+class CoverLetter(Base):
+    __tablename__ = "cover_letters"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), index=True)
+    tailored_resume_id = Column(Integer, ForeignKey("tailored_resumes.id"), nullable=True)
+    content = Column(Text)
+    tone = Column(String, default="Professional", index=True)
+    version = Column(Integer, default=1)
+    job_title = Column(String, nullable=True)
+    company = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
+
+    user = relationship("User")
+    job = relationship("Job")
+    tailored_resume = relationship("TailoredResume")
+
 class ApplicationTracker(Base):
     __tablename__ = "application_tracker"
     id = Column(Integer, primary_key=True, index=True)

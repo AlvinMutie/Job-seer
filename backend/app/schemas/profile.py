@@ -76,3 +76,19 @@ class TailoredResumeCompareResponse(BaseModel):
     added_count: int
     removed_count: int
     unchanged_count: int
+
+
+class CoverLetterResponse(BaseModel):
+    id: int
+    user_id: int
+    job_id: int
+    tailored_resume_id: Optional[int] = None
+    content: str
+    tone: str
+    version: int
+    job_title: Optional[str] = None
+    company: Optional[str] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)
