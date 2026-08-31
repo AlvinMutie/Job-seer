@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, DollarSign, Target, Check, Loader2, Settings as SettingsIcon, Save, Briefcase, AlertCircle } from 'lucide-react';
+import { User, MapPin, DollarSign, Target, Check, Loader2, Settings as SettingsIcon, Save, Briefcase, AlertCircle, Info } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
@@ -67,7 +67,7 @@ function Settings() {
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
             <PageHeader
                 badgeText="CAREER PREFERENCES"
-                title="Account Settings & Profile"
+                title="Account Settings & Career Profile"
                 subtitle="Update your technical skills, experience level, and preferred role to optimize AI job matching calculations."
             />
 
@@ -81,45 +81,65 @@ function Settings() {
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Input
-                            label="Preferred Job Title"
-                            icon={Target}
-                            placeholder="e.g. Senior Frontend Engineer"
-                            required
-                            value={formData.preferred_role}
-                            onChange={e => setFormData({ ...formData, preferred_role: e.target.value })}
-                        />
+                        <div className="space-y-1">
+                            <Input
+                                label="Preferred Job Title"
+                                icon={Target}
+                                placeholder="e.g. Senior Frontend Engineer"
+                                required
+                                value={formData.preferred_role}
+                                onChange={e => setFormData({ ...formData, preferred_role: e.target.value })}
+                            />
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <Info size={11} className="text-indigo-400" /> Used to match role title fit (15% match weight).
+                            </p>
+                        </div>
 
-                        <Select
-                            label="Experience Level"
-                            icon={Briefcase}
-                            value={formData.experience_level}
-                            onChange={e => setFormData({ ...formData, experience_level: e.target.value })}
-                            options={[
-                                { value: 'Junior', label: 'Junior' },
-                                { value: 'Mid-Level', label: 'Mid-Level' },
-                                { value: 'Senior', label: 'Senior' },
-                                { value: 'Lead / Architect', label: 'Lead / Architect' }
-                            ]}
-                        />
+                        <div className="space-y-1">
+                            <Select
+                                label="Experience Level"
+                                icon={Briefcase}
+                                value={formData.experience_level}
+                                onChange={e => setFormData({ ...formData, experience_level: e.target.value })}
+                                options={[
+                                    { value: 'Junior', label: 'Junior' },
+                                    { value: 'Mid-Level', label: 'Mid-Level' },
+                                    { value: 'Senior', label: 'Senior' },
+                                    { value: 'Lead / Architect', label: 'Lead / Architect' }
+                                ]}
+                            />
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <Info size={11} className="text-indigo-400" /> Used to evaluate experience alignment (15% match weight).
+                            </p>
+                        </div>
 
-                        <Input
-                            label="Location Preference"
-                            icon={MapPin}
-                            placeholder="e.g. Remote, Nairobi, NYC"
-                            required
-                            value={formData.location_preference}
-                            onChange={e => setFormData({ ...formData, location_preference: e.target.value })}
-                        />
+                        <div className="space-y-1">
+                            <Input
+                                label="Location Preference"
+                                icon={MapPin}
+                                placeholder="e.g. Remote, Nairobi, NYC"
+                                required
+                                value={formData.location_preference}
+                                onChange={e => setFormData({ ...formData, location_preference: e.target.value })}
+                            />
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <Info size={11} className="text-indigo-400" /> Filters job recommendations by work mode and location.
+                            </p>
+                        </div>
 
-                        <Input
-                            label="Salary Expectation (Annual)"
-                            icon={DollarSign}
-                            placeholder="e.g. $100,000 - $140,000"
-                            required
-                            value={formData.salary_expectation}
-                            onChange={e => setFormData({ ...formData, salary_expectation: e.target.value })}
-                        />
+                        <div className="space-y-1">
+                            <Input
+                                label="Salary Expectation (Annual)"
+                                icon={DollarSign}
+                                placeholder="e.g. $100,000 - $140,000"
+                                required
+                                value={formData.salary_expectation}
+                                onChange={e => setFormData({ ...formData, salary_expectation: e.target.value })}
+                            />
+                            <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <Info size={11} className="text-indigo-400" /> Stores your compensation benchmark for offer evaluations.
+                            </p>
+                        </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -132,6 +152,9 @@ function Settings() {
                             value={formData.skills}
                             onChange={e => setFormData({ ...formData, skills: e.target.value })}
                         ></textarea>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                            <Info size={11} className="text-indigo-400" /> Evaluated by AI match engine against job listings (40% skills overlap weight).
+                        </p>
                     </div>
 
                     {message.text && (

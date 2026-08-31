@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2, UserCheck, Compass } from 'lucide-react';
+import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2, UserCheck, Compass, Check } from 'lucide-react';
 import { jobService, authService, trackerService, dashboardService } from '../services/api';
 import TailorModal from '../components/TailorModal';
 import PageHeader from '../components/ui/PageHeader';
@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import EmptyState from '../components/ui/EmptyState';
+import NextBestAction from '../components/ui/NextBestAction';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
@@ -125,7 +126,9 @@ function Dashboard() {
         }
     };
 
-    const isNewUser = !user?.profile?.has_resume && (analytics?.total_applications || 0) === 0;
+    const hasProfile = user?.profile?.preferred_role && user?.profile?.skills;
+    const hasResume = Boolean(user?.profile?.resume_text);
+    const totalApps = analytics?.total_applications || 0;
 
     return (
         <div className="space-y-8 animate-fade-in relative">
@@ -163,49 +166,48 @@ function Dashboard() {
                 }
             />
 
-            {/* Candidate Workspace Onboarding Banner (For New Users) */}
-            {isNewUser && (
-                <Card variant="glass" className="p-6 bg-gradient-to-r from-indigo-950/30 via-slate-900 to-indigo-950/20 border-indigo-500/30 space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-600/20 border border-indigo-500/30 rounded-xl flex items-center justify-center text-indigo-400">
-                            <Compass size={22} />
-                        </div>
-                        <div>
-                            <h3 className="text-base font-bold text-white">Let's build your job search workspace</h3>
-                            <p className="text-xs text-slate-400">Follow 3 quick steps to unlock V2 match scoring and automated resume tailoring.</p>
-                        </div>
+            {/* Next Best Action Proactive Banner */}
+            <NextBestAction user={user} analytics={analytics} />
+
+            {/* Career Progress Signal Strip */}
+            <Card variant="flat" className="p-4 bg-slate-900/60 flex flex-wrap items-center justify-between gap-4 border-slate-800">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Career Readiness Signals</span>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                    <div className="flex items-center gap-1.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${hasProfile ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
+                            {hasProfile ? <Check size={12} /> : '1'}
+                        </span>
+                        <span className={hasProfile ? 'text-white' : 'text-slate-500'}>Profile</span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                        <a href="/settings" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
-                            <div className="flex items-center justify-between mb-2">
-                                <Badge variant="indigo" size="sm">Step 1</Badge>
-                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                            </div>
-                            <h4 className="text-sm font-bold text-white">1. Configure Preferences</h4>
-                            <p className="text-xs text-slate-400 mt-0.5">Set target title & technical skills</p>
-                        </a>
+                    <span className="text-slate-700">➔</span>
 
-                        <a href="/resume-hub" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
-                            <div className="flex items-center justify-between mb-2">
-                                <Badge variant="cyan" size="sm">Step 2</Badge>
-                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                            </div>
-                            <h4 className="text-sm font-bold text-white">2. Upload Base CV</h4>
-                            <p className="text-xs text-slate-400 mt-0.5">Run 10-layer ATS health scan</p>
-                        </a>
-
-                        <a href="/jobs" className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-indigo-500/40 transition-colors group">
-                            <div className="flex items-center justify-between mb-2">
-                                <Badge variant="emerald" size="sm">Step 3</Badge>
-                                <ChevronRight size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
-                            </div>
-                            <h4 className="text-sm font-bold text-white">3. Discover & Match Jobs</h4>
-                            <p className="text-xs text-slate-400 mt-0.5">Explore tech roles & calculate fit</p>
-                        </a>
+                    <div className="flex items-center gap-1.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${hasResume ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
+                            {hasResume ? <Check size={12} /> : '2'}
+                        </span>
+                        <span className={hasResume ? 'text-white' : 'text-slate-500'}>Base CV</span>
                     </div>
-                </Card>
-            )}
+
+                    <span className="text-slate-700">➔</span>
+
+                    <div className="flex items-center gap-1.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${jobs.length > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
+                            {jobs.length > 0 ? <Check size={12} /> : '3'}
+                        </span>
+                        <span className={jobs.length > 0 ? 'text-white' : 'text-slate-500'}>Job Search</span>
+                    </div>
+
+                    <span className="text-slate-700">➔</span>
+
+                    <div className="flex items-center gap-1.5">
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${totalApps > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
+                            {totalApps > 0 ? <Check size={12} /> : '4'}
+                        </span>
+                        <span className={totalApps > 0 ? 'text-white' : 'text-slate-500'}>Applications ({totalApps})</span>
+                    </div>
+                </div>
+            </Card>
 
             {/* KPI Stat Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

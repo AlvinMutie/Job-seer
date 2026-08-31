@@ -1,4 +1,4 @@
-# Job Seer Design System & UI Foundation (UX-01 to UX-05)
+# Job Seer Design System & UI Foundation (UX-01 to UX-08)
 
 ## Executive Summary
 This document specifies the visual identity, design tokens, typography hierarchy, semantic color matrix, reusable UI component standards, responsive guidelines, and accessibility conventions for **Job Seer**.
@@ -8,9 +8,9 @@ This document specifies the visual identity, design tokens, typography hierarchy
 ## 1. Visual Identity & Brand Personality
 
 Job Seer communicates:
-- **Intelligence**: Clear, explainable score metrics and structured data presentation.
+- **Intelligence**: Clear, explainable score metrics, proactive candidate guidance, and structured data presentation.
 - **Professionalism**: Modern dark-slate palette with indigo/purple accents. Avoids sci-fi gimmicks, heavy 3D scenes, or particle blobs.
-- **Momentum**: High-contrast typography and clear CTA affordances that move candidates from CV upload to interview invitations.
+- **Momentum**: High-contrast typography, decision-first Next Best Action recommendations, and clear CTA affordances that move candidates from CV upload to interview invitations.
 
 ---
 
@@ -35,7 +35,7 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 3. Surface & Depth Hierarchy Scale (UX-04 / UX-05)
+## 3. Surface & Depth Hierarchy Scale (UX-04 to UX-08)
 
 - **Level 1 (Page Surface)**: `#0b0f19` solid slate app background.
 - **Level 2 (Content Panels)**: Glass slate containers (`bg-slate-900/75 border border-white/10 rounded-2xl`).
@@ -43,12 +43,12 @@ Job Seer uses CSS custom properties defined in `frontend/src/index.css`:
 
 ---
 
-## 4. Navigation & Workflow Grouping (UX-05)
+## 4. Navigation & Workflow Grouping (UX-05 to UX-08)
 
 Sidebar and drawer menus organize application tools into 4 core candidate workflow sections:
-1. **Overview**: Dashboard Command Center
-2. **Discover**: Jobs Discovery Hub, V2 Matches
-3. **Manage**: Application Tracker (Kanban / List), Resume Intelligence Hub
+1. **Overview**: Dashboard Command Center & Next Best Action Proactive Banner
+2. **Discover**: Jobs Discovery Hub, V2 Explainable Matches
+3. **Manage**: Application Tracker (Kanban / List), Resume Intelligence Studio
 4. **Account**: Candidate Profile & Career Preferences
 
 ---
@@ -75,6 +75,7 @@ Sidebar and drawer menus organize application tools into 4 core candidate workfl
 7. **`EmptyState.jsx`**: Standardized empty state card with icon, title, description, and action button slot.
 8. **`LoadingSkeleton.jsx`**: Skeleton loader (`card`, `table-row`, `line`) for asynchronous feedback.
 9. **`PageHeader.jsx`**: Standardized header block with title, subtitle, badge tag, and action slot.
+10. **`NextBestAction.jsx`**: Proactive candidate recommendation card evaluating candidate setup state and pipeline progress.
 
 ---
 

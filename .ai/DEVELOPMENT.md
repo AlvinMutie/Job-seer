@@ -5,19 +5,21 @@ This document outlines the architecture, coding guidelines, error handling frame
 
 ---
 
-## 1. UX Architecture & Frontend Polish (UX-01 to UX-05)
+## 1. UX Architecture & Product Intelligence (UX-01 to UX-08)
 
-UX-01 through UX-05 established a modern, product-grade frontend architecture:
+UX-01 through UX-08 established a modern, product-grade frontend architecture:
+
+### Next Best Action & Product Intelligence (UX-08)
+- `NextBestAction.jsx` evaluates candidate state (Profile setup, Base CV upload, Job discovery, High match review, Interview preparation) and surfaces a high-priority "Next Move" action card.
+- Career readiness progress signals (Profile ➔ Base CV ➔ Job Search ➔ Applications) rendered on the Dashboard.
+
+### Candidate Workflow & Context Preservation (UX-07)
+- Continuous candidate workflow (**Discover → Match → Prepare → Apply → Track**).
+- Target opportunity context preserved across Jobs Hub, Matches, and Resume Hub via URL query parameters (`?jobId=...`).
 
 ### Navigation & Workflow Organization (UX-05)
 - Organized into 4 workflow sections: **Overview** (`/dashboard`), **Discover** (`/jobs`, `/matches`), **Manage** (`/tracker`, `/resume-hub`), and **Account** (`/settings`).
 - Mobile slide-down navigation drawer with touch-friendly navigation targets.
-
-### Candidate Onboarding & Guidance (UX-05)
-- Automated detection of new candidates (unuploaded CV or 0 applications) triggering a 3-step setup banner on the Dashboard:
-  1. Configure Preferences
-  2. Upload Base CV
-  3. Discover & Match Jobs
 
 ### Visual Polish & Surface Hierarchy (UX-04)
 - 3-level surface depth scale (`#0b0f19` app background, `glass-card` slate panels, elevated modal overlays).

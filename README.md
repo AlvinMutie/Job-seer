@@ -16,12 +16,13 @@ Job Seer addresses this problem by parsing candidate resumes, normalizing techni
 
 ## Core Capabilities
 
-- **Intelligent Command Center Dashboard**: Real-time aggregated workspace (`Dashboard.jsx`) featuring KPI stat cards, application status breakdown, ATS health indicators, action launchpad, and job recommendations.
+- **Intelligent Command Center Dashboard**: Real-time aggregated workspace (`Dashboard.jsx`) featuring Proactive Next Best Action recommendations (`NextBestAction.jsx`), Career Readiness signals, KPI stat cards, application status breakdown, ATS health indicators, action launchpad, and job recommendations.
+- **Continuous Candidate Workflow**: Seamless 5-stage candidate journey (**DISCOVER → MATCH → PREPARE → APPLY → TRACK**) preserving target opportunity context across Jobs Hub, Matches, and Resume Hub.
 - **ATS Health & Resume Intelligence**: Automated ATS readiness scoring (0-100), section completeness detection, contact presence checks, technical skill categorization across 7 domains (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`), and targeted improvements.
 - **Matching Engine V2 & Explainable Scoring**: Multi-factor explainable scoring breakdown (Skills 40%, Content 30%, Experience 15%, Role Title 15%) with human-readable score rationale, score weights, matched/missing skill chips, and interactive analytics modal (`MatchBreakdownModal.jsx`).
 - **Resume Tailoring V2 & Persistence**: Persistent versioned resume tailoring (`v1`, `v2`, `v3`) with factual candidate integrity guarantees, `difflib` line-by-line diff comparison modal (`ResumeDiffViewer.jsx`), and version history management.
 - **Intelligent Cover Letters & Multi-Tone Persistence**: Multi-tone cover letter generator (`Professional`, `Enthusiastic`, `Executive`, `Technical`) with per-tone versioning, copy-to-clipboard modal (`CoverLetterViewer.jsx`), and user ownership isolation.
-- **Application Tracker V2 & Kanban Board Workspace**: Complete Kanban pipeline board (`Tracker.jsx`) with HTML5 drag-and-drop status movements across 5 stages (`Not Applied`, `Applied`, `Interview`, `Offer`, `Rejected`), optimistic UI updates with server rollback, date tracking (`applied_date`, `interview_date`, `follow_up_date`), safe URL link handling, detail modal (`ApplicationDetailModal.jsx`), and view switcher (Board/List).
+- **Application Tracker V2 & Kanban Board Workspace**: Complete Kanban pipeline board (`Tracker.jsx`) with HTML5 drag-and-drop status movements across 5 stages (`Not Applied`, `Applied`, `Interview`, `Offer`, `Rejected`), optimistic UI updates with server rollback, date tracking (`applied_date`, `interview_date`, `follow_up_date`), stage-specific action guidance hints, detail modal (`ApplicationDetailModal.jsx`), and view switcher (Board/List).
 - **Job Discovery & Repository Hub**: Dedicated job repository (`JobsHub.jsx`) with keyword search, location filtering, work mode filters (`Remote`, `Hybrid`, `On-site`), experience level filters, column sorting (`Newest`, `Oldest`, `Title`, `Company`), and database-level limit/offset pagination.
 - **Production Security & Performance**: Dual `HttpOnly` `SameSite=Lax` cookies & Bearer tokens, sliding window rate limiting (`RateLimiter`), HTTP security headers (`nosniff`, `DENY`, `strict-origin-when-cross-origin`, `1; mode=block`), and compound database indexes.
 - **Deployment & Production Readiness**: Containerized Docker image (`Dockerfile`, `docker-compose.yml`), liveness (`GET /health`) and readiness (`GET /health/ready`) probes, environment template (`.env.example`), and complete deployment procedures.
@@ -54,6 +55,7 @@ cd backend
 ./venv/bin/pytest tests/ -v
 
 # Backend Security Suite (90 tests passing)
+cd backend
 ./venv/bin/pytest tests/ -m security -v
 
 # Frontend Unit Tests (6 tests passing)
@@ -61,6 +63,7 @@ cd frontend
 npm test
 
 # Production Build
+cd frontend
 npm run build
 ```
 
