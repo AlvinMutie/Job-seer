@@ -8,7 +8,7 @@ def test_public_root_health_check(client):
     assert data["status"] == "running"
 
 
-def test_public_get_jobs(client, seed_test_jobs):
+def test_public_get_jobs_unauthenticated(client, seed_test_jobs):
     """Verify GET /jobs is accessible publicly without authentication."""
     response = client.get("/jobs")
     assert response.status_code == 200
@@ -16,53 +16,132 @@ def test_public_get_jobs(client, seed_test_jobs):
     assert len(jobs) == 2
 
 
-def test_match_unauthenticated_current_vulnerability(client, seed_test_jobs):
+def test_public_get_jobs_authenticated(client, test_user, seed_test_jobs):
+    """Verify GET /jobs remains accessible when authenticated."""
+    response = client.get("/jobs", headers=test_user["headers"])
+    assert response.status_code == 200
+    jobs = response.json()
+    assert len(jobs) == 2
+
+
+def test_match_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY VULNERABILITY CAPTURE (SEC-02):
-    Verify that POST /match currently allows unauthenticated requests and returns 200 OK.
-    DO NOT FIX YET — This test records the baseline vulnerability.
+    SECURITY BOUNDARY VERIFICATION (P0-02):
+    Verify that POST /match without Authorization header is rejected with 401 Unauthorized.
+    Payload is valid to distinguish 401 auth failure from 422 schema error.
     """
     payload = {
         "resume_text": "I am a Senior Python developer skilled in FastAPI and AWS.",
         "job_id": seed_test_jobs[0].id
     }
     response = client.post("/match", data=payload)
-    # Records current vulnerable behavior (returns 200 without auth)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_match_malformed_jwt_rejected(client, seed_test_jobs):
+    """Verify POST /match with invalid JWT returns 401 Unauthorized."""
+    payload = {
+        "resume_text": "Python developer",
+        "job_id": seed_test_jobs[0].id
+    }
+    headers = {"Authorization": "Bearer invalid.jwt.token"}
+    response = client.post("/match", data=payload, headers=headers)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_match_authenticated_success(client, test_user, seed_test_jobs):
+    """Verify POST /match with valid Bearer token processes request and returns 200 OK."""
+    payload = {
+        "resume_text": "I am a Senior Python developer skilled in FastAPI and AWS.",
+        "job_id": seed_test_jobs[0].id
+    }
+    response = client.post("/match", data=payload, headers=test_user["headers"])
     assert response.status_code == 200
-    assert "match_percentage" in response.json()
+    data = response.json()
+    assert "match_percentage" in data
+    assert "matched_skills" in data
 
 
-def test_tailor_resume_unauthenticated_current_vulnerability(client, seed_test_jobs):
+def test_tailor_resume_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY VULNERABILITY CAPTURE (SEC-02):
-    Verify that POST /tailor-resume currently allows unauthenticated requests and returns 200 OK.
-    DO NOT FIX YET — This test records the baseline vulnerability.
+    SECURITY BOUNDARY VERIFICATION (P0-02):
+    Verify that POST /tailor-resume without Authorization header is rejected with 401 Unauthorized.
     """
     payload = {
         "resume_text": "Python developer",
         "job_id": seed_test_jobs[0].id
     }
     response = client.post("/tailor-resume", data=payload)
-    # Records current vulnerable behavior (returns 200 without auth)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_tailor_resume_malformed_jwt_rejected(client, seed_test_jobs):
+    """Verify POST /tailor-resume with invalid JWT returns 401 Unauthorized."""
+    payload = {
+        "resume_text": "Python developer",
+        "job_id": seed_test_jobs[0].id
+    }
+    headers = {"Authorization": "Bearer invalid.jwt.token"}
+    response = client.post("/tailor-resume", data=payload, headers=headers)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_tailor_resume_authenticated_success(client, test_user, seed_test_jobs):
+    """Verify POST /tailor-resume with valid Bearer token processes request and returns 200 OK."""
+    payload = {
+        "resume_text": "Python developer",
+        "job_id": seed_test_jobs[0].id
+    }
+    response = client.post("/tailor-resume", data=payload, headers=test_user["headers"])
     assert response.status_code == 200
-    assert "suggestions" in response.json()
+    data = response.json()
+    assert "suggestions" in data
+    assert data["job_title"] == "Senior Python Developer"
 
 
-def test_generate_cover_letter_unauthenticated_current_vulnerability(client, seed_test_jobs):
+def test_generate_cover_letter_unauthenticated_rejected(client, seed_test_jobs):
     """
-    SECURITY VULNERABILITY CAPTURE (SEC-02):
-    Verify that POST /generate-cover-letter currently allows unauthenticated requests and returns 200 OK.
-    DO NOT FIX YET — This test records the baseline vulnerability.
+    SECURITY BOUNDARY VERIFICATION (P0-02):
+    Verify that POST /generate-cover-letter without Authorization header is rejected with 401 Unauthorized.
     """
     payload = {
         "job_id": seed_test_jobs[0].id,
-        "candidate_name": "Anonymous Candidate",
+        "candidate_name": "Test Candidate",
         "resume_text": "Python developer"
     }
     response = client.post("/generate-cover-letter", data=payload)
-    # Records current vulnerable behavior (returns 200 without auth)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Not authenticated"
+
+
+def test_generate_cover_letter_malformed_jwt_rejected(client, seed_test_jobs):
+    """Verify POST /generate-cover-letter with invalid JWT returns 401 Unauthorized."""
+    payload = {
+        "job_id": seed_test_jobs[0].id,
+        "candidate_name": "Test Candidate",
+        "resume_text": "Python developer"
+    }
+    headers = {"Authorization": "Bearer invalid.jwt.token"}
+    response = client.post("/generate-cover-letter", data=payload, headers=headers)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Could not validate credentials"
+
+
+def test_generate_cover_letter_authenticated_success(client, test_user, seed_test_jobs):
+    """Verify POST /generate-cover-letter with valid Bearer token processes request and returns 200 OK."""
+    payload = {
+        "job_id": seed_test_jobs[0].id,
+        "candidate_name": "Test Candidate",
+        "resume_text": "Python developer"
+    }
+    response = client.post("/generate-cover-letter", data=payload, headers=test_user["headers"])
     assert response.status_code == 200
-    assert "cover_letter" in response.json()
+    data = response.json()
+    assert "cover_letter" in data
 
 
 def test_resource_owner_profile_isolation(client, test_user, secondary_user):

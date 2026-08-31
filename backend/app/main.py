@@ -82,7 +82,12 @@ async def get_jobs(
     return jobs
 
 @app.post("/match")
-async def match_resume(resume_text: str = Form(...), job_id: int = Form(...), db: Session = Depends(get_db)):
+async def match_resume(
+    resume_text: str = Form(...), 
+    job_id: int = Form(...), 
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     job = await job_service.get_job_by_id(db, job_id)
     if not job:
         return {"error": "Job not found"}
@@ -108,6 +113,7 @@ async def generate_cover_letter_api(
     job_id: int = Form(...),
     candidate_name: str = Form(...),
     resume_text: str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     job = await job_service.get_job_by_id(db, job_id)
@@ -124,6 +130,7 @@ async def generate_cover_letter_api(
 async def tailor_resume_api(
     job_id: int = Form(...),
     resume_text: str = Form(...),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     job = await job_service.get_job_by_id(db, job_id)
