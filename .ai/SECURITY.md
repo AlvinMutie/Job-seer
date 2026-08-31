@@ -19,13 +19,24 @@ This document specifies the security requirements, threat catalog, upload bounda
 
 ---
 
+## Error Handling & Information Disclosure Prevention (P2-01)
+
+The backend enforces centralized exception handling (`app/core/errors.py`) to prevent sensitive implementation detail leakage:
+
+1. **Sanitized 500 Responses**: Unhandled internal exceptions return a generic safe message `"An unexpected server error occurred."` with zero raw tracebacks or exception internals exposed to the client.
+2. **Secrets Protection**: Exception responses never reveal database connection strings, passwords, JWT secrets, or filesystem paths.
+3. **Structured Error Codes**: Standardizes error codes (`VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `TOKEN_INVALID`, `UPLOAD_TOO_LARGE`) while preserving backward-compatible top-level `detail` fields for frontend rendering.
+4. **Server-Side Logging**: Full tracebacks are logged server-side via `logging.exception` for developer diagnosis without client exposure.
+
+---
+
 ## Resume Upload Security & Safety Gate (P0-03 / P1-05)
 
 `POST /upload-resume` enforces a 10-layer security boundary verified by automated safety tests:
 
 1. **Extension Whitelisting**: Strictly permits `.pdf`, `.docx`, `.txt` (case-insensitive). Rejects executable scripts (`.exe`, `.py`, `.sh`, `.js`, `.php`, `.html`, `.jpg`, `.png`, `.zip`, `.doc`) with `400 Bad Request`.
-2. **MIME Magic Byte Verification**: Validates PDF header (`%PDF-`), DOCX header (`PK\x03\x04`), and TXT UTF-8 decodability. Executables or binaries disguised with fake extensions are rejected.
-3. **File Size Boundaries**: Enforces 10MB (`10,485,760 bytes`) maximum file size limit. Oversized uploads return `413 Content Too Large`. Empty (0-byte) files return `400 Bad Request`.
+2. **MIME Magic Byte Verification**: Validates PDF header (`%PDF-`), DOCX header (`PK\x03\x04`), and TXT UTF-8 decodability.
+3. **File Size Boundaries**: Enforces 10MB (`10,485,760 bytes`) maximum file size limit. Oversized uploads return `413 Content Too Large`.
 4. **Path Traversal Protection**: Client-supplied filenames (e.g. `../../evil.txt`, `/etc/passwd.txt`) are discarded for storage purposes.
 5. **Server UUID Filenames**: Files are saved strictly in `uploads/` using server-generated UUIDs (`resume_{user_id}_{uuid.hex}{ext}`).
 6. **Old File Lifecycle Cleanup**: Uploading a new resume automatically deletes the previous stored resume from disk.
@@ -38,7 +49,7 @@ This document specifies the security requirements, threat catalog, upload bounda
 The backend enforces strict JWT authentication validation across all protected routes via `app/auth.py` (`get_current_user`):
 
 1. **Secret Key Verification**: Signed using externalized `settings.SECRET_KEY`. Tokens signed with unauthorized keys are rejected with `401 Unauthorized`.
-2. **Algorithm Restriction**: Strictly specifies `algorithms=[settings.ALGORITHM]` (`HS256`). Arbitrary algorithm claims (e.g. `HS512` or `none`) are rejected.
+2. **Algorithm Restriction**: Strictly specifies `algorithms=[settings.ALGORITHM]` (`HS256`).
 3. **Signature & Expiration Validation**: Automatically rejects expired (`exp`) or payload-tampered tokens.
 4. **Subject Claim Verification**: Requires valid `sub` claim mapping to an active database user.
-5. **Scheme Enforcement**: Strictly enforces `Authorization: Bearer <token>`. Invalid schemes (Basic, Token) or empty Bearer tokens are rejected.
+5. **Scheme Enforcement**: Strictly enforces `Authorization: Bearer <token>`.

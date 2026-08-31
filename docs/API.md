@@ -19,6 +19,54 @@
 
 ---
 
+## Standard Error Response Format (P2-01)
+
+All HTTP error responses return a standardized JSON structure:
+
+```json
+{
+  "detail": "The requested job was not found.",
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "The requested job was not found.",
+    "details": null
+  }
+}
+```
+
+For validation errors (`422 Unprocessable Entity`), structured field details are returned:
+
+```json
+{
+  "detail": "Request validation error: invalid fields provided",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Request validation error: invalid fields provided",
+    "details": [
+      {
+        "field": "email",
+        "message": "field required"
+      }
+    ]
+  }
+}
+```
+
+### Common Error Codes
+
+- `VALIDATION_ERROR` (422) — Missing or invalid request parameters
+- `AUTHENTICATION_REQUIRED` (401) — Missing Authorization header
+- `INVALID_CREDENTIALS` (401) — Incorrect login username or password
+- `TOKEN_INVALID` (401) — Invalid or tampered Bearer token
+- `RESOURCE_NOT_FOUND` (404) — Requested database resource not found
+- `CONFLICT` (400) — Resource conflict (e.g. email already registered)
+- `UNSUPPORTED_FILE_TYPE` (400) — Forbidden upload extension
+- `INVALID_FILE_CONTENT` (400) — Invalid MIME magic bytes or non-UTF-8 text
+- `UPLOAD_TOO_LARGE` (413) — Upload size exceeds 10MB limit
+- `INTERNAL_SERVER_ERROR` (500) — Unhandled server error (sanitized output)
+
+---
+
 ## CORS Security Policy (P0-04)
 
 - **Allowed Origins**: Configured via `settings.ALLOWED_ORIGINS` (default: `http://localhost:5173,http://localhost:3000`).

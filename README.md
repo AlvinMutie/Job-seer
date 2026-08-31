@@ -21,6 +21,7 @@ Smart Job Hunter addresses this problem by parsing candidate resumes, normalizin
 - **Resume Tailoring**: Rule-based suggestion engine identifying missing skill requirements for specific job listings.
 - **Cover Letter Generation**: Dynamic cover letter template formatting tailored to specific roles and extracted skills.
 - **Application Pipeline Tracker**: Application status tracking (Not Applied, Applied, Interview, Offer, Rejected).
+- **Centralized Error Handling**: Standardized API error responses (`ErrorCode` taxonomy) with safe 500 error sanitization and zero detail leakage.
 
 ---
 
@@ -74,13 +75,14 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 │                 FastAPI REST Backend                   │
 │  ┌───────────────────┐        ┌─────────────────────┐  │
 │  │   app.core.config │        │    app/schemas/     │  │
-│  └─────────┬─────────┘        │   (Pydantic DTOs)   │  │
-│            │                  └──────────┬──────────┘  │
+│  │   app.core.errors │        │   (Pydantic DTOs)   │  │
+│  └─────────┬─────────┘        └──────────┬──────────┘  │
+│            │                             │             │
 │  ┌─────────▼─────────┐                   │             │
-│  │   app/routers/    │                    │             │
-│  │ (auth,jobs,match) │                    │             │
-│  └─────────┬─────────┘                    │             │
-│            └──────────────────────────────┘             │
+│  │   app/routers/    │                   │             │
+│  │ (auth,jobs,match) │                   │             │
+│  └─────────┬─────────┘                   │             │
+│            └─────────────────────────────┘             │
 └──────────────────────────┬─────────────────────────────┘
                            │ SQLAlchemy ORM
 ┌──────────────────────────▼─────────────────────────────┐
@@ -109,7 +111,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 ### Testing Infrastructure
 - **Framework**: `pytest` 9.1+ with `pytest-cov` and FastAPI `TestClient`
 - **Database Isolation**: In-memory SQLite (`sqlite:///:memory:`) with SQLAlchemy `StaticPool`
-- **Coverage Baseline**: **91% Overall Code Coverage (100% auth.py & tailor_service.py coverage)**
+- **Coverage Baseline**: **90% Overall Code Coverage (100% auth.py & main.py coverage)**
 
 ---
 
@@ -119,7 +121,7 @@ The matching engine uses a hybrid statistical NLP scoring model rather than gene
 Smart-Job-Hunter/
 ├── backend/
 │   ├── app/
-│   │   ├── core/           # Centralized configuration (config.py)
+│   │   ├── core/           # Centralized config (config.py) & errors (errors.py)
 │   │   ├── models/         # SQLAlchemy ORM database models (models.py)
 │   │   ├── routers/        # APIRouter modules (auth, jobs, matching, profile, applications)
 │   │   ├── schemas/        # Pydantic DTO schemas (auth, profile, matching, applications)
@@ -128,7 +130,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT generation and verification (100% coverage)
 │   │   ├── database.py     # Database engine and session management
 │   │   └── main.py         # App entry point & router registration (36 lines)
-│   ├── tests/              # Automated test suite (92 tests)
+│   ├── tests/              # Automated test suite (103 tests)
 │   ├── pyproject.toml      # Pytest configuration, markers, coverage settings
 │   ├── requirements.txt    # Backend dependencies
 │   └── seed_jobs.py        # Seed dataset script
@@ -236,10 +238,10 @@ For full endpoint definitions and payload contracts, consult [docs/API.md](file:
 ```bash
 cd backend
 
-# Run full test suite (92 tests)
+# Run full test suite (103 tests)
 ./venv/bin/pytest tests/ -v
 
-# Run with test coverage (91% baseline)
+# Run with test coverage (90% baseline)
 ./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
 
 # Run specific test markers
@@ -249,9 +251,9 @@ cd backend
 ./venv/bin/pytest tests/ -m regression -v
 ```
 
-- **Total Test Count**: **92 tests**
-- **Pass Rate**: **100% (92 / 92)**
-- **Measured Code Coverage**: **91% Baseline**
+- **Total Test Count**: **103 tests**
+- **Pass Rate**: **100% (103 / 103)**
+- **Measured Code Coverage**: **90% Baseline**
 - **Test Database**: In-memory SQLite (`sqlite:///:memory:`) using `StaticPool` (zero side-effects on development database).
 
 ---
@@ -260,3 +262,6 @@ cd backend
 
 - **Phase 0 (Security & Baseline — COMPLETED)**: P0-00 through P0-05 completed.
 - **Phase 1 (Modular Monolith Refactoring — COMPLETED)**: P1-01 through P1-05 completed.
+- **Phase 2 (Feature & Schema Polish)**:
+  - `P2-01`: Enhanced Error Handling & Standardized API Responses (**Completed — 103 tests**)
+  - `P2-02`: Application Tracker Filtering & Pagination (*Pending*)

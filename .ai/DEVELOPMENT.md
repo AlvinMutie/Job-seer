@@ -1,96 +1,108 @@
-# DEVELOPMENT.md — Local Development & Engineering Standards
+# DEVELOPMENT.md — Developer & Architectural Guide
 
-## Setup Instructions
-
-### Environment Requirements
-- Python 3.10+
-- Node.js 18+
-- npm 9+
+## Executive Overview
+This document outlines the architecture, coding guidelines, error handling framework, and development practices for **Smart Job Hunter**.
 
 ---
 
-## 1. Backend Setup
+## 1. Centralized Error Infrastructure
 
-```bash
-cd backend
+Error handling is centralized in `backend/app/core/errors.py`. The framework provides standardized API error structures, error code taxonomies, custom exceptions, and global exception handlers.
 
-# Create virtual environment
-python3 -m venv venv
+### Error Code Taxonomy (`ErrorCode`)
 
-# Activate virtual environment (Linux/Mac)
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Download required spaCy NLP model
-python -m spacy download en_core_web_sm
-
-# Copy environment template to .env (do NOT commit .env to Git)
-cp .env.example .env
-
-# Seed database with sample jobs
-python seed_jobs.py
-
-# Run FastAPI server
-uvicorn app.main:app --reload --port 8000
+```python
+from app.core.errors import ErrorCode
 ```
 
-The API server will run at `http://localhost:8000`. Direct API docs available at `http://localhost:8000/docs`.
+| Error Code | HTTP Status | Description |
+| ---------- | ----------- | ----------- |
+| `VALIDATION_ERROR` | 422 | Request body or parameter validation failure |
+| `AUTHENTICATION_REQUIRED` | 401 | Missing Authorization header |
+| `INVALID_CREDENTIALS` | 401 | Wrong username or password |
+| `TOKEN_INVALID` | 401 | Invalid or tampered JWT signature |
+| `TOKEN_EXPIRED` | 401 | Expired JWT `exp` claim |
+| `FORBIDDEN` | 403 | Insufficient permissions for resource |
+| `RESOURCE_NOT_FOUND` | 404 | Requested database entity or route not found |
+| `CONFLICT` | 400 / 409 | Entity conflict (e.g. duplicate email) |
+| `UNSUPPORTED_FILE_TYPE` | 400 | Forbidden file extension (.exe, .py, etc.) |
+| `INVALID_FILE_CONTENT` | 400 | File header signature / MIME magic byte mismatch |
+| `UPLOAD_TOO_LARGE` | 413 | File size exceeds 10MB limit |
+| `UPLOAD_INVALID` | 400 | General file upload validation failure |
+| `PROCESSING_ERROR` | 400 / 500 | Business logic processing error |
+| `DATABASE_ERROR` | 500 | Database query or connection error |
+| `INTERNAL_SERVER_ERROR` | 500 | Unhandled server exception (sanitized output) |
 
 ---
 
-## 2. Architecture & Layer Responsibilities
+## 2. Standardized Error Response Structure
 
-The backend follows a modular monolith architecture with clear layer separations:
+All error responses returned by the API adhere to the dual-compatible JSON format:
 
-- `app/routers/` → API Transport & Routing Layer (`auth.py`, `jobs.py`, `matching.py`, `profile.py`, `applications.py`).
-- `app/schemas/` → Pydantic Data Transfer Objects (DTOs) & Request/Response Validation (`auth.py`, `jobs.py`, `matching.py`, `profile.py`, `applications.py`).
-- `app/models/` → SQLAlchemy ORM Persistent Database Entities (`models.py`).
-- `app/services/` → Core Business Logic & Matching Engines (`matching_engine.py`, `job_service.py`, `tailor_service.py`, `cover_letter.py`).
-- `app/utils/` → Infrastructure utilities and security boundary helpers (`file_handling.py`).
-- `app/core/` → Centralized configuration (`config.py`).
-
----
-
-## 3. Testing Infrastructure & Coverage
-
-Automated testing is configured in `backend/pyproject.toml`:
-
-```bash
-cd backend
-
-# Run full test suite (58 tests)
-./venv/bin/pytest tests/ -v
-
-# Run with test coverage (88% baseline)
-./venv/bin/pytest tests/ --cov=app --cov-report=term-missing --cov-report=html
-
-# Run specific test markers
-./venv/bin/pytest tests/ -m security -v
-./venv/bin/pytest tests/ -m unit -v
-./venv/bin/pytest tests/ -m integration -v
-./venv/bin/pytest tests/ -m regression -v
+```json
+{
+  "detail": "The requested job was not found.",
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "The requested job was not found.",
+    "details": null
+  }
+}
 ```
 
-HTML coverage reports are generated at `backend/htmlcov/index.html`.
+For validation errors (HTTP 422), structured field-level details are provided:
 
----
-
-## 4. Environment Configuration
-
-Application configuration is centralized in `backend/app/core/config.py` using `pydantic-settings`:
-
-- **Development**: Reads environment variables from local `backend/.env`.
-- **Testing**: Explicit test fixtures in `tests/conftest.py` supply isolated test settings.
-- **Production**: `SECRET_KEY` MUST be provided via environment variables (min 32 characters). Wildcard `*` in `CORS_ORIGINS` is prohibited in production.
-
----
-
-## 5. Mandatory Engineering Workflow
-
-All development tasks MUST follow the 10-step engineering lifecycle:
-
-```text
-UNDERSTAND ➔ PLAN ➔ SHOW PLAN ➔ APPROVAL ➔ IMPLEMENT ➔ TEST ➔ SECURITY REVIEW ➔ VERIFY ➔ DOCUMENT ➔ REPORT
+```json
+{
+  "detail": "Request validation error: invalid fields provided",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Request validation error: invalid fields provided",
+    "details": [
+      {
+        "field": "email",
+        "message": "field required"
+      }
+    ]
+  }
+}
 ```
+
+*Note: The top-level `detail` string is retained for 100% backward compatibility with standard Axios/React frontend components.*
+
+---
+
+## 3. How to Raise Errors in Routers & Services
+
+### Method A: Raise `APIException` (Recommended for custom structured errors)
+
+```python
+from app.core.errors import APIException, ErrorCode, ErrorDetail
+
+raise APIException(
+    status_code=409,
+    code=ErrorCode.CONFLICT,
+    message="Resource conflict detected",
+    details=[ErrorDetail(field="email", message="Email already exists")]
+)
+```
+
+### Method B: Raise Standard `HTTPException`
+
+Standard FastAPI `HTTPException` calls are automatically captured by the global `http_exception_handler` and converted into the standardized error format:
+
+```python
+from fastapi import HTTPException, status
+
+raise HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Job not found"
+)
+```
+
+---
+
+## 4. Exception Handling & Logging Safety
+
+- Global fallback handler catches all unhandled Python `Exception` types, logs the full exception and traceback server-side via `logger.exception(...)`, and returns a sanitized HTTP 500 response.
+- **Security Rule**: Never expose raw stack traces, SQL queries, database credentials, JWT secrets, or filesystem paths to the client.

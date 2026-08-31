@@ -25,7 +25,13 @@ flowchart TD
         P1-05[P1-05: Add File Upload & Matching Safety Gate Tests ✓ COMPLETED]
     end
 
-    P0-00 --> P0-01 --> P0-02 --> P0-03 --> P0-04 --> P0-05 --> P1-01 --> P1-02 --> P1-03 --> P1-04 --> P1-05
+    subgraph P2 [P2: Feature & Schema Polish]
+        P2-01[P2-01: Enhanced Error Handling & Standardized API Responses ✓ COMPLETED]
+        P2-02[P2-02: Application Tracker Filtering & Pagination]
+        P2-03[P2-03: Frontend Client Hardening & State Management]
+    end
+
+    P0-00 --> P0-01 --> P0-02 --> P0-03 --> P0-04 --> P0-05 --> P1-01 --> P1-02 --> P1-03 --> P1-04 --> P1-05 --> P2-01 --> P2-02 --> P2-03
 ```
 
 ---
@@ -63,15 +69,15 @@ flowchart TD
 - **Result**: Added 13 JWT security safety gate tests. 71 / 71 tests passing (89% coverage).
 
 ### P1-05 — Add File Upload & Matching Safety Gate Tests (✓ COMPLETED)
-- **Result**: Added 21 file upload and matching safety gate tests covering MIME validation, path traversal, UUID filenames, 10MB limits, old file cleanup, user isolation, empty/whitespace/Unicode/HTML matching inputs, and numerical safety. Increased code coverage to **91%**. **92 / 92 tests passing**. Zero production code changes required.
+- **Result**: Added 21 file upload and matching safety gate tests. 92 / 92 tests passing (91% coverage).
+
+### P2-01 — Enhanced Error Handling & Standardized API Responses (✓ COMPLETED)
+- **Result**: Created `app/core/errors.py` providing `ErrorCode` taxonomy, custom `APIException`, and global exception handlers for validation (422), auth (401), resource (404), upload (400/413), and unhandled server (500) errors. Added `backend/tests/test_errors.py` verifying sanitized output with zero information disclosure. **103 / 103 tests passing** (90% coverage).
 
 ---
 
-## Phase 2 Roadmap & Next Priorities
+## Pending Task Breakdown (Phase 2)
 
-With **Phase 0** and **Phase 1** 100% complete, the repository has achieved a hardened, modular, and fully tested backend architecture (92 tests, 91% coverage).
-
-Phase 2 focus areas:
-- `P2-01`: Enhanced error handling middleware and structured JSON error responses.
-- `P2-02`: Advanced application tracker filtering and pagination.
-- `P2-03`: Frontend API service hardening and state management.
+### P2-02 — Application Tracker Filtering & Pagination
+- **Objective**: Add status filters, search capabilities, and offset/limit pagination to `GET /applications`.
+- **Files Likely Affected**: `backend/app/routers/applications.py`, `backend/tests/test_applications.py`.
