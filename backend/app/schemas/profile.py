@@ -39,6 +39,8 @@ class ResumeHealthBreakdown(BaseModel):
 class ResumeHealthResponse(BaseModel):
     health_score: float = Field(..., ge=0.0, le=100.0)
     classification: str
+    is_ats_compliant: bool = True
+    ats_risk_level: str = "Low"
     breakdown: ResumeHealthBreakdown
     sections_detected: List[str]
     contact_checks: ContactChecks
@@ -95,3 +97,47 @@ class CoverLetterResponse(BaseModel):
     updated_at: datetime.datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FormattedTemplateSaveRequest(BaseModel):
+    name: str = Field(default="ATS Standard Resume", max_length=100)
+    template_style: str = Field(default="executive_serif")
+    canva_reference_url: Optional[str] = None
+    content_json: Optional[str] = None
+    formatted_text: Optional[str] = None
+
+
+class FormattedTemplateUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    template_style: Optional[str] = None
+    canva_reference_url: Optional[str] = None
+    content_json: Optional[str] = None
+    formatted_text: Optional[str] = None
+
+
+class FormattedTemplateResponse(BaseModel):
+    id: int
+    user_id: int
+    name: str
+    template_style: str
+    canva_reference_url: Optional[str] = None
+    content_json: Optional[str] = None
+    formatted_text: Optional[str] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResumeStructureResponse(BaseModel):
+    full_name: str
+    email: str
+    phone: str
+    location: str
+    linkedin: str
+    github: str
+    summary: str
+    skills: str
+    experience: str
+    education: str
+    projects: str

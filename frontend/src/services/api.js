@@ -147,4 +147,18 @@ export const trackerService = {
     deleteApplication: (id) => api.delete(`/applications/${id}`).then(res => res.data),
 };
 
+export const templateService = {
+    list: () => api.get('/resume/templates', { params: { t: Date.now() } }).then(res => res.data),
+    save: (data) => api.post('/resume/templates', data).then(res => res.data),
+    update: (id, data) => api.put(`/resume/templates/${id}`, data).then(res => res.data),
+    delete: (id) => api.delete(`/resume/templates/${id}`).then(res => res.data),
+    formatStructure: (params = {}) => {
+        const formData = new FormData();
+        if (params.raw_text) formData.append('raw_text', params.raw_text);
+        if (params.tailored_resume_id) formData.append('tailored_resume_id', params.tailored_resume_id);
+        return api.post('/resume/format-structure', formData).then(res => res.data);
+    },
+};
+
 export default api;
+

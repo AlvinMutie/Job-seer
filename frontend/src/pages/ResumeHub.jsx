@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target, ExternalLink, Copy, CheckCircle } from 'lucide-react';
-import { authService, jobService, trackerService, tailoredResumeService, coverLetterService, getApiErrorMessage } from '../services/api';
+import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target, ExternalLink, Copy, CheckCircle, Link2, Edit3 } from 'lucide-react';
+import { authService, jobService, trackerService, tailoredResumeService, coverLetterService, templateService, getApiErrorMessage } from '../services/api';
 import ResumeDiffViewer from '../components/ResumeDiffViewer';
 import CoverLetterViewer from '../components/CoverLetterViewer';
+import AtsRecommendationBanner from '../components/AtsRecommendationBanner';
+import ResumeTemplateStudio from '../components/ResumeTemplateStudio';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -17,6 +19,7 @@ function ResumeHub() {
     const [jobs, setJobs] = useState([]);
     const [tailoredResumes, setTailoredResumes] = useState([]);
     const [coverLetters, setCoverLetters] = useState([]);
+    const [savedTemplates, setSavedTemplates] = useState([]);
     
     const [loading, setLoading] = useState(true);
     const [healthLoading, setHealthLoading] = useState(false);
@@ -44,18 +47,25 @@ function ResumeHub() {
     const [activeCoverLetter, setActiveCoverLetter] = useState(null);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
 
+    // Template Studio States
+    const [isStudioOpen, setIsStudioOpen] = useState(false);
+    const [studioInitialText, setStudioInitialText] = useState('');
+    const [studioInitialTemplate, setStudioInitialTemplate] = useState(null);
+
     const fetchAllData = async () => {
         try {
-            const [userData, jobsData, tailoredData, letterData] = await Promise.all([
+            const [userData, jobsData, tailoredData, letterData, templatesData] = await Promise.all([
                 authService.getMe(),
                 jobService.getJobs({ limit: 50 }),
                 tailoredResumeService.list().catch(() => []),
-                coverLetterService.list().catch(() => [])
+                coverLetterService.list().catch(() => []),
+                templateService.list().catch(() => [])
             ]);
             setUser(userData);
             setJobs(jobsData);
             setTailoredResumes(tailoredData);
             setCoverLetters(letterData);
+            setSavedTemplates(templatesData || []);
 
             // Read URL query parameter for pre-selected job ID
             const urlParams = new URLSearchParams(window.location.search);
@@ -87,6 +97,21 @@ function ResumeHub() {
     useEffect(() => {
         fetchAllData();
     }, []);
+
+    const refreshTemplates = async () => {
+        try {
+            const data = await templateService.list();
+            setSavedTemplates(data || []);
+        } catch (err) {
+            console.error('Failed to reload templates:', err);
+        }
+    };
+
+    const handleOpenStudio = (rawText = '', template = null) => {
+        setStudioInitialText(rawText || user?.profile?.resume_text || '');
+        setStudioInitialTemplate(template);
+        setIsStudioOpen(true);
+    };
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -241,6 +266,22 @@ function ResumeHub() {
                 badgeText="RESUME INTELLIGENCE STUDIO"
                 title="Resume Hub & Application Generator"
                 subtitle="Upload base CVs, run ATS readiness checks, generate versioned tailored resumes, and format multi-tone cover letters."
+                action={
+                    <Button
+                        variant="primary"
+                        icon={Sparkles}
+                        onClick={() => handleOpenStudio()}
+                        className="font-semibold shadow-xs"
+                    >
+                        ATS Template Studio
+                    </Button>
+                }
+            />
+
+            {/* ATS Health Recommendation & Compliance Banner */}
+            <AtsRecommendationBanner
+                healthReport={healthReport}
+                onOpenStudio={() => handleOpenStudio()}
             />
 
             {/* Contextual Selected Job Target Banner with Direct Application Link */}
@@ -313,6 +354,15 @@ function ResumeHub() {
                             className="bg-white dark:bg-slate-900 font-semibold"
                         >
                             {copiedResumeId === latestTailoredRecord.id ? "Copied to Clipboard!" : "Copy Tailored CV"}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            icon={Sparkles}
+                            onClick={() => handleOpenStudio(latestTailoredRecord.tailored_resume_text)}
+                            className="bg-white dark:bg-slate-900 font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50"
+                        >
+                            Format ATS (11pt)
                         </Button>
                         <Button
                             variant="secondary"
@@ -458,6 +508,12 @@ function ResumeHub() {
                             <ShieldCheck size={18} /> ATS Health
                         </button>
                         <button
+                            onClick={() => setActiveTab('templates')}
+                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'templates' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
+                        >
+                            <Sparkles size={18} /> ATS Templates ({savedTemplates.length})
+                        </button>
+                        <button
                             onClick={() => setActiveTab('tailored_history')}
                             className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'tailored_history' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                         >
@@ -491,9 +547,18 @@ function ResumeHub() {
                                             <span className="text-slate-400 text-lg">/ 100</span>
                                         </div>
                                     </div>
-                                    <Badge variant={healthReport.health_score >= 85 ? 'emerald' : healthReport.health_score >= 70 ? 'indigo' : 'amber'}>
-                                        {healthReport.classification} Readiness
-                                    </Badge>
+                                    <div className="flex flex-col items-center md:items-end gap-2">
+                                        <Badge variant={healthReport.health_score >= 85 ? 'emerald' : healthReport.health_score >= 70 ? 'indigo' : 'amber'}>
+                                            {healthReport.classification} Readiness
+                                        </Badge>
+                                        <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                                            healthReport.is_ats_compliant
+                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                        }`}>
+                                            ATS Risk: {healthReport.ats_risk_level || (healthReport.is_ats_compliant ? 'Low' : 'High')}
+                                        </span>
+                                    </div>
                                 </Card>
 
                                 <Card variant="flat" className="p-5 space-y-3">
@@ -505,6 +570,33 @@ function ResumeHub() {
                                         <HealthMetric label="Technical Skills" score={healthReport.breakdown.skills} weight="20%" />
                                     </div>
                                 </Card>
+
+                                {healthReport.recommendations && healthReport.recommendations.length > 0 && (
+                                    <Card variant="flat" className="p-5 space-y-3 border-amber-200 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/20">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                                                <AlertTriangle size={15} /> Formatting & ATS Parser Recommendations
+                                            </h4>
+                                            <Button
+                                                size="sm"
+                                                variant="primary"
+                                                icon={Sparkles}
+                                                onClick={() => handleOpenStudio()}
+                                                className="text-xs"
+                                            >
+                                                Fix in ATS Studio
+                                            </Button>
+                                        </div>
+                                        <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                                            {healthReport.recommendations.map((rec, idx) => (
+                                                <li key={idx} className="flex items-start gap-2">
+                                                    <span className="text-amber-600 dark:text-amber-400 font-bold">•</span>
+                                                    <span>{rec}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </Card>
+                                )}
                             </div>
                         ) : (
                             <EmptyState
@@ -515,7 +607,95 @@ function ResumeHub() {
                         )
                     )}
 
-                    {/* Tab 2: Saved Tailored Resumes */}
+                    {/* Tab 2: ATS Templates Studio & Saved Drafts */}
+                    {activeTab === 'templates' && (
+                        <div className="space-y-4 animate-fade-in">
+                            <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                        ATS Executive Template Collection
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Standardized single-column resumes formatted in Times New Roman 11pt, 1.5 line spaced with Canva design references.
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    icon={Plus}
+                                    onClick={() => handleOpenStudio()}
+                                >
+                                    New ATS Template
+                                </Button>
+                            </div>
+
+                            {savedTemplates.length === 0 ? (
+                                <EmptyState
+                                    icon={Sparkles}
+                                    title="No saved ATS templates yet"
+                                    description="Open the ATS Template Studio to format your resume with Times New Roman 11pt and 1.5 line spacing, link your Canva template, and save drafts."
+                                    actionLabel="Launch Template Studio"
+                                    onAction={() => handleOpenStudio()}
+                                />
+                            ) : (
+                                savedTemplates.map(tpl => (
+                                    <Card key={tpl.id} variant="flat" className="p-5 space-y-3 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                    <Badge variant="indigo" size="sm">Times New Roman 11pt</Badge>
+                                                    <Badge variant="slate" size="sm">1.5 Spaced</Badge>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                                        {new Date(tpl.updated_at || tpl.created_at).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-base font-bold text-slate-900 dark:text-white">{tpl.name}</h4>
+                                                {tpl.canva_reference_url && (
+                                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400">
+                                                        <Link2 size={13} />
+                                                        <a
+                                                            href={tpl.canva_reference_url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="hover:underline flex items-center gap-1"
+                                                        >
+                                                            Canva Template Reference <ExternalLink size={11} />
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="primary"
+                                                    size="sm"
+                                                    icon={Edit3}
+                                                    onClick={() => handleOpenStudio(tpl.formatted_text, tpl)}
+                                                >
+                                                    Open in Studio
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    icon={Trash2}
+                                                    onClick={async () => {
+                                                        if (window.confirm(`Delete template "${tpl.name}"?`)) {
+                                                            await templateService.delete(tpl.id);
+                                                            refreshTemplates();
+                                                        }
+                                                    }}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 3: Saved Tailored Resumes */}
                     {activeTab === 'tailored_history' && (
                         <div className="space-y-4 animate-fade-in">
                             {tailoredResumes.length === 0 ? (
@@ -570,6 +750,16 @@ function ResumeHub() {
                                                     {copiedResumeId === item.id ? "Copied!" : "Copy CV"}
                                                 </Button>
                                                 <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    icon={Sparkles}
+                                                    onClick={() => handleOpenStudio(item.tailored_resume_text)}
+                                                    className="font-medium text-indigo-600 hover:bg-indigo-50"
+                                                    title="Format in ATS Template Studio (Times New Roman 11pt, 1.5 line spacing)"
+                                                >
+                                                    Format ATS
+                                                </Button>
+                                                <Button
                                                     variant="secondary"
                                                     size="sm"
                                                     icon={GitCompare}
@@ -604,7 +794,7 @@ function ResumeHub() {
                         </div>
                     )}
 
-                    {/* Tab 3: Saved Cover Letters */}
+                    {/* Tab 4: Saved Cover Letters */}
                     {activeTab === 'cover_letters' && (
                         <div className="space-y-4 animate-fade-in">
                             {coverLetters.length === 0 ? (
@@ -670,7 +860,7 @@ function ResumeHub() {
                         </div>
                     )}
 
-                    {/* Tab 4: Text Preview */}
+                    {/* Tab 5: Text Preview */}
                     {activeTab === 'preview' && (
                         <Card variant="flat" className="flex flex-col overflow-hidden h-[550px]">
                             <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -699,6 +889,17 @@ function ResumeHub() {
                 letterData={activeCoverLetter}
                 onDelete={handleDeleteCoverLetter}
             />
+
+            {isStudioOpen && (
+                <ResumeTemplateStudio
+                    initialRawText={studioInitialText}
+                    initialTemplate={studioInitialTemplate}
+                    onClose={() => setIsStudioOpen(false)}
+                    onSaved={() => {
+                        refreshTemplates();
+                    }}
+                />
+            )}
         </div>
     );
 }

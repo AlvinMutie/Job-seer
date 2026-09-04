@@ -134,3 +134,22 @@ class ApplicationTracker(Base):
         Index("idx_app_tracker_user_status", "user_id", "status"),
         Index("idx_app_tracker_user_job", "user_id", "job_id"),
     )
+
+
+class SavedResumeTemplate(Base):
+    __tablename__ = "saved_resume_templates"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    name = Column(String, default="ATS Standard Resume")
+    template_style = Column(String, default="executive_serif")  # Times New Roman, 11pt, 1.5 spacing
+    canva_reference_url = Column(String, nullable=True)
+    content_json = Column(Text, nullable=True)
+    formatted_text = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
+    updated_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), onupdate=lambda: datetime.datetime.now(datetime.timezone.utc))
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index("idx_saved_templates_user", "user_id"),
+    )

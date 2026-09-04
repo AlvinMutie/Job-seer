@@ -6,14 +6,18 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, s
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import User, Profile, Job, TailoredResume, CoverLetter
+from app.models.models import User, Profile, Job, TailoredResume, CoverLetter, SavedResumeTemplate
 from app.auth import get_current_user
 from app.schemas.profile import (
     ProfileUpdate, 
     ResumeHealthResponse, 
     TailoredResumeResponse, 
     TailoredResumeCompareResponse,
-    CoverLetterResponse
+    CoverLetterResponse,
+    FormattedTemplateSaveRequest,
+    FormattedTemplateUpdateRequest,
+    FormattedTemplateResponse,
+    ResumeStructureResponse
 )
 from app.utils.file_handling import validate_upload_file, save_user_resume
 from app.services.resume_intelligence import resume_intelligence_service
@@ -443,3 +447,144 @@ async def delete_cover_letter(
     db.commit()
 
     return {"message": "Cover letter version deleted successfully"}
+
+
+# ==========================================
+# ATS-FRIENDLY RESUME TEMPLATE STUDIO
+# ==========================================
+
+@router.get("/resume/templates", response_model=List[FormattedTemplateResponse])
+async def list_saved_templates(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves all saved ATS-friendly resume templates for the authenticated user.
+    """
+    templates = (
+        db.query(SavedResumeTemplate)
+        .filter(SavedResumeTemplate.user_id == current_user.id)
+        .order_by(SavedResumeTemplate.updated_at.desc())
+        .all()
+    )
+    return templates
+
+
+@router.post("/resume/templates", response_model=FormattedTemplateResponse)
+async def create_saved_template(
+    template_data: FormattedTemplateSaveRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Saves a formatted resume template draft with styling metadata and Canva reference link.
+    """
+    new_template = SavedResumeTemplate(
+        user_id=current_user.id,
+        name=template_data.name or "ATS Standard Resume",
+        template_style=template_data.template_style or "executive_serif",
+        canva_reference_url=template_data.canva_reference_url,
+        content_json=template_data.content_json,
+        formatted_text=template_data.formatted_text
+    )
+    db.add(new_template)
+    db.commit()
+    db.refresh(new_template)
+    return new_template
+
+
+@router.put("/resume/templates/{template_id}", response_model=FormattedTemplateResponse)
+async def update_saved_template(
+    template_id: int,
+    update_data: FormattedTemplateUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Updates an existing saved resume template for the authenticated user.
+    """
+    template = (
+        db.query(SavedResumeTemplate)
+        .filter(SavedResumeTemplate.id == template_id, SavedResumeTemplate.user_id == current_user.id)
+        .first()
+    )
+    if not template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved resume template not found."
+        )
+
+    if update_data.name is not None:
+        template.name = update_data.name
+    if update_data.template_style is not None:
+        template.template_style = update_data.template_style
+    if update_data.canva_reference_url is not None:
+        template.canva_reference_url = update_data.canva_reference_url
+    if update_data.content_json is not None:
+        template.content_json = update_data.content_json
+    if update_data.formatted_text is not None:
+        template.formatted_text = update_data.formatted_text
+
+    db.commit()
+    db.refresh(template)
+    return template
+
+
+@router.delete("/resume/templates/{template_id}")
+async def delete_saved_template(
+    template_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Deletes a saved resume template belonging to the authenticated user.
+    """
+    template = (
+        db.query(SavedResumeTemplate)
+        .filter(SavedResumeTemplate.id == template_id, SavedResumeTemplate.user_id == current_user.id)
+        .first()
+    )
+    if not template:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Saved resume template not found."
+        )
+
+    db.delete(template)
+    db.commit()
+    return {"message": "Saved resume template deleted successfully"}
+
+
+@router.post("/resume/format-structure", response_model=ResumeStructureResponse)
+async def get_structured_resume_sections(
+    tailored_resume_id: Optional[int] = Form(None),
+    raw_text: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Parses resume text or tailored resume into clean structured sections for
+    the ATS Template Studio (Times New Roman, 11pt, 1.5 line spacing).
+    """
+    text_to_parse = raw_text
+
+    if not text_to_parse and tailored_resume_id:
+        tailored = (
+            db.query(TailoredResume)
+            .filter(TailoredResume.id == tailored_resume_id, TailoredResume.user_id == current_user.id)
+            .first()
+        )
+        if tailored:
+            text_to_parse = tailored.tailored_resume_text
+
+    if not text_to_parse and current_user.profile:
+        text_to_parse = current_user.profile.resume_text
+
+    if not text_to_parse:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No resume text available to parse into template format."
+        )
+
+    structure = resume_intelligence_service.parse_resume_structure(text_to_parse)
+    return structure
