@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle, ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck, Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2, UserCheck, Compass, Check } from 'lucide-react';
+import {
+    Search, MapPin, Briefcase, Sparkles, Upload, AlertTriangle,
+    ChevronRight, TrendingUp, Target, BarChart3, Scissors, ShieldCheck,
+    Mail, History, ArrowRight, LayoutGrid, FileText, CheckCircle2,
+    UserCheck, Compass, Check, ExternalLink
+} from 'lucide-react';
 import { jobService, authService, trackerService, dashboardService } from '../services/api';
 import TailorModal from '../components/TailorModal';
 import PageHeader from '../components/ui/PageHeader';
@@ -52,7 +57,7 @@ function Dashboard() {
                 setResumeText(userData.profile.resume_text);
             }
         } catch (error) {
-            console.error("Dashboard command center init failed:", error);
+            console.error("Dashboard init error:", error);
         } finally {
             setLoading(false);
         }
@@ -87,7 +92,7 @@ function Dashboard() {
 
     const handleMatch = async (jobId) => {
         if (!resumeText) {
-            showToast("Please upload your resume in the Resume Hub first!", "warning");
+            showToast("Please upload your resume in the Resume Hub first", "warning");
             return;
         }
         setMatchingJobId(jobId);
@@ -97,9 +102,9 @@ function Dashboard() {
             formData.append('job_id', jobId);
             const result = await jobService.matchResume(formData);
             setMatchResults(prev => ({ ...prev, [jobId]: result }));
-            showToast("AI match score calculated!", "success");
+            showToast("Match score calculated", "success");
         } catch (error) {
-            console.error("Match failed:", error);
+            console.error("Match calculation failed:", error);
         }
         setMatchingJobId(null);
     };
@@ -131,7 +136,7 @@ function Dashboard() {
     const totalApps = analytics?.total_applications || 0;
 
     return (
-        <div className="space-y-8 animate-fade-in relative">
+        <div className="space-y-8 animate-fade-in relative w-full">
             {/* Toast Feedback Notification */}
             {toast.show && (
                 <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl border flex items-center gap-2.5 animate-fade-in text-xs font-semibold ${
@@ -146,14 +151,14 @@ function Dashboard() {
 
             {/* Page Header */}
             <PageHeader
-                badgeText={`Targeting: ${user?.profile?.preferred_role || 'General Engineering'}`}
-                title={`Welcome back, ${user?.full_name?.split(' ')[0] || 'Candidate'} 👋`}
-                subtitle="Real-time intelligence dashboard across your matching scores, application pipeline, and AI assets."
+                badgeText={`Targeting: ${user?.profile?.preferred_role || 'Software Engineering'}`}
+                title={`Welcome back, ${user?.full_name?.split(' ')[0] || 'Candidate'}`}
+                subtitle="Intelligence dashboard tracking match scores, active pipeline status, and tailored application assets."
                 action={
                     !user?.profile?.has_resume ? (
                         <a href="/resume-hub">
                             <Button variant="outline" size="sm" icon={AlertTriangle} className="text-amber-400 border-amber-500/30 hover:bg-amber-500/10">
-                                Upload CV for AI Match Scoring
+                                Upload Resume
                             </Button>
                         </a>
                     ) : (
@@ -166,12 +171,12 @@ function Dashboard() {
                 }
             />
 
-            {/* Next Best Action Proactive Banner */}
+            {/* Next Best Action Proactive Guidance */}
             <NextBestAction user={user} analytics={analytics} />
 
-            {/* Career Progress Signal Strip */}
-            <Card variant="flat" className="p-4 bg-slate-900/60 flex flex-wrap items-center justify-between gap-4 border-slate-800">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Career Readiness Signals</span>
+            {/* Career Progress Workflow Strip */}
+            <Card variant="flat" className="p-4 bg-slate-900/60 flex flex-wrap items-center justify-between gap-4 border-slate-800 rounded-2xl">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Workflow Readiness</span>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
                     <div className="flex items-center gap-1.5">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${hasProfile ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
@@ -180,7 +185,7 @@ function Dashboard() {
                         <span className={hasProfile ? 'text-white' : 'text-slate-500'}>Profile</span>
                     </div>
 
-                    <span className="text-slate-700">➔</span>
+                    <ChevronRight size={14} className="text-slate-600" />
 
                     <div className="flex items-center gap-1.5">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${hasResume ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
@@ -189,29 +194,29 @@ function Dashboard() {
                         <span className={hasResume ? 'text-white' : 'text-slate-500'}>Base CV</span>
                     </div>
 
-                    <span className="text-slate-700">➔</span>
+                    <ChevronRight size={14} className="text-slate-600" />
 
                     <div className="flex items-center gap-1.5">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${jobs.length > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
                             {jobs.length > 0 ? <Check size={12} /> : '3'}
                         </span>
-                        <span className={jobs.length > 0 ? 'text-white' : 'text-slate-500'}>Job Search</span>
+                        <span className={jobs.length > 0 ? 'text-white' : 'text-slate-500'}>Job Matching</span>
                     </div>
 
-                    <span className="text-slate-700">➔</span>
+                    <ChevronRight size={14} className="text-slate-600" />
 
                     <div className="flex items-center gap-1.5">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${totalApps > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
                             {totalApps > 0 ? <Check size={12} /> : '4'}
                         </span>
-                        <span className={totalApps > 0 ? 'text-white' : 'text-slate-500'}>Applications ({totalApps})</span>
+                        <span className={totalApps > 0 ? 'text-white' : 'text-slate-500'}>Pipeline ({totalApps})</span>
                     </div>
                 </div>
             </Card>
 
-            {/* KPI Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card variant="glass" className="p-5 space-y-3 border-indigo-500/20 bg-indigo-500/5">
+            {/* KPI Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <Card variant="glass" className="p-5 space-y-3 border-indigo-500/20 bg-indigo-500/5 rounded-2xl">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-indigo-500/20 rounded-xl text-indigo-400">
                             <Target size={20} />
@@ -220,14 +225,14 @@ function Dashboard() {
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Average Match</p>
-                        <p className="text-2xl font-extrabold text-white mt-1">{analytics?.average_match_score || 0}%</p>
+                        <p className="text-2xl font-bold text-white mt-1">{analytics?.average_match_score || 0}%</p>
                     </div>
                     <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                         <div className="bg-indigo-500 h-full rounded-full transition-all duration-700" style={{ width: `${analytics?.average_match_score || 0}%` }}></div>
                     </div>
                 </Card>
 
-                <Card variant="glass" className="p-5 space-y-3 border-emerald-500/20 bg-emerald-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-emerald-500/20 bg-emerald-500/5 rounded-2xl">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
                             <TrendingUp size={20} />
@@ -236,14 +241,14 @@ function Dashboard() {
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Total Applications</p>
-                        <p className="text-2xl font-extrabold text-white mt-1">{analytics?.total_applications || 0}</p>
+                        <p className="text-2xl font-bold text-white mt-1">{analytics?.total_applications || 0}</p>
                     </div>
-                    <p className="text-[11px] text-slate-400">
-                        {analytics?.status_counts?.interview || 0} Interviews · {analytics?.status_counts?.applied || 0} Applied
+                    <p className="text-xs text-slate-400">
+                        {analytics?.status_counts?.interview || 0} Interviews &bull; {analytics?.status_counts?.applied || 0} Applied
                     </p>
                 </Card>
 
-                <Card variant="glass" className="p-5 space-y-3 border-cyan-500/20 bg-cyan-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-cyan-500/20 bg-cyan-500/5 rounded-2xl">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-cyan-500/20 rounded-xl text-cyan-400">
                             <ShieldCheck size={20} />
@@ -252,14 +257,14 @@ function Dashboard() {
                     </div>
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">ATS Health Score</p>
-                        <p className="text-2xl font-extrabold text-white mt-1">
+                        <p className="text-2xl font-bold text-white mt-1">
                             {analytics?.ats_health_score !== null ? `${analytics?.ats_health_score}%` : 'N/A'}
                         </p>
                     </div>
-                    <p className="text-[11px] text-slate-400">{analytics?.ats_classification || 'Upload resume to check'}</p>
+                    <p className="text-xs text-slate-400">{analytics?.ats_classification || 'Upload resume to check'}</p>
                 </Card>
 
-                <Card variant="glass" className="p-5 space-y-3 border-amber-500/20 bg-amber-500/5">
+                <Card variant="glass" className="p-5 space-y-3 border-amber-500/20 bg-amber-500/5 rounded-2xl">
                     <div className="flex justify-between items-start">
                         <div className="p-2.5 bg-amber-500/20 rounded-xl text-amber-400">
                             <History size={20} />
@@ -267,21 +272,21 @@ function Dashboard() {
                         <Badge variant="amber">Assets Saved</Badge>
                     </div>
                     <div>
-                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Tailored & Letters</p>
-                        <p className="text-2xl font-extrabold text-white mt-1">
+                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Tailored Materials</p>
+                        <p className="text-2xl font-bold text-white mt-1">
                             {(analytics?.tailored_resumes_count || 0) + (analytics?.cover_letters_count || 0)}
                         </p>
                     </div>
-                    <p className="text-[11px] text-slate-400">
-                        {analytics?.tailored_resumes_count || 0} Tailored CVs · {analytics?.cover_letters_count || 0} Letters
+                    <p className="text-xs text-slate-400">
+                        {analytics?.tailored_resumes_count || 0} Tailored CVs &bull; {analytics?.cover_letters_count || 0} Letters
                     </p>
                 </Card>
             </div>
 
-            {/* Action Launchpad Bar */}
-            <Card variant="glass" className="p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60">
+            {/* Quick Action Bar */}
+            <Card variant="glass" className="p-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 rounded-2xl">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                    <Sparkles size={16} className="text-indigo-400" /> Action Launchpad
+                    <Sparkles size={16} className="text-indigo-400" /> Quick Actions
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
                     <a href="/resume-hub">
@@ -302,12 +307,12 @@ function Dashboard() {
                 </div>
             </Card>
 
-            {/* Search Bar */}
-            <Card variant="flat" className="p-3 bg-slate-900/80">
+            {/* Search & Filter Bar */}
+            <Card variant="flat" className="p-3.5 bg-slate-900/80 rounded-2xl">
                 <form onSubmit={(e) => { e.preventDefault(); fetchJobs(); }} className="flex flex-col md:flex-row gap-3">
                     <div className="flex-1">
                         <Input
-                            placeholder="Search keywords (React, Python, FastAPI, Docker...)"
+                            placeholder="Search keywords (React, Python, TypeScript, Docker...)"
                             icon={Search}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -315,25 +320,30 @@ function Dashboard() {
                     </div>
                     <div className="flex-1">
                         <Input
-                            placeholder="Location preference (e.g. Remote, NYC)"
+                            placeholder="Location preference (Remote, New York, San Francisco...)"
                             icon={MapPin}
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                         />
                     </div>
-                    <Button type="submit" variant="primary" size="md">
+                    <Button type="submit" variant="primary" size="md" className="px-6">
                         Find Jobs
                     </Button>
                 </form>
             </Card>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Job Discovery & Recommendations Column */}
-                <div className="lg:col-span-2 space-y-4">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                        Top AI Recommendations <Sparkles className="text-amber-400" size={18} />
-                    </h2>
+            {/* Main Widescreen Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Left/Main Column: Top AI Recommendations */}
+                <div className="lg:col-span-8 space-y-4">
+                    <div className="flex items-center justify-between pb-1">
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            Top Recommendations
+                        </h2>
+                        <span className="text-xs text-slate-400 font-medium">
+                            {jobs.length} roles discovered
+                        </span>
+                    </div>
 
                     {loading ? (
                         <LoadingSkeleton variant="card" count={3} />
@@ -356,17 +366,17 @@ function Dashboard() {
                                 matchResult={matchResults[job.id]}
                                 onApplySuccess={() => {
                                     initDashboard();
-                                    showToast("Application added to Tracker!", "success");
+                                    showToast("Application added to Tracker", "success");
                                 }}
                             />
                         ))
                     )}
                 </div>
 
-                {/* Right Column: Pipeline Stage Activity & Assets */}
-                <div className="space-y-6">
+                {/* Right Column: Pipeline Status & Recent Assets */}
+                <div className="lg:col-span-4 space-y-6">
                     {/* Pipeline Stage Breakdown */}
-                    <Card variant="glass" className="p-5 space-y-4">
+                    <Card variant="glass" className="p-5 space-y-4 rounded-2xl">
                         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                             <LayoutGrid size={16} className="text-indigo-400" /> Pipeline Stage Breakdown
                         </h3>
@@ -379,10 +389,29 @@ function Dashboard() {
                         </div>
                     </Card>
 
+                    {/* ATS Scan Overview Card */}
+                    <Card variant="glass" className="p-5 space-y-3 rounded-2xl border-slate-800">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                <ShieldCheck size={16} className="text-emerald-400" /> ATS Scan Status
+                            </h3>
+                            <a href="/resume-hub" className="text-xs text-indigo-400 hover:underline">Manage CV</a>
+                        </div>
+                        <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <div className="text-sm font-bold text-white">Document Readiness</div>
+                                <div className="text-xs text-slate-400">{analytics?.ats_classification || 'Scan active'}</div>
+                            </div>
+                            <div className="text-xl font-bold text-emerald-400">
+                                {analytics?.ats_health_score !== null ? `${analytics?.ats_health_score}%` : 'N/A'}
+                            </div>
+                        </div>
+                    </Card>
+
                     {/* Recent AI Generated Assets */}
-                    <Card variant="glass" className="p-5 space-y-4">
+                    <Card variant="glass" className="p-5 space-y-4 rounded-2xl">
                         <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                            <History size={16} className="text-amber-400" /> Recent AI Generated Assets
+                            <History size={16} className="text-amber-400" /> Recent Generated Assets
                         </h3>
                         <div className="space-y-3 text-xs">
                             {analytics?.recent_tailored_resumes?.map(item => (
@@ -463,7 +492,7 @@ function JobCard({ job, onMatch, onTailor, isMatching, isTailoring, matchResult,
     };
 
     return (
-        <Card variant="interactive" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+        <Card variant="interactive" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group rounded-2xl">
             {matchResult && (
                 <div className={`absolute top-0 right-0 px-3.5 py-1 border-b border-l rounded-bl-xl font-bold text-xs ${matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'}`}>
                     {matchResult.match_percentage}% Match

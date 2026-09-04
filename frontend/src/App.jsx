@@ -295,7 +295,7 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
             </AnimatePresence>
 
             {/* Main Workspace Body */}
-            <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-7xl">
+            <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 overflow-y-auto w-full min-w-0 max-w-[1720px] mx-auto">
                 {children}
             </main>
         </div>
