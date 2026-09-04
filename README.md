@@ -70,70 +70,194 @@ $$\text{DISCOVER} \longrightarrow \text{MATCH} \longrightarrow \text{PREPARE} \l
 - High-contrast, vibrant light mode with rich typography and micro-animations via Framer Motion.
 - Fully responsive across mobile (360px) to ultra-wide displays (1440px+).
 
----
-
 ## System Architecture & Technology Stack
 
+Job Seer is built on a decoupled, asynchronous multi-tier architecture engineered for high throughput, sub-second NLP analysis, robust data integrity, and strict enterprise security standards.
+
 ```mermaid
-graph TD
-    A[Candidate CV / Search Request] --> B[FastAPI Backend Gateway]
-    B --> C[External Job Service]
-    C -->|API Query| D[Adzuna Developer Portal]
-    D -->|Real Postings| C
-    C -->|Deduplicate & Ingest| E[(SQLite / PostgreSQL DB)]
-    
-    B --> F[NLP Matching Engine V2]
-    A --> F
-    E --> F
-    F -->|TF-IDF + Cosine| G[Explainable Fit Score & Skills Breakdown]
-    
-    B --> H[ATS Health Auditor]
-    A --> H
-    H --> I[10-Layer Health Report 0-100]
-    
-    B --> J[Tailoring & Cover Letter Studio]
-    J -->|difflib| K[Versioned Resumes & Cover Letters]
-    
-    G --> L[React 18 Dashboard & Kanban Tracker]
-    I --> L
-    K --> L
-    L -->|Direct Handoff| M[Official Employer Application Portal]
+graph TB
+    subgraph ClientTier ["1. PRESENTATION LAYER (React 18 SPA)"]
+        UI_Dashboard["Command Center & Analytics"]
+        UI_JobsHub["Live Jobs Hub & Discovery"]
+        UI_ResumeHub["Resume Hub & Health Auditor"]
+        UI_AtsPortal["ATS Portal & Canva Studio"]
+        UI_Tracker["Kanban Application Pipeline"]
+        UI_Context["Theme & Auth State Contexts"]
+        UI_Axios["Axios Client (withCredentials Interceptor)"]
+    end
+
+    subgraph SecurityPerimeter ["2. SECURITY & GATEWAY PERIMETER"]
+        SEC_CORS["Strict CORS Middleware"]
+        SEC_OWASP["OWASP Security Headers (nosniff, DENY, XSS)"]
+        SEC_RateLimit["Sliding-Window Rate Limiter (Memory Store)"]
+        SEC_AuthGuard["Dual Auth Guard (HttpOnly Cookies + Bearer JWT)"]
+    end
+
+    subgraph APITier ["3. API & ROUTING CONTROLLER LAYER (FastAPI)"]
+        API_Auth["/auth - Authentication & Session Router"]
+        API_Profile["/profile & /resume - CV & Template Router"]
+        API_Jobs["/jobs - Aggregation & Search Router"]
+        API_Match["/matches - V2 Fit Engine Router"]
+        API_Tracker["/applications - Kanban Pipeline Router"]
+    end
+
+    subgraph IntelligenceTier ["4. INTELLIGENCE & PROCESSING SUBSYSTEMS"]
+        ENG_Adzuna["Adzuna Sync Worker (HTML Sanitation, Salary Normalization, Deduplication)"]
+        ENG_MatchV2["V2 Match Engine (TF-IDF, Cosine Similarity, Skill Aliases, Seniority Calibration)"]
+        ENG_AtsAudit["10-Layer ATS Auditor (Section Completeness, Noise Filter, Action Verbs)"]
+        ENG_Tailor["Tailoring Engine (Factual diff generation, Versioned CV snapshots)"]
+        ENG_CoverLetter["Multi-Tone Cover Letter Generator (4 Work Culture Profiles)"]
+        ENG_Canva["Canva Template Ingestion & ATS Studio (Archetype Mapping, Times New Roman 11pt)"]
+    end
+
+    subgraph PersistenceTier ["5. DATA PERSISTENCE & STORAGE LAYER"]
+        ORM_SQLA["SQLAlchemy 2.0 ORM (Declarative Models & Session Management)"]
+        DB_Storage[("Relational Database - SQLite / PostgreSQL")]
+        FS_Storage["Isolated Resume Storage (UUID Hashed File Hierarchy)"]
+    end
+
+    subgraph ExternalTier ["6. EXTERNAL ECOSYSTEM"]
+        EXT_Adzuna["Adzuna Global Job Exchange REST API"]
+        EXT_Canva["Canva Design Template References"]
+        EXT_Employer["Official Employer Career Portals"]
+    end
+
+    %% Client to Security & API
+    UI_Axios -->|Encrypted HTTPS Requests| SEC_CORS
+    SEC_CORS --> SEC_OWASP
+    SEC_OWASP --> SEC_RateLimit
+    SEC_RateLimit --> SEC_AuthGuard
+    SEC_AuthGuard --> API_Auth & API_Profile & API_Jobs & API_Match & API_Tracker
+
+    %% API to Intelligence
+    API_Jobs --> ENG_Adzuna
+    API_Profile --> ENG_AtsAudit & ENG_Canva
+    API_Match --> ENG_MatchV2
+    API_Profile --> ENG_Tailor & ENG_CoverLetter
+
+    %% Intelligence to External
+    ENG_Adzuna <-->|REST API Query / Rate-Limited Batching| EXT_Adzuna
+    ENG_Canva -.->|Archetype & Color Ingestion| EXT_Canva
+
+    %% Persistence
+    API_Auth & API_Tracker & ENG_Adzuna & ENG_Tailor & ENG_Canva --> ORM_SQLA
+    ORM_SQLA --> DB_Storage
+    API_Profile --> FS_Storage
+
+    %% Direct Handoff
+    UI_JobsHub & UI_Tracker & UI_ResumeHub -->|1-Click Direct Handoff| EXT_Employer
 ```
 
-### Backend Architecture
-- **Language & Runtime**: Python 3.11+ / 3.14 compatible
-- **API Framework**: **FastAPI** (Asynchronous endpoints, automatic OpenAPI / Swagger documentation)
-- **ORM & Database**: **SQLAlchemy 2.0+** with SQLite / PostgreSQL support
-- **NLP & Text Analysis**:
-  - `spaCy` (`en_core_web_sm`) for tokenization and entity recognition
-  - `scikit-learn` (`TfidfVectorizer`) for content vectorization and cosine similarity
-  - `PyMuPDF` (`fitz`) and `docx2txt` for resilient document parsing
-- **Security & Auth**:
-  - `python-jose` (JWT Access Tokens) + `passlib` / `bcrypt` (Salted password hashing)
-  - Dual authentication: `HttpOnly`, `SameSite=Lax` cookies with Bearer token fallback
-  - Custom sliding-window in-memory `RateLimiter` protecting login and sensitive endpoints
-  - Full OWASP compliance: Content-Security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection`)
+---
 
-### Frontend Architecture
-- **Framework**: **React 18.2** (Vite build tool)
-- **Styling**: Tailwind CSS + Custom Design System tokens
-- **Animations**: `framer-motion` for physics-based layout transitions and smooth accordion disclosures
-- **Icons**: `lucide-react`
-- **HTTP Client**: Axios with centralized request/response error interceptors and `withCredentials: true`
+### Tiered Architecture Breakdown
+
+#### 1. Presentation Layer (Frontend SPA)
+* **Single-Page Application**: Built on **React 18.2** utilizing the **Vite** build engine for sub-second hot-module replacement and minified production asset generation.
+* **Component Architecture**: Atomic component model separated into core UI primitives (`Card`, `Button`, `Badge`, `Input`, `Select`, `PageHeader`, `EmptyState`, `LoadingSkeleton`) and feature modules (`JobsHub`, `ResumeHub`, `AtsPortal`, `Tracker`, `Matches`, `Dashboard`).
+* **State Management**: Reactive local state combined with shared context providers (`ThemeContext` for persistent light/dark themes, `AuthContext` for credentials).
+* **Communication & Resilience**: Centralized **Axios** instance configured with interceptors that automatically manage `withCredentials: true`, uniform error deserialization via `getApiErrorMessage()`, and graceful offline fallbacks.
+
+#### 2. Security & Gateway Perimeter
+* **OWASP Hardening Middleware**: Injects enterprise-grade defense headers across all HTTP responses:
+  * `X-Content-Type-Options: nosniff` (prevents MIME-sniffing exploits)
+  * `X-Frame-Options: DENY` (clickjacking mitigation)
+  * `X-XSS-Protection: 1; mode=block` (cross-site scripting containment)
+  * `Referrer-Policy: strict-origin-when-cross-origin`
+* **Sliding-Window Rate Limiting**: In-memory sliding-window limiter enforcing strict request quotas on brute-force vulnerable routes (`POST /auth/login` restricted to 10 requests/minute per client IP) while ensuring high availability for standard browsing.
+* **Dual Authentication Strategy**: Seamlessly verifies requests using either secure `HttpOnly`, `SameSite=Lax` session cookies or standard `Authorization: Bearer <token>` headers for third-party client interoperability.
+
+#### 3. Core Application & Routing Layer (FastAPI)
+* **Asynchronous Execution**: Native async route handlers run concurrently via `asyncio` and `uvicorn`, guaranteeing low-latency response times during compute-intensive NLP passes.
+* **Schema Validation & Typing**: Strict request and response serialization powered by **Pydantic v2**, preventing malformed data ingestion, SQL injection, and parameter tampering.
+* **Interactive API Documentation**: Auto-generates fully compliant OpenAPI v3 schemas accessible via `/docs` (Swagger UI) and `/redoc`.
+
+#### 4. Domain Intelligence & Processing Engines
+* **Engine V2 (Explainable NLP Match Scoring)**:
+  * Employs `scikit-learn` `TfidfVectorizer` and `cosine_similarity` for deep semantic document matching.
+  * Incorporates `spaCy` NLP linguistic pipeline for tokenization and entity extraction.
+  * Dynamic skill taxonomy normalization resolving aliases (e.g., *FastAPI* -> *Python Backend*, *K8s* -> *Kubernetes*).
+* **10-Layer ATS Health Diagnostic Engine**:
+  * Multi-dimensional scoring evaluating structural completeness, formatting noise, contact data presence, section boundaries, and action verb density.
+* **External Job Aggregation & Normalization Pipeline**:
+  * Communicates asynchronously with the Adzuna Global Job Board API.
+  * Cleans raw HTML description markup, extracts normalized salary bounds, and applies composite-hash deduplication.
+* **Canva Template Ingestion & ATS Portal Studio**:
+  * Interprets Canva template design hashes and query parameters without external redirects.
+  * Formats candidate data into the single-column corporate gold standard in **Times New Roman, 11pt font, 1.5 line spacing**.
+  * Renders 5 distinct visual layout archetypes with browser-native PDF generation.
+
+#### 5. Data Persistence & Schema Management Layer
+* **Object-Relational Mapping**: **SQLAlchemy 2.0+** using declarative class mappings with explicit foreign key relationships, cascade configurations, and database indexes.
+* **Dual Database Compatibility**: Runs natively on **SQLite** for rapid development and automated test runs, while fully compatible with enterprise **PostgreSQL** in production.
+* **Isolated File System Storage**: Uploaded resume files (`.pdf`, `.docx`, `.txt`) are hashed with server-generated UUIDs, validated for magic byte signatures, and stored in user-isolated directories preventing path traversal.
+
+---
+
+### Comprehensive Technology Stack Matrix
+
+#### Client-Side Technologies (Frontend)
+
+| Layer / Subsystem | Technology / Library | Version | Functional Purpose & Implementation |
+|---|---|---|---|
+| **Core UI Framework** | React | 18.2.0 | Declarative component UI engine managing view states and live DOM diffing |
+| **Build & Tooling** | Vite | 4.5.14 | Instant esbuild compilation, optimized rollup packaging, and hot reload |
+| **Styling Framework** | Tailwind CSS | 3.4.1 | Utility-first responsive design tokens and CSS variables |
+| **Layout & Animation** | Framer Motion | 10.16.4 | Physics-based animation engine for smooth transitions and disclosures |
+| **Iconography** | Lucide React | 0.294.0 | Lightweight, consistent SVG icon set for professional data displays |
+| **HTTP Transport** | Axios | 1.6.2 | Promise-based HTTP client with request/response security interceptors |
+| **Routing** | React Router DOM | 6.20.0 | Client-side routing with authentication guards and layout wrappers |
+| **Testing** | Vitest + Testing Library | 1.0.4 | Unit testing framework verifying UI components and interaction states |
+
+#### Server-Side Technologies (Backend)
+
+| Layer / Subsystem | Technology / Library | Version | Functional Purpose & Implementation |
+|---|---|---|---|
+| **Language Runtime** | Python | 3.11+ / 3.14 | Modern high-performance asynchronous runtime environment |
+| **Web Framework** | FastAPI | 0.104.1 | Modern async web framework with automatic OpenAPI documentation |
+| **ASGI Web Server** | Uvicorn | 0.24.0 | Lightning-fast ASGI web server implementation |
+| **Data Validation** | Pydantic | 2.5.2 | Robust data parsing, validation, and JSON schema generation |
+| **ORM Framework** | SQLAlchemy | 2.0.23 | Enterprise ORM supporting declarative schemas and connection pooling |
+| **Password Hashing** | Passlib (Bcrypt) | 1.7.4 | Cryptographically secure salted password hashing |
+| **JWT Cryptography** | Python-Jose | 3.3.0 | JSON Web Token encoding, signing, and verification |
+| **PDF Extraction** | PyMuPDF (Fitz) | 1.23.8 | High-fidelity text extraction from multi-page PDF resumes |
+| **Word Extraction** | docx2txt | 0.8 | Structured text extraction from Microsoft Word (`.docx`) documents |
+| **HTTP Queries** | Requests / Urllib3 | 2.31.0 | External service queries to the Adzuna Global Job API |
+
+#### NLP & Machine Learning Subsystems
+
+| Module | Algorithm / Package | Scope | Key Functional Mechanism |
+|---|---|---|---|
+| **Linguistic Parser** | spaCy (`en_core_web_sm`) | Text Tokenization | Part-of-speech tagging, tokenization, and sentence boundary detection |
+| **Vector Space Engine** | scikit-learn (`TfidfVectorizer`) | Document Similarity | Term frequency-inverse document frequency text vectorization |
+| **Proximity Scoring** | scikit-learn (`cosine_similarity`) | Fit Scoring | Geometric cosine angle calculation between resume and job vectors |
+| **Skill Taxonomy** | Regex + Token Normalizer | Competency Extraction | Bidirectional alias mapping (resolves hundreds of technical synonym pairs) |
+| **Document Diffing** | Python `difflib` | Version Comparisons | Unified sequence matcher generating highlighted line additions and deletions |
+
+#### Security & Quality Assurance Specifications
+
+| Security Vector | Implementation Mechanism | Validation Standard |
+|---|---|---|
+| **Session Protection** | Dual HttpOnly Cookies + Bearer JWT | Cross-Site Scripting (XSS) proof session storage |
+| **CORS Governance** | Strict origin whitelisting | Blocks unauthorized cross-domain browser API invocations |
+| **Denial of Service** | Sliding-window client IP limiter | Caps aggressive automated attacks on sensitive routes |
+| **File Injection Defense** | Magic-byte signature inspection | Rejects renamed executables and enforces maximum size boundaries |
+| **Path Traversal Defense**| Server-side UUID4 filename assignment | Prohibits relative path overrides (`../`) |
+| **SQL Injection Defense** | Parameterized SQLAlchemy query binding | Guarantees zero unescaped user string interpolation in database queries |
 
 ---
 
 ## Testing & Code Quality Metrics
 
-Every layer of the system is tested with automated test suites:
+Every layer of the system is verified with an automated end-to-end test suite:
 
 ```bash
-# Backend Automated Suite (177 tests passing)
+# Backend Automated Suite (183 tests passing)
 cd backend
 ./venv/bin/pytest tests/ -v
 
-# Run targeted external job sync & tailoring tests
-./venv/bin/pytest tests/test_external_job_sync.py tests/test_tailored_resume.py -v
+# Run targeted external job sync & Canva template tests
+./venv/bin/pytest tests/test_external_job_sync.py tests/test_resume_templates.py -v
 
 # Frontend Unit Tests
 cd frontend
@@ -144,10 +268,11 @@ cd frontend
 npm run build
 ```
 
-| Component | Metric | Status |
+| Component | Test Suite Metric | Status |
 |---|---|---|
-| **Backend Test Suite** | **177 / 177 Passed (100%)** | Passed (100%) |
+| **Backend Test Suite** | **183 / 183 Passed (100%)** | Passed (100%) |
 | **External Job Ingestion Tests** | **6 / 6 Passed (100%)** | Passed (100%) |
+| **Canva Template & ATS Studio Tests** | **6 / 6 Passed (100%)** | Passed (100%) |
 | **Security & Rate Limiting Tests** | **12 / 12 Passed (100%)** | Passed (100%) |
 | **Frontend Unit Tests** | **6 / 6 Passed (100%)** | Passed (100%) |
 | **Vite Production Bundle** | **0 Errors, 0 Warnings** | Optimized |
