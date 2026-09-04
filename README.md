@@ -1,13 +1,5 @@
 # Job Seer — Intelligent Career Discovery & Application Platform
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.141+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18.2-61DAFB.svg?logo=react&logoColor=black)](https://reactjs.org/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.14-3776AB.svg?logo=python&logoColor=white)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/Tests-177%20Passing%20(100%25)-brightgreen.svg)]()
-[![Adzuna API](https://img.shields.io/badge/Adzuna-Live%20Job%20API-orange.svg)]()
-
 > **Job Seer** is an end-to-end intelligent job search companion and career acceleration platform. It bridges the gap between candidates and real-world opportunities through **live external job board aggregation**, **explainable multi-vector NLP match scoring**, **automated 10-layer ATS health diagnostics**, **versioned resume tailoring with diff analysis**, and a **drag-and-drop Kanban application pipeline**.
 
 ---
