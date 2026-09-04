@@ -142,12 +142,6 @@ function Landing() {
                         transition={{ duration: 0.5 }}
                         className="lg:col-span-6 xl:col-span-6 flex flex-col items-start"
                     >
-                        {/* Status Chip */}
-                        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-950/70 border border-indigo-300 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300 text-xs font-extrabold uppercase tracking-wider mb-6 shadow-xs">
-                            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-                            <span>Intelligent Career Search Platform</span>
-                        </div>
-
                         {/* Display Large Headline */}
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight mb-6 leading-[1.1] text-slate-950 dark:text-white">
                             Intelligent career search with{' '}

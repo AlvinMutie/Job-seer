@@ -18,13 +18,13 @@ export default function Input({
     return (
         <div className="space-y-1.5 w-full text-left">
             {label && (
-                <label htmlFor={inputId} className="block text-xs font-semibold text-slate-700 ml-0.5">
+                <label htmlFor={inputId} className="block text-xs font-semibold text-slate-700 dark:text-slate-300 ml-0.5">
                     {label} {required && <span className="text-rose-500">*</span>}
                 </label>
             )}
             <div className="relative">
                 {Icon && (
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none">
                         <Icon size={16} />
                     </div>
                 )}
@@ -33,10 +33,10 @@ export default function Input({
                     type={type}
                     disabled={disabled}
                     required={required}
-                    className={`w-full bg-white border text-slate-900 placeholder-slate-400 rounded-xl py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed ${Icon ? 'pl-10 pr-4' : 'px-4'
+                    className={`w-full bg-white dark:bg-slate-900 border text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed ${Icon ? 'pl-10 pr-4' : 'px-4'
                         } ${error
-                            ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/20'
-                            : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
+                            ? 'border-rose-300 dark:border-rose-700 focus:border-rose-500 focus:ring-rose-500/20'
+                            : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 dark:focus:border-indigo-500 focus:ring-indigo-600/20'
                         } ${className}`}
                     {...props}
                 />
