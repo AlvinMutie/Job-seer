@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileSetup from './pages/ProfileSetup';
 import ResumeHub from './pages/ResumeHub';
+import AtsPortal from './pages/AtsPortal';
 import Settings from './pages/Settings';
 import JobsHub from './pages/JobsHub';
 import { authService } from './services/api';
@@ -65,6 +66,12 @@ function App() {
                 <Route path="/resume-hub" element={
                     <ProtectedRoute>
                         <DashboardLayout pageTitle="Resume Hub"><ResumeHub /></DashboardLayout>
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/ats-portal" element={
+                    <ProtectedRoute>
+                        <DashboardLayout pageTitle="ATS Portal"><AtsPortal /></DashboardLayout>
                     </ProtectedRoute>
                 } />
 
@@ -152,7 +159,8 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
         {
             group: 'Career Assets',
             items: [
-                { icon: <FileText size={17} />, label: 'Resume Hub', path: '/resume-hub' }
+                { icon: <FileText size={17} />, label: 'Resume Hub', path: '/resume-hub' },
+                { icon: <Sparkles size={17} />, label: 'ATS Portal', path: '/ats-portal' }
             ]
         },
         {

@@ -37,7 +37,7 @@ export default function AtsRecommendationBanner({ healthReport, onOpenStudio }) 
                     onClick={onOpenStudio}
                 >
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Open ATS Template Studio
+                    Open ATS Portal
                 </Button>
             </div>
         );
@@ -72,7 +72,7 @@ export default function AtsRecommendationBanner({ healthReport, onOpenStudio }) 
                                 <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Times New Roman 11pt, 1.5 Spaced
                             </span>
                             <span className="inline-flex items-center gap-1 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Canva Link Reference Import
+                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-500" /> Canva In-System Import
                             </span>
                         </div>
                     </div>
@@ -84,7 +84,7 @@ export default function AtsRecommendationBanner({ healthReport, onOpenStudio }) 
                         className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg shadow-amber-600/20 px-4 py-2.5"
                     >
                         <FileText className="w-4 h-4 mr-2" />
-                        Convert to ATS Template Studio
+                        Convert in ATS Portal
                         <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                 </div>

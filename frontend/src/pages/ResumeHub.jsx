@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target, ExternalLink, Copy, CheckCircle, Link2, Edit3 } from 'lucide-react';
 import { authService, jobService, trackerService, tailoredResumeService, coverLetterService, templateService, getApiErrorMessage } from '../services/api';
 import ResumeDiffViewer from '../components/ResumeDiffViewer';
 import CoverLetterViewer from '../components/CoverLetterViewer';
 import AtsRecommendationBanner from '../components/AtsRecommendationBanner';
-import ResumeTemplateStudio from '../components/ResumeTemplateStudio';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -14,6 +14,7 @@ import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import EmptyState from '../components/ui/EmptyState';
 
 function ResumeHub() {
+    const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [healthReport, setHealthReport] = useState(null);
     const [jobs, setJobs] = useState([]);
@@ -46,11 +47,6 @@ function ResumeHub() {
     
     const [activeCoverLetter, setActiveCoverLetter] = useState(null);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
-
-    // Template Studio States
-    const [isStudioOpen, setIsStudioOpen] = useState(false);
-    const [studioInitialText, setStudioInitialText] = useState('');
-    const [studioInitialTemplate, setStudioInitialTemplate] = useState(null);
 
     const fetchAllData = async () => {
         try {
@@ -107,10 +103,12 @@ function ResumeHub() {
         }
     };
 
-    const handleOpenStudio = (rawText = '', template = null) => {
-        setStudioInitialText(rawText || user?.profile?.resume_text || '');
-        setStudioInitialTemplate(template);
-        setIsStudioOpen(true);
+    const handleOpenStudio = (template = null) => {
+        if (template?.id) {
+            navigate(`/ats-portal?template_id=${template.id}`);
+        } else {
+            navigate('/ats-portal');
+        }
     };
 
     const handleFileChange = (e) => {
@@ -270,10 +268,10 @@ function ResumeHub() {
                     <Button
                         variant="primary"
                         icon={Sparkles}
-                        onClick={() => handleOpenStudio()}
+                        onClick={() => navigate('/ats-portal')}
                         className="font-semibold shadow-xs"
                     >
-                        ATS Template Studio
+                        ATS Portal
                     </Button>
                 }
             />
@@ -281,7 +279,7 @@ function ResumeHub() {
             {/* ATS Health Recommendation & Compliance Banner */}
             <AtsRecommendationBanner
                 healthReport={healthReport}
-                onOpenStudio={() => handleOpenStudio()}
+                onOpenStudio={() => navigate('/ats-portal')}
             />
 
             {/* Contextual Selected Job Target Banner with Direct Application Link */}
@@ -359,10 +357,10 @@ function ResumeHub() {
                             variant="outline"
                             size="sm"
                             icon={Sparkles}
-                            onClick={() => handleOpenStudio(latestTailoredRecord.tailored_resume_text)}
+                            onClick={() => navigate(`/ats-portal?tailored_id=${latestTailoredRecord.id}`)}
                             className="bg-white dark:bg-slate-900 font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50"
                         >
-                            Format ATS (11pt)
+                            Format in ATS Portal
                         </Button>
                         <Button
                             variant="secondary"
@@ -581,10 +579,10 @@ function ResumeHub() {
                                                 size="sm"
                                                 variant="primary"
                                                 icon={Sparkles}
-                                                onClick={() => handleOpenStudio()}
+                                                onClick={() => navigate('/ats-portal')}
                                                 className="text-xs"
                                             >
-                                                Fix in ATS Studio
+                                                Open ATS Portal
                                             </Button>
                                         </div>
                                         <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
@@ -623,7 +621,7 @@ function ResumeHub() {
                                     variant="primary"
                                     size="sm"
                                     icon={Plus}
-                                    onClick={() => handleOpenStudio()}
+                                    onClick={() => navigate('/ats-portal')}
                                 >
                                     New ATS Template
                                 </Button>
@@ -633,9 +631,9 @@ function ResumeHub() {
                                 <EmptyState
                                     icon={Sparkles}
                                     title="No saved ATS templates yet"
-                                    description="Open the ATS Template Studio to format your resume with Times New Roman 11pt and 1.5 line spacing, link your Canva template, and save drafts."
-                                    actionLabel="Launch Template Studio"
-                                    onAction={() => handleOpenStudio()}
+                                    description="Open the ATS Portal to format your resume with Times New Roman 11pt and 1.5 line spacing, import your Canva template, and save drafts."
+                                    actionLabel="Launch ATS Portal"
+                                    onAction={() => navigate('/ats-portal')}
                                 />
                             ) : (
                                 savedTemplates.map(tpl => (
@@ -663,9 +661,9 @@ function ResumeHub() {
                                                     variant="primary"
                                                     size="sm"
                                                     icon={Edit3}
-                                                    onClick={() => handleOpenStudio(tpl.formatted_text, tpl)}
+                                                    onClick={() => navigate(`/ats-portal?template_id=${tpl.id}`)}
                                                 >
-                                                    Open in Studio
+                                                    Open in ATS Portal
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
@@ -746,11 +744,11 @@ function ResumeHub() {
                                                     variant="outline"
                                                     size="sm"
                                                     icon={Sparkles}
-                                                    onClick={() => handleOpenStudio(item.tailored_resume_text)}
+                                                    onClick={() => navigate(`/ats-portal?tailored_id=${item.id}`)}
                                                     className="font-medium text-indigo-600 hover:bg-indigo-50"
-                                                    title="Format in ATS Template Studio (Times New Roman 11pt, 1.5 line spacing)"
+                                                    title="Format in ATS Portal (Times New Roman 11pt, 1.5 line spacing)"
                                                 >
-                                                    Format ATS
+                                                    Format in ATS Portal
                                                 </Button>
                                                 <Button
                                                     variant="secondary"
@@ -882,17 +880,6 @@ function ResumeHub() {
                 letterData={activeCoverLetter}
                 onDelete={handleDeleteCoverLetter}
             />
-
-            {isStudioOpen && (
-                <ResumeTemplateStudio
-                    initialRawText={studioInitialText}
-                    initialTemplate={studioInitialTemplate}
-                    onClose={() => setIsStudioOpen(false)}
-                    onSaved={() => {
-                        refreshTemplates();
-                    }}
-                />
-            )}
         </div>
     );
 }
