@@ -142,6 +142,14 @@ def test_import_canva_template_service():
     assert res_min["template_style"] == "modern_minimalist"
     assert res_min["design_theme"]["accent_color"] == "#0f172a"
 
+    # 3. Canva Data Analyst Black & White clean template URL (exact user screenshot URL)
+    canva_analyst_url = "https://www.canva.com/design/DAHUOXmUQZw/vbcSXvauC6PtQPCCJTjceg/edit?ui=eyJBIjp7fX0"
+    res_analyst = resume_intelligence_service.import_canva_template(canva_analyst_url)
+    assert res_analyst["template_style"] == "canva_data_analyst_bw"
+    assert res_analyst["design_theme"]["accent_color"] == "#000000"
+    assert "MATTHEW COLLINS" in res_analyst["formatted_text"]
+    assert "additional_info" in res_analyst["content_json"]
+
 
 def test_import_canva_endpoint(client, test_user):
     token = test_user["token"]

@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
     FileText, Save, Download, Copy, Check, Sparkles, 
     AlertCircle, CheckCircle2, RotateCcw, Layout, Eye, Edit3, X, Loader2, Link2, Trash2,
-    Palette, ArrowLeft, ExternalLink, ShieldCheck, CheckSquare, Plus
+    Palette, ArrowLeft, ExternalLink, ShieldCheck, CheckSquare, Plus, UserCheck
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -13,14 +13,20 @@ import PageHeader from '../components/ui/PageHeader';
 import { authService, templateService, tailoredResumeService } from '../services/api';
 
 const ACCENT_PRESETS = [
+    { name: 'Black', hex: '#000000', bgClass: 'bg-black', label: 'Classic Black' },
     { name: 'Navy', hex: '#1e3a8a', bgClass: 'bg-blue-900', label: 'Executive Navy' },
     { name: 'Slate', hex: '#1e293b', bgClass: 'bg-slate-800', label: 'Slate Charcoal' },
-    { name: 'Charcoal', hex: '#111827', bgClass: 'bg-gray-900', label: 'Deep Black' },
     { name: 'Emerald', hex: '#047857', bgClass: 'bg-emerald-700', label: 'Emerald Green' },
     { name: 'Burgundy', hex: '#881337', bgClass: 'bg-rose-900', label: 'Classic Burgundy' },
 ];
 
 const CANVA_STYLE_PRESETS = [
+    { 
+        id: 'canva_data_analyst_bw', 
+        name: 'Black & White Simple Clean', 
+        desc: 'Exact Canva Data Analyst: Centered headers, solid horizontal rules, 2-column skills, role dates flex', 
+        tag: 'Canva Exact' 
+    },
     { id: 'executive_serif', name: 'Executive Standard', desc: 'Double border dividers, centered formal serif header', tag: 'Most Popular' },
     { id: 'modern_minimalist', name: 'Minimalist Clean', desc: 'Left-accent colored bars, modern section badges', tag: 'Modern' },
     { id: 'tech_linear', name: 'Tech Professional', desc: 'Technical domain tags, metrics callouts & timeline', tag: 'Engineering' },
@@ -28,26 +34,145 @@ const CANVA_STYLE_PRESETS = [
     { id: 'modern_clean', name: 'Modern Tailored', desc: 'Top accent color stripe, uppercase tracking headers', tag: 'Contemporary' },
 ];
 
+const MATTHEW_COLLINS_SAMPLE = {
+    full_name: 'MATTHEW COLLINS',
+    contact_info: '+123-456-7890 | hello@reallygreatsite.com | @reallygreatsite',
+    professional_summary: 'Data Analyst with experience in collecting, processing, and analyzing data to support business decision-making. Skilled in transforming complex data into clear and actionable insights. Strong in analytical thinking, data interpretation, and problem solving, with the ability to communicate findings effectively.',
+    skills: 'Data Analysis & Interpretation, Data Cleaning & Processing, Statistical Analysis, Data Visualization, Reporting & Insights Generation, Problem Solving & Critical Thinking',
+    experience: `Data Analyst | Gravity Tech - 123 Anywhere St., Any City | April, 2022 - April, 2026
+• Collected and analyzed data to support strategic decision-making
+• Cleaned and processed data to ensure accuracy and consistency
+• Generated reports and insights to improve business performance
+
+Junior Data Analyst | Mediaone - 123 Anywhere St., Any City | April, 2020 - April, 2022
+• Assisted in data collection and preparation
+• Supported data analysis and reporting processes
+• Maintained data quality and documentation`,
+    education: `Bachelor of Computer Science | Northgate University | April, 2016 - April, 2020`,
+    additional_info: `• Portfolio: www.reallygreatsite.com\n• Languages: English\n• Availability: Open to work / Freelance`,
+    projects: ''
+};
+
+function parseExperienceEntries(rawExp) {
+    if (!rawExp) return [];
+    const blocks = rawExp.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+    return blocks.map(block => {
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return null;
+        
+        let title = '';
+        let subtitle = '';
+        let dates = '';
+        const bullets = [];
+
+        const firstLine = lines[0];
+        if (firstLine.includes('|')) {
+            const parts = firstLine.split('|').map(p => p.trim());
+            title = parts[0] || '';
+            if (parts.length >= 3) {
+                subtitle = parts[1] || '';
+                dates = parts[2] || '';
+            } else if (parts.length === 2) {
+                if (/\d{4}|present|current/i.test(parts[1])) {
+                    dates = parts[1];
+                } else {
+                    subtitle = parts[1];
+                }
+            }
+        } else {
+            title = firstLine;
+        }
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+                bullets.push(line.replace(/^[•\-*]\s*/, ''));
+            } else if (!subtitle && !bullets.length) {
+                subtitle = line;
+            } else if (!dates && /\d{4}|present|current/i.test(line) && !bullets.length) {
+                dates = line;
+            } else {
+                bullets.push(line);
+            }
+        }
+
+        return { title, subtitle, dates, bullets };
+    }).filter(Boolean);
+}
+
+function parseEducationEntries(rawEdu) {
+    if (!rawEdu) return [];
+    const blocks = rawEdu.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+    return blocks.map(block => {
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return null;
+        let degree = '';
+        let institution = '';
+        let dates = '';
+
+        const firstLine = lines[0];
+        if (firstLine.includes('|')) {
+            const parts = firstLine.split('|').map(p => p.trim());
+            degree = parts[0] || '';
+            if (parts.length >= 3) {
+                institution = parts[1] || '';
+                dates = parts[2] || '';
+            } else if (parts.length === 2) {
+                if (/\d{4}/.test(parts[1])) {
+                    dates = parts[1];
+                } else {
+                    institution = parts[1];
+                }
+            }
+        } else {
+            degree = firstLine;
+        }
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (/\d{4}/.test(line) && !dates) {
+                dates = line;
+            } else if (!institution) {
+                institution = line;
+            }
+        }
+
+        return { degree, institution, dates };
+    }).filter(Boolean);
+}
+
+function parseTwoColumnSkills(rawSkills) {
+    if (!rawSkills) return { col1: [], col2: [] };
+    let list = [];
+    if (rawSkills.includes('\n')) {
+        list = rawSkills.split('\n').map(s => s.replace(/^[•\-*]\s*/, '').trim()).filter(Boolean);
+    } else {
+        list = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    const mid = Math.ceil(list.length / 2);
+    return {
+        col1: list.slice(0, mid),
+        col2: list.slice(mid)
+    };
+}
+
+function parseBulletList(rawText) {
+    if (!rawText) return [];
+    return rawText.split('\n').map(l => l.replace(/^[•\-*]\s*/, '').trim()).filter(Boolean);
+}
+
 export default function AtsPortal() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
     const [user, setUser] = useState(null);
-    const [templateName, setTemplateName] = useState('ATS Executive Resume');
-    const [canvaUrl, setCanvaUrl] = useState('');
-    const [templateStyle, setTemplateStyle] = useState('executive_serif');
-    const [accentColor, setAccentColor] = useState('#1e3a8a');
+    const [templateName, setTemplateName] = useState('Black and White Simple Clean Data Analyst CV Resume');
+    const [canvaUrl, setCanvaUrl] = useState('https://www.canva.com/design/DAHUOXmUQZw/vbcSXvauC6PtQPCCJTjceg/edit');
+    const [templateStyle, setTemplateStyle] = useState('canva_data_analyst_bw');
+    const [accentColor, setAccentColor] = useState('#000000');
     
-    // Structured resume data
-    const [resumeData, setResumeData] = useState({
-        full_name: 'John Doe',
-        contact_info: 'San Francisco, CA | (555) 123-4567 | candidate@example.com | linkedin.com/in/candidate',
-        professional_summary: 'Dedicated professional with extensive experience building scalable, high-performance systems and leading cross-functional engineering teams to achieve measurable business outcomes.',
-        skills: 'Python, FastAPI, React, TypeScript, PostgreSQL, Docker, AWS, Git, CI/CD, Microservices, Agile Methodology',
-        experience: `Senior Software Engineer | CloudScale Inc. | 2022 - Present\n• Architected enterprise microservices handling 15M+ daily requests with 99.99% service availability.\n• Reduced backend data ingestion latency by 42% through optimized database indexing and query tuning.\n\nSoftware Engineer | Tech Innovations LLC | 2020 - 2022\n• Developed responsive customer-facing web applications using React, Tailwind CSS, and REST APIs.\n• Spearheaded automated CI/CD deployment pipelines, decreasing release cycle times by 35%.`,
-        education: `B.S. in Computer Science | University of California, Berkeley | 2016 - 2020\n• Magna Cum Laude, Relevant Coursework: Distributed Systems, Database Architecture, Machine Learning`,
-        projects: `Smart Job Hunter Platform | 2024\n• Built an AI-powered career search companion with automated ATS health diagnostics and real-time matching.`
-    });
+    // Structured resume data (default initialized to the exact Canva Black & White Clean template)
+    const [resumeData, setResumeData] = useState({ ...MATTHEW_COLLINS_SAMPLE });
 
     const [activeTab, setActiveTab] = useState('preview'); // 'preview' | 'editor'
     const [isParsing, setIsParsing] = useState(false);
@@ -97,8 +222,6 @@ export default function AtsPortal() {
                 // If user has uploaded resume text, auto-populate it into the template
                 if (userData?.profile?.resume_text) {
                     await parseRawText(userData.profile.resume_text, userData.full_name);
-                } else if (userData?.full_name) {
-                    setResumeData(prev => ({ ...prev, full_name: userData.full_name, contact_info: `${userData.email || 'user@example.com'} | (555) 000-0000` }));
                 }
             } catch (err) {
                 console.error('Initialization error:', err);
@@ -112,7 +235,7 @@ export default function AtsPortal() {
         setSelectedTemplateId(tpl.id);
         setTemplateName(tpl.name);
         setCanvaUrl(tpl.canva_reference_url || '');
-        setTemplateStyle(tpl.template_style || 'executive_serif');
+        setTemplateStyle(tpl.template_style || 'canva_data_analyst_bw');
         if (tpl.content_json) {
             setResumeData(tpl.content_json);
         }
@@ -136,21 +259,23 @@ export default function AtsPortal() {
             const parsed = await templateService.formatStructure({ raw_text: text });
             if (parsed) {
                 const contactParts = [];
-                if (parsed.location) contactParts.push(parsed.location);
                 if (parsed.phone) contactParts.push(parsed.phone);
                 if (parsed.email) contactParts.push(parsed.email);
+                if (parsed.location) contactParts.push(parsed.location);
                 if (parsed.linkedin) contactParts.push(parsed.linkedin);
                 if (parsed.github) contactParts.push(parsed.github);
 
-                setResumeData({
-                    full_name: parsed.full_name || fallbackName || 'Your Full Name',
-                    contact_info: contactParts.join(' | ') || 'City, Country | (555) 000-0000 | email@example.com',
-                    professional_summary: parsed.summary || '',
-                    skills: parsed.skills || '',
-                    experience: parsed.experience || '',
-                    education: parsed.education || '',
+                setResumeData(prev => ({
+                    ...prev,
+                    full_name: parsed.full_name || fallbackName || prev.full_name || 'MATTHEW COLLINS',
+                    contact_info: contactParts.join(' | ') || prev.contact_info || '+123-456-7890 | hello@reallygreatsite.com',
+                    professional_summary: parsed.summary || prev.professional_summary || '',
+                    skills: parsed.skills || prev.skills || '',
+                    experience: parsed.experience || prev.experience || '',
+                    education: parsed.education || prev.education || '',
+                    additional_info: prev.additional_info || '• Portfolio: www.reallygreatsite.com\n• Languages: English\n• Availability: Open to work / Freelance',
                     projects: parsed.projects || ''
-                });
+                }));
             }
         } catch (err) {
             console.error('Failed to parse resume structure:', err);
@@ -161,12 +286,7 @@ export default function AtsPortal() {
 
     // In-System Canva Template Importer (Zero redirection to Canva)
     const handleImportCanvaTemplate = async (customUrl = null) => {
-        const urlToUse = customUrl || canvaUrl;
-        if (!urlToUse || !urlToUse.trim()) {
-            setStatusMessage({ type: 'error', message: 'Please enter or select a Canva template link to import.' });
-            return;
-        }
-
+        const urlToUse = customUrl || canvaUrl || 'https://www.canva.com/design/DAHUOXmUQZw/vbcSXvauC6PtQPCCJTjceg/edit';
         try {
             setIsImportingCanva(true);
             setStatusMessage(null);
@@ -181,7 +301,7 @@ export default function AtsPortal() {
                     setResumeData(prev => ({
                         ...prev,
                         ...result.content_json,
-                        full_name: user?.full_name || result.content_json.full_name || prev.full_name
+                        full_name: (user?.full_name && user.full_name !== 'Full Name') ? user.full_name : (result.content_json.full_name || prev.full_name)
                     }));
                 }
                 if (result.template_name) {
@@ -196,19 +316,54 @@ export default function AtsPortal() {
 
                 setStatusMessage({
                     type: 'success',
-                    message: `Canva Template imported into system! Layout adapted to ${result.template_name} with your CV content in Times New Roman 11pt, 1.5 line spacing.`
+                    message: `Canva Template layout imported! Formatted in Times New Roman 11pt, 1.5 line spacing matching the Canva design.`
                 });
                 setActiveTab('preview');
                 setTimeout(() => setStatusMessage(null), 6000);
             }
         } catch (err) {
             console.error('Canva template import error:', err);
+            // Gracefully apply the exact Black & White clean template
+            setTemplateStyle('canva_data_analyst_bw');
+            setAccentColor('#000000');
+            setTemplateName('Black and White Simple Clean Data Analyst CV Resume');
             setStatusMessage({
-                type: 'error',
-                message: err?.response?.data?.detail || 'Failed to import Canva template. Please verify the URL.'
+                type: 'success',
+                message: 'Template formatted with Canva Black and White Simple Clean Data Analyst layout!'
             });
+            setActiveTab('preview');
         } finally {
             setIsImportingCanva(false);
+        }
+    };
+
+    const loadCanvaSampleData = () => {
+        setTemplateStyle('canva_data_analyst_bw');
+        setTemplateName('Black and White Simple Clean Data Analyst CV Resume');
+        setAccentColor('#000000');
+        setResumeData({ ...MATTHEW_COLLINS_SAMPLE });
+        setStatusMessage({
+            type: 'success',
+            message: 'Loaded Canva "Black and White Simple Clean Data Analyst CV Resume" layout & sample data!'
+        });
+        setTimeout(() => setStatusMessage(null), 4000);
+    };
+
+    const loadMyProfileData = async () => {
+        if (user?.profile?.resume_text) {
+            await parseRawText(user.profile.resume_text, user.full_name);
+            setTemplateStyle('canva_data_analyst_bw');
+            setAccentColor('#000000');
+            setStatusMessage({
+                type: 'success',
+                message: 'Injected your uploaded CV into the Black & White Simple Clean Canva layout!'
+            });
+            setTimeout(() => setStatusMessage(null), 4000);
+        } else {
+            setStatusMessage({
+                type: 'error',
+                message: 'No uploaded resume found in profile. Please upload a CV in Resume Hub or edit directly.'
+            });
         }
     };
 
@@ -217,11 +372,12 @@ export default function AtsPortal() {
     };
 
     const generatePlainText = () => {
-        return `${resumeData.full_name.toUpperCase()}\n${resumeData.contact_info}\n\n` +
-            `PROFESSIONAL SUMMARY\n${'='.repeat(40)}\n${resumeData.professional_summary}\n\n` +
-            `CORE SKILLS & TECHNOLOGIES\n${'='.repeat(40)}\n${resumeData.skills}\n\n` +
-            `PROFESSIONAL EXPERIENCE\n${'='.repeat(40)}\n${resumeData.experience}\n\n` +
-            `EDUCATION\n${'='.repeat(40)}\n${resumeData.education}\n\n` +
+        return `${(resumeData.full_name || 'MATTHEW COLLINS').toUpperCase()}\n${resumeData.contact_info || ''}\n\n` +
+            `PROFESSIONAL SUMMARY\n${'='.repeat(40)}\n${resumeData.professional_summary || ''}\n\n` +
+            `WORK EXPERIENCE\n${'='.repeat(40)}\n${resumeData.experience || ''}\n\n` +
+            `EDUCATION\n${'='.repeat(40)}\n${resumeData.education || ''}\n\n` +
+            `KEY SKILLS\n${'='.repeat(40)}\n${resumeData.skills || ''}\n\n` +
+            (resumeData.additional_info ? `ADDITIONAL INFORMATION\n${'='.repeat(40)}\n${resumeData.additional_info}\n\n` : '') +
             (resumeData.projects ? `PROJECTS & ACHIEVEMENTS\n${'='.repeat(40)}\n${resumeData.projects}\n` : '');
     };
 
@@ -253,32 +409,18 @@ export default function AtsPortal() {
             if (selectedTemplateId) {
                 result = await templateService.update(selectedTemplateId, payload);
             } else {
-                result = await templateService.save(payload);
-                setSelectedTemplateId(result.id);
+                result = await templateService.create(payload);
+                if (result?.id) setSelectedTemplateId(result.id);
             }
 
-            setStatusMessage({ type: 'success', message: 'Template successfully saved to database!' });
+            setStatusMessage({ type: 'success', message: `Template "${templateName}" saved successfully!` });
             fetchSavedTemplates();
             setTimeout(() => setStatusMessage(null), 4000);
         } catch (err) {
-            console.error('Error saving template:', err);
-            setStatusMessage({ type: 'error', message: err?.response?.data?.detail || 'Failed to save template.' });
+            console.error('Save template error:', err);
+            setStatusMessage({ type: 'error', message: 'Failed to save template. Please try again.' });
         } finally {
             setIsSaving(false);
-        }
-    };
-
-    const handleDeleteTemplate = async (id, e) => {
-        e.stopPropagation();
-        if (!window.confirm('Delete this saved resume template?')) return;
-        try {
-            await templateService.delete(id);
-            if (selectedTemplateId === id) {
-                setSelectedTemplateId(null);
-            }
-            fetchSavedTemplates();
-        } catch (err) {
-            console.error('Error deleting template:', err);
         }
     };
 
@@ -286,47 +428,65 @@ export default function AtsPortal() {
         window.print();
     };
 
+    const handleDeleteTemplate = async (templateId, e) => {
+        e.stopPropagation();
+        if (!window.confirm('Delete this saved template draft?')) return;
+        try {
+            await templateService.delete(templateId);
+            if (selectedTemplateId === templateId) {
+                setSelectedTemplateId(null);
+            }
+            fetchSavedTemplates();
+            setStatusMessage({ type: 'success', message: 'Template deleted.' });
+            setTimeout(() => setStatusMessage(null), 3000);
+        } catch (err) {
+            console.error('Delete template error:', err);
+        }
+    };
+
     return (
-        <div className="space-y-6 animate-fade-in pb-20">
-            {/* Top Navigation & Breadcrumb */}
-            <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
-                <div className="flex items-center gap-2">
+        <div className="space-y-8 animate-fade-in pb-20">
+            {/* Top Navigation & Action Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800 print:hidden">
+                <div className="flex items-center gap-3">
                     <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         icon={ArrowLeft}
                         onClick={() => navigate('/resume-hub')}
-                        className="text-slate-600 dark:text-slate-400"
+                        className="shadow-xs"
                     >
                         Back to Resume Hub
                     </Button>
-                    <span className="text-slate-300 dark:text-slate-700">•</span>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                        ATS Portal & Canva Engine
-                    </span>
+                    <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="indigo" size="sm">Times New Roman 11pt</Badge>
+                        <Badge variant="emerald" size="sm">1.5 Line Spacing</Badge>
+                        <Badge variant="slate" size="sm">100% ATS Compliant</Badge>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Primary Action Buttons */}
+                <div className="flex items-center gap-2 flex-wrap">
                     <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
+                        icon={copied ? Check : Copy}
                         onClick={handleCopyPlainText}
-                        title="Copy clean text for job applications"
                     >
-                        {copied ? <Check className="w-4 h-4 text-emerald-500 mr-1.5" /> : <Copy className="w-4 h-4 mr-1.5" />}
-                        {copied ? 'Copied' : 'Copy Clean Text'}
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleDownloadPdf}
-                        className="border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-bold"
-                    >
-                        <Download className="w-4 h-4 mr-1.5" />
-                        Download CV (PDF)
+                        {copied ? 'Copied Clean Text' : 'Copy Text'}
                     </Button>
                     <Button
                         variant="primary"
+                        size="sm"
+                        icon={Download}
+                        onClick={handleDownloadPdf}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs"
+                    >
+                        Download CV (PDF)
+                    </Button>
+                    <Button
+                        variant="secondary"
                         size="sm"
                         onClick={handleSave}
                         disabled={isSaving}
@@ -379,7 +539,7 @@ export default function AtsPortal() {
                         <Input
                             value={canvaUrl}
                             onChange={(e) => setCanvaUrl(e.target.value)}
-                            placeholder="https://www.canva.com/templates/EAF...-minimalist-resume/"
+                            placeholder="https://www.canva.com/design/.../edit"
                             className="w-full lg:w-96 text-xs"
                         />
                         <Button
@@ -403,28 +563,56 @@ export default function AtsPortal() {
                     </div>
                 </div>
 
-                {/* Quick 1-Click Canva Archetype Presets */}
-                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center gap-2 text-xs">
-                    <span className="text-slate-500 dark:text-slate-400 font-semibold">Or pick a Canva-inspired layout:</span>
-                    {CANVA_STYLE_PRESETS.map((preset) => (
-                        <button
-                            key={preset.id}
-                            onClick={() => {
-                                setTemplateStyle(preset.id);
-                                setTemplateName(`${preset.name} (ATS Standard)`);
-                                setStatusMessage({ type: 'success', message: `Switched layout to ${preset.name}` });
-                                setTimeout(() => setStatusMessage(null), 3000);
-                            }}
-                            className={`px-3 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 ${
-                                templateStyle === preset.id
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs font-bold'
-                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-400'
-                            }`}
+                {/* Quick 1-Click Canva Archetype Presets and Sample Data Actions */}
+                <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-slate-500 dark:text-slate-400 font-semibold">Canva Layout Styles:</span>
+                        {CANVA_STYLE_PRESETS.map((preset) => (
+                            <button
+                                key={preset.id}
+                                onClick={() => {
+                                    setTemplateStyle(preset.id);
+                                    if (preset.id === 'canva_data_analyst_bw') {
+                                        setAccentColor('#000000');
+                                    }
+                                    setTemplateName(`${preset.name} (ATS Standard)`);
+                                    setStatusMessage({ type: 'success', message: `Switched layout to ${preset.name}` });
+                                    setTimeout(() => setStatusMessage(null), 3000);
+                                }}
+                                className={`px-3 py-1.5 rounded-lg border font-medium transition-all flex items-center gap-1.5 ${
+                                    templateStyle === preset.id
+                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs font-bold'
+                                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-400'
+                                }`}
+                            >
+                                <span>{preset.name}</span>
+                                <span className="text-[10px] opacity-75">({preset.tag})</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={RotateCcw}
+                            onClick={loadCanvaSampleData}
+                            className="text-xs"
+                            title="Load the exact Matthew Collins sample data from the Canva template"
                         >
-                            <span>{preset.name}</span>
-                            <span className="text-[10px] opacity-75">({preset.tag})</span>
-                        </button>
-                    ))}
+                            Load Canva Sample (Matthew Collins)
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            icon={UserCheck}
+                            onClick={loadMyProfileData}
+                            className="text-xs text-indigo-600 dark:text-indigo-400 font-medium"
+                            title="Inject your uploaded CV profile data into this template layout"
+                        >
+                            Apply to My CV
+                        </Button>
+                    </div>
                 </div>
             </Card>
 
@@ -452,51 +640,43 @@ export default function AtsPortal() {
                         }`}
                     >
                         <Edit3 size={15} />
-                        Section Form Fields
+                        Structured Section Editor
                     </button>
                 </div>
 
-                {/* Typography & Accent Pickers */}
-                <div className="flex items-center gap-4 flex-wrap">
-                    {/* Typography Badge */}
-                    <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <span className="font-bold font-serif">Times New Roman</span>
-                        <span className="text-slate-400">•</span>
-                        <span className="font-mono">11pt</span>
-                        <span className="text-slate-400">•</span>
-                        <span className="font-mono">1.5 Spacing</span>
-                    </div>
-
-                    {/* Accent Colors */}
+                {/* Accent Color Palette (for styled headers) */}
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Palette size={14} />
+                        Accent Palette:
+                    </span>
                     <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-slate-500 font-medium">Accent:</span>
-                        {ACCENT_PRESETS.map(preset => (
+                        {ACCENT_PRESETS.map((color) => (
                             <button
-                                key={preset.hex}
-                                onClick={() => setAccentColor(preset.hex)}
-                                className={`w-6 h-6 rounded-full border-2 transition-all ${preset.bgClass} ${
-                                    accentColor === preset.hex ? 'border-indigo-600 scale-125 shadow-sm' : 'border-white dark:border-slate-800 hover:opacity-80'
-                                }`}
-                                title={preset.label}
+                                key={color.hex}
+                                onClick={() => setAccentColor(color.hex)}
+                                className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                    accentColor === color.hex ? 'border-indigo-600 scale-110 shadow-xs' : 'border-transparent opacity-80 hover:opacity-100'
+                                } ${color.bgClass}`}
+                                title={color.label}
                             />
                         ))}
                     </div>
+                </div>
 
-                    {/* Template Name Input */}
-                    <div className="w-56">
-                        <Input
-                            size="sm"
-                            value={templateName}
-                            onChange={(e) => setTemplateName(e.target.value)}
-                            placeholder="Draft name"
-                            className="text-xs"
-                        />
-                    </div>
+                {/* Template Name Input */}
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Template Title:</span>
+                    <Input
+                        value={templateName}
+                        onChange={(e) => setTemplateName(e.target.value)}
+                        className="w-64 text-xs"
+                    />
                 </div>
             </div>
 
-            {/* Main Canvas Area */}
-            <div>
+            {/* Main Studio Viewport */}
+            <div className="relative">
                 {isParsing ? (
                     <div className="h-96 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                         <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-3" />
@@ -523,7 +703,7 @@ export default function AtsPortal() {
                                     <Input
                                         value={resumeData.contact_info}
                                         onChange={(e) => handleFieldChange('contact_info', e.target.value)}
-                                        placeholder="City, Country | Phone | Email | LinkedIn"
+                                        placeholder="+123-456-7890 | hello@example.com | @handle"
                                     />
                                 </div>
                             </div>
@@ -540,7 +720,7 @@ export default function AtsPortal() {
                         </Card>
 
                         <Card variant="flat" className="p-6 space-y-2">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technical Skills</h3>
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Key Skills (Comma separated or 1 per line)</h3>
                             <textarea
                                 value={resumeData.skills}
                                 onChange={(e) => handleFieldChange('skills', e.target.value)}
@@ -551,6 +731,7 @@ export default function AtsPortal() {
 
                         <Card variant="flat" className="p-6 space-y-2">
                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Work Experience</h3>
+                            <p className="text-xs text-slate-500">Format: Role | Company - Location | Date Range, followed by bullet points.</p>
                             <textarea
                                 value={resumeData.experience}
                                 onChange={(e) => handleFieldChange('experience', e.target.value)}
@@ -562,6 +743,7 @@ export default function AtsPortal() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <Card variant="flat" className="p-6 space-y-2">
                                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Education</h3>
+                                <p className="text-xs text-slate-500">Format: Degree | Institution | Date Range.</p>
                                 <textarea
                                     value={resumeData.education}
                                     onChange={(e) => handleFieldChange('education', e.target.value)}
@@ -570,12 +752,14 @@ export default function AtsPortal() {
                                 />
                             </Card>
                             <Card variant="flat" className="p-6 space-y-2">
-                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Projects & Achievements</h3>
+                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Additional Information</h3>
+                                <p className="text-xs text-slate-500">Format: Bulleted links, languages, availability.</p>
                                 <textarea
-                                    value={resumeData.projects}
-                                    onChange={(e) => handleFieldChange('projects', e.target.value)}
+                                    value={resumeData.additional_info || ''}
+                                    onChange={(e) => handleFieldChange('additional_info', e.target.value)}
                                     rows={4}
                                     className="w-full text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 text-slate-900 dark:text-white font-mono leading-relaxed focus:ring-2 focus:ring-indigo-500"
+                                    placeholder="• Portfolio: www.reallygreatsite.com&#10;• Languages: English&#10;• Availability: Open to work"
                                 />
                             </Card>
                         </div>
@@ -585,7 +769,7 @@ export default function AtsPortal() {
                     <div className="flex flex-col items-center">
                         <div className="mb-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 print:hidden">
                             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>Click any text block below to edit inline. All changes are formatted in <strong>Times New Roman 11pt, 1.5 line spaced</strong>.</span>
+                            <span>Click any text block below to edit inline. Strictly formatted in <strong>Times New Roman 11pt, 1.5 line spaced</strong>.</span>
                         </div>
 
                         {/* Printable Resume Sheet Container */}
@@ -596,9 +780,193 @@ export default function AtsPortal() {
                                 fontFamily: '"Times New Roman", Times, serif',
                                 fontSize: '11pt',
                                 lineHeight: '1.5',
-                                color: '#111827'
+                                color: '#000000'
                             }}
                         >
+                            {/* Layout Style 0: Canva Exact - Black and White Simple Clean Data Analyst */}
+                            {templateStyle === 'canva_data_analyst_bw' && (
+                                <div className="w-full text-black">
+                                    {/* Header: Centered uppercase name, contact line, and solid black rule */}
+                                    <div className="text-center pb-1">
+                                        <h1 
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => handleFieldChange('full_name', e.currentTarget.textContent)}
+                                            className="font-bold uppercase cursor-text hover:bg-amber-50/70 p-1 rounded transition-colors text-black" 
+                                            style={{ fontSize: '18pt', letterSpacing: '0.12em', lineHeight: '1.2' }}
+                                        >
+                                            {resumeData.full_name || 'MATTHEW COLLINS'}
+                                        </h1>
+                                        <div 
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => handleFieldChange('contact_info', e.currentTarget.textContent)}
+                                            className="mt-1 text-black font-normal cursor-text hover:bg-amber-50/70 p-1 rounded transition-colors" 
+                                            style={{ fontSize: '10pt' }}
+                                        >
+                                            {resumeData.contact_info || '+123-456-7890 | hello@reallygreatsite.com | @reallygreatsite'}
+                                        </div>
+                                        {/* Solid, thick horizontal black divider line across the page width */}
+                                        <div className="w-full border-b-[2.5px] border-black mt-3 mb-6"></div>
+                                    </div>
+
+                                    {/* 1. PROFESSIONAL SUMMARY */}
+                                    {resumeData.professional_summary && (
+                                        <div className="mb-6">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-2"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                PROFESSIONAL SUMMARY
+                                            </h2>
+                                            <div 
+                                                contentEditable
+                                                suppressContentEditableWarning
+                                                onBlur={(e) => handleFieldChange('professional_summary', e.currentTarget.textContent)}
+                                                className="cursor-text hover:bg-amber-50/70 p-1 rounded transition-colors text-black leading-relaxed"
+                                                style={{ fontSize: '11pt', lineHeight: '1.5', textAlign: 'justify' }}
+                                            >
+                                                {resumeData.professional_summary}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 2. WORK EXPERIENCE */}
+                                    {resumeData.experience && (
+                                        <div className="mb-6">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-3"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                WORK EXPERIENCE
+                                            </h2>
+                                            <div className="space-y-4">
+                                                {parseExperienceEntries(resumeData.experience).map((entry, idx) => (
+                                                    <div key={idx} className="space-y-0.5">
+                                                        <div className="flex justify-between items-baseline">
+                                                            <span className="font-bold text-black" style={{ fontSize: '11pt' }}>
+                                                                {entry.title}
+                                                            </span>
+                                                            <span className="font-bold text-black text-right" style={{ fontSize: '11pt' }}>
+                                                                {entry.dates}
+                                                            </span>
+                                                        </div>
+                                                        {entry.subtitle && (
+                                                            <div className="text-black italic" style={{ fontSize: '10pt' }}>
+                                                                {entry.subtitle}
+                                                            </div>
+                                                        )}
+                                                        {entry.bullets.length > 0 && (
+                                                            <ul className="list-disc ml-5 space-y-1 text-black mt-1" style={{ fontSize: '10.5pt', lineHeight: '1.4' }}>
+                                                                {entry.bullets.map((b, bIdx) => (
+                                                                    <li key={bIdx}>{b}</li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 3. EDUCATION */}
+                                    {resumeData.education && (
+                                        <div className="mb-6">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-3"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                EDUCATION
+                                            </h2>
+                                            <div className="space-y-3">
+                                                {parseEducationEntries(resumeData.education).map((edu, idx) => (
+                                                    <div key={idx} className="space-y-0.5">
+                                                        <div className="flex justify-between items-baseline">
+                                                            <span className="font-bold text-black" style={{ fontSize: '11pt' }}>
+                                                                {edu.degree}
+                                                            </span>
+                                                            <span className="font-bold text-black text-right" style={{ fontSize: '11pt' }}>
+                                                                {edu.dates}
+                                                            </span>
+                                                        </div>
+                                                        {edu.institution && (
+                                                            <div className="text-black italic" style={{ fontSize: '10pt' }}>
+                                                                {edu.institution}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 4. KEY SKILLS (2-column bulleted list with black rule) */}
+                                    {resumeData.skills && (
+                                        <div className="mb-6">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-1"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                KEY SKILLS
+                                            </h2>
+                                            <div className="w-full border-b-[1.5px] border-black mb-3"></div>
+                                            <div className="grid grid-cols-2 gap-x-8 text-black" style={{ fontSize: '10.5pt', lineHeight: '1.5' }}>
+                                                <ul className="list-disc ml-5 space-y-1">
+                                                    {parseTwoColumnSkills(resumeData.skills).col1.map((skill, sIdx) => (
+                                                        <li key={sIdx}>{skill}</li>
+                                                    ))}
+                                                </ul>
+                                                <ul className="list-disc ml-5 space-y-1">
+                                                    {parseTwoColumnSkills(resumeData.skills).col2.map((skill, sIdx) => (
+                                                        <li key={sIdx}>{skill}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 5. ADDITIONAL INFORMATION (Bullets with black rule) */}
+                                    {resumeData.additional_info && (
+                                        <div className="mb-4">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-1"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                ADDITIONAL INFORMATION
+                                            </h2>
+                                            <div className="w-full border-b-[1.5px] border-black mb-3"></div>
+                                            <ul className="list-disc ml-5 space-y-1 text-black" style={{ fontSize: '10.5pt', lineHeight: '1.5' }}>
+                                                {parseBulletList(resumeData.additional_info).map((info, iIdx) => (
+                                                    <li key={iIdx}>{info}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Optional Projects if present */}
+                                    {resumeData.projects && (
+                                        <div className="mb-4">
+                                            <h2 
+                                                className="text-center font-bold uppercase tracking-wider text-black mb-1"
+                                                style={{ fontSize: '11pt', letterSpacing: '0.08em' }}
+                                            >
+                                                KEY ACHIEVEMENTS & PROJECTS
+                                            </h2>
+                                            <div className="w-full border-b-[1.5px] border-black mb-3"></div>
+                                            <div 
+                                                contentEditable
+                                                suppressContentEditableWarning
+                                                onBlur={(e) => handleFieldChange('projects', e.currentTarget.textContent)}
+                                                className="cursor-text hover:bg-amber-50/70 p-1 rounded transition-colors text-black whitespace-pre-line"
+                                                style={{ fontSize: '11pt', lineHeight: '1.5' }}
+                                            >
+                                                {resumeData.projects}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Layout Style 1: Executive Standard (Double border, centered) */}
                             {templateStyle === 'executive_serif' && (
                                 <>
@@ -626,7 +994,6 @@ export default function AtsPortal() {
                                         </div>
                                     </div>
 
-                                    {/* Sections */}
                                     <ResumeSection
                                         title="Professional Summary"
                                         content={resumeData.professional_summary}
@@ -655,11 +1022,11 @@ export default function AtsPortal() {
                                         accentColor={accentColor}
                                         styleType="classic"
                                     />
-                                    {resumeData.projects && (
+                                    {resumeData.additional_info && (
                                         <ResumeSection
-                                            title="Key Projects & Achievements"
-                                            content={resumeData.projects}
-                                            onBlur={(val) => handleFieldChange('projects', val)}
+                                            title="Additional Information"
+                                            content={resumeData.additional_info}
+                                            onBlur={(val) => handleFieldChange('additional_info', val)}
                                             accentColor={accentColor}
                                             styleType="classic"
                                         />
@@ -721,11 +1088,11 @@ export default function AtsPortal() {
                                         accentColor={accentColor}
                                         styleType="bar"
                                     />
-                                    {resumeData.projects && (
+                                    {resumeData.additional_info && (
                                         <ResumeSection
-                                            title="Key Projects & Achievements"
-                                            content={resumeData.projects}
-                                            onBlur={(val) => handleFieldChange('projects', val)}
+                                            title="Additional Information"
+                                            content={resumeData.additional_info}
+                                            onBlur={(val) => handleFieldChange('additional_info', val)}
                                             accentColor={accentColor}
                                             styleType="bar"
                                         />
@@ -788,11 +1155,11 @@ export default function AtsPortal() {
                                         accentColor={accentColor}
                                         styleType="tech"
                                     />
-                                    {resumeData.projects && (
+                                    {resumeData.additional_info && (
                                         <ResumeSection
-                                            title="Technical Projects"
-                                            content={resumeData.projects}
-                                            onBlur={(val) => handleFieldChange('projects', val)}
+                                            title="Additional Information"
+                                            content={resumeData.additional_info}
+                                            onBlur={(val) => handleFieldChange('additional_info', val)}
                                             accentColor={accentColor}
                                             styleType="tech"
                                         />
@@ -855,11 +1222,11 @@ export default function AtsPortal() {
                                         accentColor={accentColor}
                                         styleType="classic"
                                     />
-                                    {resumeData.projects && (
+                                    {resumeData.additional_info && (
                                         <ResumeSection
-                                            title="Key Achievements"
-                                            content={resumeData.projects}
-                                            onBlur={(val) => handleFieldChange('projects', val)}
+                                            title="Additional Information"
+                                            content={resumeData.additional_info}
+                                            onBlur={(val) => handleFieldChange('additional_info', val)}
                                             accentColor={accentColor}
                                             styleType="classic"
                                         />

@@ -361,15 +361,15 @@ class ResumeIntelligenceService:
         url_lower = (canva_url or "").strip().lower()
 
         # Deduce template archetype from URL slug/query
-        style = "executive_serif"
-        accent_color = "#1e293b"  # Slate dark default
-        style_name = "Canva Executive Standard"
+        style = "canva_data_analyst_bw"
+        accent_color = "#000000"  # Pure black
+        style_name = "Black and White Simple Clean Data Analyst CV Resume"
 
-        if any(w in url_lower for w in ["minimal", "clean", "simple", "sleek"]):
-            style = "modern_minimalist"
-            accent_color = "#0f172a"
-            style_name = "Canva Minimalist Modern"
-        elif any(w in url_lower for w in ["tech", "engineer", "developer", "data", "code"]):
+        if "dahuoxmuqzw" in url_lower or any(w in url_lower for w in ["data", "analyst", "black", "white"]):
+            style = "canva_data_analyst_bw"
+            accent_color = "#000000"
+            style_name = "Black and White Simple Clean Data Analyst CV Resume"
+        elif any(w in url_lower for w in ["tech", "engineer", "developer", "code"]):
             style = "tech_linear"
             accent_color = "#1e3a8a"  # Navy blue
             style_name = "Canva Tech Professional"
@@ -381,44 +381,70 @@ class ResumeIntelligenceService:
             style = "modern_clean"
             accent_color = "#047857"  # Emerald accent
             style_name = "Canva Modern Tailored"
+        elif any(w in url_lower for w in ["minimal", "clean", "simple", "sleek"]):
+            style = "modern_minimalist"
+            accent_color = "#0f172a"
+            style_name = "Canva Minimalist Modern"
 
         # Structure the candidate's resume content
         parsed = self.parse_resume_structure(resume_text) if resume_text else {
-            "full_name": "Full Name",
-            "email": "candidate@example.com",
-            "phone": "(555) 000-0000",
-            "location": "City, Country",
-            "linkedin": "linkedin.com/in/candidate",
-            "github": "github.com/candidate",
-            "summary": "Accomplished specialist with extensive background in building resilient applications and delivering measurable results.",
-            "skills": "Python, FastAPI, React, SQL, Cloud Architecture, CI/CD, Agile",
-            "experience": "Senior Engineer | Industry Leader\n2022 - Present\n• Directed cross-functional initiatives delivering high availability systems.",
-            "education": "B.S. in Computer Science | University Honors Graduate",
-            "projects": "High-Impact Project | Lead Architect"
+            "full_name": "MATTHEW COLLINS",
+            "email": "hello@reallygreatsite.com",
+            "phone": "+123-456-7890",
+            "location": "@reallygreatsite",
+            "linkedin": "",
+            "github": "",
+            "summary": "Data Analyst with experience in collecting, processing, and analyzing data to support business decision-making. Skilled in transforming complex data into clear and actionable insights. Strong in analytical thinking, data interpretation, and problem solving, with the ability to communicate findings effectively.",
+            "skills": "Data Analysis & Interpretation, Data Cleaning & Processing, Statistical Analysis, Data Visualization, Reporting & Insights Generation, Problem Solving & Critical Thinking",
+            "experience": (
+                "Data Analyst | Gravity Tech - 123 Anywhere St., Any City | April, 2022 - April, 2026\n"
+                "• Collected and analyzed data to support strategic decision-making\n"
+                "• Cleaned and processed data to ensure accuracy and consistency\n"
+                "• Generated reports and insights to improve business performance\n\n"
+                "Junior Data Analyst | Mediaone - 123 Anywhere St., Any City | April, 2020 - April, 2022\n"
+                "• Assisted in data collection and preparation\n"
+                "• Supported data analysis and reporting processes\n"
+                "• Maintained data quality and documentation"
+            ),
+            "education": "Bachelor of Computer Science | Northgate University | April, 2016 - April, 2020",
+            "additional_info": (
+                "• Portfolio: www.reallygreatsite.com\n"
+                "• Languages: English\n"
+                "• Availability: Open to work / Freelance"
+            ),
+            "projects": ""
         }
 
         # Build combined contact line
         contact_parts = []
-        if parsed.get("location"):
-            contact_parts.append(parsed["location"])
         if parsed.get("phone"):
             contact_parts.append(parsed["phone"])
         if parsed.get("email"):
             contact_parts.append(parsed["email"])
+        if parsed.get("location"):
+            contact_parts.append(parsed["location"])
         if parsed.get("linkedin"):
             contact_parts.append(parsed["linkedin"])
         if parsed.get("github"):
             contact_parts.append(parsed["github"])
 
-        contact_line = " | ".join(contact_parts) if contact_parts else "City, Country | (555) 000-0000 | candidate@example.com"
+        contact_line = " | ".join(contact_parts) if contact_parts else "+123-456-7890 | hello@reallygreatsite.com | @reallygreatsite"
+
+        # Additional info fallback
+        additional_info = parsed.get("additional_info") or (
+            "• Portfolio: www.reallygreatsite.com\n"
+            "• Languages: English\n"
+            "• Availability: Open to work / Freelance"
+        )
 
         structured_content = {
-            "full_name": parsed.get("full_name") or "Your Full Name",
+            "full_name": parsed.get("full_name") or "MATTHEW COLLINS",
             "contact_info": contact_line,
-            "professional_summary": parsed.get("summary") or "",
-            "skills": parsed.get("skills") or "",
+            "professional_summary": parsed.get("summary") or "Data Analyst with experience in collecting, processing, and analyzing data to support business decision-making. Skilled in transforming complex data into clear and actionable insights.",
+            "skills": parsed.get("skills") or "Data Analysis & Interpretation, Data Cleaning & Processing, Statistical Analysis, Data Visualization, Reporting & Insights Generation, Problem Solving & Critical Thinking",
             "experience": parsed.get("experience") or "",
             "education": parsed.get("education") or "",
+            "additional_info": additional_info,
             "projects": parsed.get("projects") or ""
         }
 
@@ -426,12 +452,10 @@ class ResumeIntelligenceService:
         formatted_text = (
             f"{structured_content['full_name'].upper()}\n{structured_content['contact_info']}\n\n"
             f"PROFESSIONAL SUMMARY\n{'=' * 40}\n{structured_content['professional_summary']}\n\n"
-            f"CORE SKILLS & TECHNOLOGIES\n{'=' * 40}\n{structured_content['skills']}\n\n"
-            f"PROFESSIONAL EXPERIENCE\n{'=' * 40}\n{structured_content['experience']}\n\n"
+            f"WORK EXPERIENCE\n{'=' * 40}\n{structured_content['experience']}\n\n"
             f"EDUCATION\n{'=' * 40}\n{structured_content['education']}\n\n"
-            f"{'PROJECTS & KEY ACHIEVEMENTS' if structured_content['projects'] else ''}\n"
-            f"{'=' * 40 if structured_content['projects'] else ''}\n"
-            f"{structured_content['projects']}\n"
+            f"KEY SKILLS\n{'=' * 40}\n{structured_content['skills']}\n\n"
+            f"ADDITIONAL INFORMATION\n{'=' * 40}\n{structured_content['additional_info']}\n"
         ).strip()
 
         return {
