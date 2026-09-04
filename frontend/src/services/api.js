@@ -106,6 +106,7 @@ export const dashboardService = {
 
 export const jobService = {
     getJobs: (params) => api.get('/jobs', { params: { ...params, t: Date.now() } }).then(res => res.data),
+    syncExternalJobs: (params) => api.post('/jobs/sync-external', null, { params }).then(res => res.data),
     matchResume: (formData) => api.post('/match', formData).then(res => res.data),
     tailorResume: (formData) => api.post('/tailor-resume', formData).then(res => res.data),
     generateCoverLetter: (formData) => api.post('/generate-cover-letter', formData).then(res => res.data),

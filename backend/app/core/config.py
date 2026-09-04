@@ -25,10 +25,15 @@ class Settings(BaseSettings):
         description="SQLAlchemy database connection string"
     )
     CORS_ORIGINS: str = Field(
-        default="http://localhost:5173,http://localhost:3000",
+        default="http://localhost:5173,http://localhost:3000,http://localhost:3001",
         description="Comma-separated list of allowed CORS origins"
     )
     COOKIE_SECURE_OVERRIDE: Optional[bool] = None
+
+    # Adzuna External Job Board API
+    ADZUNA_APP_ID: Optional[str] = Field(default=None, description="Adzuna Developer Application ID")
+    ADZUNA_APP_KEY: Optional[str] = Field(default=None, description="Adzuna Developer Application Key")
+    ADZUNA_COUNTRY: str = Field(default="us", description="Default country for Adzuna job search (us, gb, ca, etc.)")
 
     model_config = SettingsConfigDict(
         env_file=".env",
