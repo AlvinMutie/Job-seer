@@ -37,6 +37,17 @@ def init_db():
         except Exception:
             pass
 
+    # Auto-seed initial jobs if jobs table is empty
+    try:
+        from app.models.models import Job
+        db = SessionLocal()
+        if db.query(Job).count() == 0:
+            from seed_jobs import seed_jobs
+            seed_jobs()
+        db.close()
+    except Exception:
+        pass
+
 def get_db():
     db = SessionLocal()
     try:
