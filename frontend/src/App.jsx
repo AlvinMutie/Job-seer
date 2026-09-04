@@ -135,29 +135,29 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
 
     const navSections = [
         {
-            group: 'Overview',
+            group: 'Core Workspace',
             items: [
-                { icon: <LayoutDashboard size={18} />, label: 'Dashboard', path: '/dashboard' }
+                { icon: <LayoutDashboard size={17} />, label: 'Dashboard', path: '/dashboard' },
+                { icon: <Briefcase size={17} />, label: 'Jobs Hub', path: '/jobs' },
+                { icon: <Trophy size={17} />, label: 'Matches', path: '/matches' }
             ]
         },
         {
-            group: 'Discover',
+            group: 'Pipeline & Tracking',
             items: [
-                { icon: <Briefcase size={18} />, label: 'Jobs Hub', path: '/jobs' },
-                { icon: <Trophy size={18} />, label: 'Matches', path: '/matches' }
+                { icon: <Clock size={17} />, label: 'Tracker', path: '/tracker' }
             ]
         },
         {
-            group: 'Manage',
+            group: 'Career Assets',
             items: [
-                { icon: <Clock size={18} />, label: 'Tracker', path: '/tracker' },
-                { icon: <FileText size={18} />, label: 'Resume Hub', path: '/resume-hub' }
+                { icon: <FileText size={17} />, label: 'Resume Hub', path: '/resume-hub' }
             ]
         },
         {
-            group: 'Account',
+            group: 'Preferences',
             items: [
-                { icon: <SettingsIcon size={18} />, label: 'Settings', path: '/settings' }
+                { icon: <SettingsIcon size={17} />, label: 'Settings', path: '/settings' }
             ]
         }
     ];
@@ -168,24 +168,24 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-indigo-500/30">
-            {/* Desktop Sidebar (Fixed / Sticky) */}
-            <aside className="hidden md:flex w-64 glass-card m-4 mr-0 rounded-3xl flex-col p-6 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border-slate-800 bg-slate-950/80">
+        <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-indigo-500/30">
+            {/* Desktop Sidebar (Pipesale Style) */}
+            <aside className="hidden md:flex w-64 m-4 mr-0 rounded-2xl flex-col p-5 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
                 <Link to="/dashboard" className="flex items-center gap-3 px-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-                        <Sparkles className="w-5 h-5 text-white" />
+                    <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+                        <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <span className="text-lg font-extrabold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent block leading-tight">
+                        <span className="text-base font-bold text-white block leading-tight">
                             Job Seer
                         </span>
-                        <span className="text-[10px] text-slate-500 block font-mono">Workspace v2</span>
+                        <span className="text-[10px] text-slate-500 block font-mono">Workspace v2.1</span>
                     </div>
                 </Link>
 
-                <nav className="flex-1 space-y-6 overflow-y-auto pr-1">
+                <nav className="flex-1 space-y-5 overflow-y-auto pr-1">
                     {navSections.map((sec) => (
-                        <div key={sec.group} className="space-y-1.5">
+                        <div key={sec.group} className="space-y-1">
                             <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block">{sec.group}</span>
                             {sec.items.map((item) => {
                                 const isActive = window.location.pathname === item.path;
@@ -193,15 +193,14 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                                     <Link
                                         key={item.label}
                                         to={item.path}
-                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative ${isActive
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
-                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${isActive
+                                            ? 'bg-slate-900 text-white border border-slate-700/80 shadow-sm'
+                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
                                             }`}
                                     >
-                                        {isActive && (
-                                            <span className="absolute left-0 top-2 bottom-2 w-1 bg-white rounded-r-full"></span>
-                                        )}
-                                        {item.icon}
+                                        <span className={isActive ? 'text-indigo-400' : 'text-slate-500'}>
+                                            {item.icon}
+                                        </span>
                                         <span>{item.label}</span>
                                     </Link>
                                 );
