@@ -99,7 +99,7 @@ function ApplicationDetailModal({ isOpen, onClose, appData, onSaved, onDelete })
                 </div>
 
                 {error && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2 text-rose-400 text-xs">
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs">
                         <AlertCircle size={16} />
                         <span>{error}</span>
                     </div>
@@ -144,13 +144,13 @@ function ApplicationDetailModal({ isOpen, onClose, appData, onSaved, onDelete })
 
                     <div className="space-y-1.5">
                         <div className="flex justify-between items-center ml-0.5">
-                            <label className="block text-xs font-semibold text-slate-300">Application URL</label>
+                            <label className="block text-xs font-semibold text-slate-700">Application URL</label>
                             {applicationUrl && (
                                 <a
                                     href={applicationUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-indigo-400 hover:underline flex items-center gap-1"
+                                    className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
                                 >
                                     Open Link <ExternalLink size={12} />
                                 </a>
@@ -165,17 +165,17 @@ function ApplicationDetailModal({ isOpen, onClose, appData, onSaved, onDelete })
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-slate-300 ml-0.5">Application Notes</label>
+                        <label className="block text-xs font-semibold text-slate-700 ml-0.5">Application Notes</label>
                         <textarea
                             rows={4}
                             placeholder="Add recruiter contact, interview notes, or preparation reminders..."
-                            className="w-full bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
+                            className="w-full bg-white border border-slate-300 text-slate-900 placeholder-slate-400 rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </div>
 
-                    <div className="pt-4 border-t border-slate-800 flex items-center justify-between gap-4">
+                    <div className="pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
                         <Button
                             type="button"
                             variant="destructive"

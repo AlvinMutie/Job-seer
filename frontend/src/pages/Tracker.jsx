@@ -127,7 +127,7 @@ function Tracker() {
                 title="Application Tracker & Kanban Workspace"
                 subtitle="Track application stages, log interview screens, record critical dates, and organize your job search pipeline."
                 action={
-                    <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl">
+                    <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 p-1 rounded-xl">
                         <Button
                             variant={viewMode === 'board' ? 'primary' : 'ghost'}
                             size="sm"
@@ -150,14 +150,14 @@ function Tracker() {
 
             {/* Error Notification */}
             {error && (
-                <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-400 text-sm">
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-700 text-sm">
                     <AlertCircle size={18} />
                     <span>{error}</span>
                 </div>
             )}
 
             {/* Search and Filters */}
-            <Card variant="glass" className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <Card variant="flat" className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
                 <form onSubmit={handleSearchSubmit} className="flex-1 flex items-center gap-2 w-full">
                     <div className="flex-1">
                         <Input
@@ -198,15 +198,15 @@ function Tracker() {
                                 key={columnStatus}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, columnStatus)}
-                                className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 min-h-[500px] flex flex-col gap-3 transition-colors hover:border-slate-700/80"
+                                className="bg-slate-100/70 border border-slate-200 rounded-2xl p-4 min-h-[500px] flex flex-col gap-3 transition-colors hover:border-slate-300"
                             >
-                                <div className="flex justify-between items-center pb-2 border-b border-slate-800">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                                <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                                         <span className={`w-2 h-2 rounded-full ${
                                             columnStatus === 'Applied' ? 'bg-indigo-500' :
-                                            columnStatus === 'Interview' ? 'bg-cyan-400' :
+                                            columnStatus === 'Interview' ? 'bg-cyan-500' :
                                             columnStatus === 'Offer' ? 'bg-emerald-500' :
-                                            columnStatus === 'Rejected' ? 'bg-rose-500' : 'bg-slate-500'
+                                            columnStatus === 'Rejected' ? 'bg-rose-500' : 'bg-slate-400'
                                         }`}></span>
                                         {columnStatus}
                                     </h4>
@@ -215,9 +215,9 @@ function Tracker() {
 
                                 <div className="flex-1 space-y-3 overflow-y-auto max-h-[600px] pr-0.5">
                                     {columnApps.length === 0 ? (
-                                        <div className="h-32 flex flex-col items-center justify-center text-center p-3 text-xs text-slate-600 border-2 border-dashed border-slate-800/60 rounded-xl space-y-1">
+                                        <div className="h-32 flex flex-col items-center justify-center text-center p-3 text-xs text-slate-500 border-2 border-dashed border-slate-200 rounded-xl space-y-1">
                                             <span>No {columnStatus.toLowerCase()} roles</span>
-                                            <span className="text-[10px] text-slate-700">Drop cards here to move stage</span>
+                                            <span className="text-[10px] text-slate-400">Drop cards here to move stage</span>
                                         </div>
                                     ) : (
                                         columnApps.map(app => (
@@ -227,12 +227,12 @@ function Tracker() {
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, app)}
                                                 onClick={() => { setSelectedApp(app); setIsDetailModalOpen(true); }}
-                                                className="p-4 space-y-3 cursor-grab active:cursor-grabbing group"
+                                                className="p-4 space-y-3 cursor-grab active:cursor-grabbing group bg-white border-slate-200"
                                             >
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <h5 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{app.title}</h5>
-                                                        <p className="text-xs text-slate-400 font-medium">{app.company}</p>
+                                                        <h5 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{app.title}</h5>
+                                                        <p className="text-xs text-slate-500 font-medium">{app.company}</p>
                                                     </div>
                                                     {app.score && (
                                                         <Badge variant="indigo" size="sm">{app.score}%</Badge>
@@ -240,14 +240,14 @@ function Tracker() {
                                                 </div>
 
                                                 {(app.applied_date || app.interview_date || app.follow_up_date) && (
-                                                    <div className="space-y-1 text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 font-mono">
+                                                    <div className="space-y-1 text-[11px] text-slate-600 border-t border-slate-100 pt-2 font-mono">
                                                         {app.applied_date && <div>Applied: {app.applied_date}</div>}
-                                                        {app.interview_date && <div className="text-cyan-400 font-bold">Interview: {app.interview_date}</div>}
-                                                        {app.follow_up_date && <div className="text-amber-400">Follow-up: {app.follow_up_date}</div>}
+                                                        {app.interview_date && <div className="text-cyan-600 font-bold">Interview: {app.interview_date}</div>}
+                                                        {app.follow_up_date && <div className="text-amber-600">Follow-up: {app.follow_up_date}</div>}
                                                     </div>
                                                 )}
 
-                                                <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px] text-indigo-400 font-semibold group-hover:underline">
+                                                <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-[11px] text-indigo-600 font-semibold group-hover:underline">
                                                     <span>{getStageActionLabel(columnStatus)}</span>
                                                     <ArrowRight size={12} />
                                                 </div>
@@ -263,19 +263,19 @@ function Tracker() {
 
             {/* TABLE LIST VIEW */}
             {viewMode === 'list' && (
-                <Card variant="glass" className="overflow-hidden">
+                <Card variant="flat" className="overflow-hidden">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-slate-800 bg-slate-900/60">
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Job Title</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Company</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Match Score</th>
-                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Applied Date</th>
+                            <tr className="border-b border-slate-200 bg-slate-50">
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-600">Job Title</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-600">Company</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-600">Status</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-600">Match Score</th>
+                                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-600">Applied Date</th>
                                 <th className="px-6 py-4"></th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/50">
+                        <tbody className="divide-y divide-slate-100">
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-8">
@@ -293,12 +293,12 @@ function Tracker() {
                                     <tr
                                         key={app.id}
                                         onClick={() => { setSelectedApp(app); setIsDetailModalOpen(true); }}
-                                        className="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                                        className="hover:bg-slate-50 transition-colors cursor-pointer"
                                     >
                                         <td className="px-6 py-4">
-                                            <div className="font-bold text-white">{app.title}</div>
+                                            <div className="font-bold text-slate-900">{app.title}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-400 text-sm">{app.company}</td>
+                                        <td className="px-6 py-4 text-slate-600 text-sm">{app.company}</td>
                                         <td className="px-6 py-4">
                                             <Badge variant={getStatusBadgeVariant(app.status)}>
                                                 {app.status}
@@ -306,18 +306,18 @@ function Tracker() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-12 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                                <div className="w-12 h-1.5 bg-slate-200 rounded-full overflow-hidden">
                                                     <div
                                                         className={`h-full rounded-full ${app.score > 80 ? 'bg-emerald-500' : app.score > 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
                                                         style={{ width: `${app.score}%` }}
                                                     ></div>
                                                 </div>
-                                                <span className="text-sm font-bold text-slate-300 font-mono">{app.score}%</span>
+                                                <span className="text-sm font-bold text-slate-700 font-mono">{app.score}%</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-xs font-mono text-slate-400">{app.applied_date || app.date}</td>
+                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{app.applied_date || app.date}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="p-2 text-slate-500 hover:text-white transition-colors">
+                                            <button className="p-2 text-slate-400 hover:text-slate-700 transition-colors">
                                                 <MoreVertical size={18} />
                                             </button>
                                         </td>
@@ -328,8 +328,8 @@ function Tracker() {
                     </table>
 
                     {/* Pagination Controls */}
-                    <div className="p-4 border-t border-slate-800 flex justify-between items-center bg-slate-900/40">
-                        <span className="text-xs text-slate-400 font-mono">Page {page}</span>
+                    <div className="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50/50">
+                        <span className="text-xs text-slate-500 font-mono">Page {page}</span>
                         <div className="flex gap-2">
                             <Button
                                 variant="secondary"
@@ -355,33 +355,33 @@ function Tracker() {
 
             {/* Stat Summary Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card variant="glass" className="p-6">
+                <Card variant="flat" className="p-6">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-slate-800/80 rounded-xl text-indigo-400"><Briefcase size={20} /></div>
+                        <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600"><Briefcase size={20} /></div>
                         <Badge variant="emerald" size="sm">Live pipeline</Badge>
                     </div>
-                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Active Applications</p>
-                    <div className="text-2xl font-extrabold text-white mt-1">{applications.length}</div>
+                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Active Applications</p>
+                    <div className="text-2xl font-extrabold text-slate-900 mt-1">{applications.length}</div>
                 </Card>
 
-                <Card variant="glass" className="p-6">
+                <Card variant="flat" className="p-6">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-slate-800/80 rounded-xl text-cyan-400"><Sparkles size={20} /></div>
+                        <div className="p-2 bg-cyan-50 rounded-xl text-cyan-600"><Sparkles size={20} /></div>
                         <Badge variant="cyan" size="sm">Schedule</Badge>
                     </div>
-                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Interviews Scheduled</p>
-                    <div className="text-2xl font-extrabold text-white mt-1">
+                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Interviews Scheduled</p>
+                    <div className="text-2xl font-extrabold text-slate-900 mt-1">
                         {applications.filter(a => a.status === 'Interview').length}
                     </div>
                 </Card>
 
-                <Card variant="glass" className="p-6">
+                <Card variant="flat" className="p-6">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-2 bg-slate-800/80 rounded-xl text-amber-400"><Sparkles size={20} /></div>
+                        <div className="p-2 bg-amber-50 rounded-xl text-amber-600"><Sparkles size={20} /></div>
                         <Badge variant="amber" size="sm">Keep tailoring</Badge>
                     </div>
-                    <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Average Match Score</p>
-                    <div className="text-2xl font-extrabold text-white mt-1">{avgScore}%</div>
+                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Average Match Score</p>
+                    <div className="text-2xl font-extrabold text-slate-900 mt-1">{avgScore}%</div>
                 </Card>
             </div>
 

@@ -8,10 +8,10 @@ export default function Card({
     ...props
 }) {
     const variantStyles = {
-        glass: "bg-slate-900/75 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl",
-        flat: "bg-slate-900 border border-slate-800 rounded-2xl",
-        elevated: "bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl shadow-slate-950/50",
-        interactive: "bg-slate-900/75 hover:bg-slate-900/90 border border-white/10 hover:border-indigo-500/30 rounded-2xl shadow-xl transition-all duration-200 cursor-pointer active:scale-[0.99]"
+        glass: "bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xs",
+        flat: "bg-white border border-slate-200 rounded-2xl",
+        elevated: "bg-white border border-slate-200/80 rounded-2xl shadow-md shadow-slate-200/60",
+        interactive: "bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-indigo-300 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer active:scale-[0.99]"
     };
 
     return (

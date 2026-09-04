@@ -37,12 +37,12 @@ function CoverLetterViewer({ isOpen, onClose, letterData, onDelete }) {
                 </div>
 
                 {/* Content Box */}
-                <div className="overflow-y-auto font-sans text-sm leading-relaxed p-6 bg-slate-950/90 rounded-2xl border border-slate-800 text-slate-200 whitespace-pre-wrap max-h-[480px]">
+                <div className="overflow-y-auto font-sans text-sm leading-relaxed p-6 bg-slate-50 rounded-2xl border border-slate-200 text-slate-800 whitespace-pre-wrap max-h-[480px]">
                     {content}
                 </div>
 
                 {/* Footer Controls */}
-                <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-4">
+                <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
                     {onDelete ? (
                         <Button
                             variant="destructive"

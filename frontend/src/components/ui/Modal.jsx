@@ -40,7 +40,7 @@ export default function Modal({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
                     />
 
                     {/* Dialog Container */}
@@ -49,16 +49,16 @@ export default function Modal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.2 }}
-                        className={`relative w-full ${maxWidth} glass-card border border-slate-700/80 bg-slate-900/95 p-6 md:p-8 rounded-3xl shadow-2xl z-10 my-8 ${className}`}
+                        className={`relative w-full ${maxWidth} bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-2xl z-10 my-8 ${className}`}
                     >
                         <div className="flex justify-between items-start mb-6">
                             <div>
-                                {title && <h2 className="text-xl md:text-2xl font-bold text-white leading-snug">{title}</h2>}
-                                {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+                                {title && <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-snug">{title}</h2>}
+                                {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 aria-label="Close modal"
                             >
                                 <X size={20} />

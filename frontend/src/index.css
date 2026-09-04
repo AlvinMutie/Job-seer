@@ -6,21 +6,21 @@
   /* Brand Colors */
   --brand-primary: #6366f1;
   --brand-primary-hover: #4f46e5;
-  --brand-secondary: #a855f7;
-  --brand-cyan: #06b6d4;
+  --brand-secondary: #8b5cf6;
+  --brand-cyan: #0891b2;
 
-  /* Surface & Background Hierarchy */
-  --bg-app: #0b0f19;
-  --bg-surface: rgba(15, 23, 42, 0.75);
-  --bg-surface-hover: rgba(30, 41, 59, 0.85);
-  --bg-elevated: #1e293b;
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(99, 102, 241, 0.3);
+  /* Surface & Background Hierarchy (Light Mode Default) */
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --border-default: #e2e8f0;
+  --border-hover: rgba(99, 102, 241, 0.4);
 
   /* Typography Colors */
-  --text-main: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-main: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 
   /* Semantic Feedback Colors */
   --color-success: #10b981;
@@ -29,51 +29,51 @@
   --color-warning-bg: rgba(245, 158, 11, 0.1);
   --color-error: #ef4444;
   --color-error-bg: rgba(239, 68, 68, 0.1);
-  --color-info: #06b6d4;
-  --color-info-bg: rgba(6, 182, 212, 0.1);
+  --color-info: #0284c7;
+  --color-info-bg: rgba(2, 132, 199, 0.1);
 }
 
 @layer base {
   body {
-    @apply bg-[#0b0f19] text-slate-100 antialiased font-['Outfit',sans-serif] selection:bg-indigo-500/30;
+    @apply bg-[#f8fafc] text-slate-900 antialiased font-['Outfit',sans-serif] selection:bg-indigo-500/20;
   }
 
   /* Accessibility Focus Rings */
   *:focus-visible {
-    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-950;
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-white;
   }
 }
 
 @layer components {
-  /* Glass Cards */
+  /* Cards */
   .glass-card {
-    @apply bg-slate-900/75 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl transition-all duration-200;
+    @apply bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-sm transition-all duration-200;
   }
   
   .glass-card:hover {
-    @apply border-indigo-500/30 bg-slate-900/90;
+    @apply border-indigo-300 shadow-md;
   }
 
   /* Form Control Base */
   .input-field {
-    @apply w-full bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply w-full bg-white border border-slate-300 text-slate-900 placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Standardized Buttons */
   .btn-primary {
-    @apply px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    @apply px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .btn-secondary {
-    @apply px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50;
+    @apply px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50;
   }
 
   .btn-destructive {
-    @apply px-5 py-2.5 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50;
+    @apply px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50;
   }
 
   /* Badges */
@@ -81,27 +81,27 @@
     @apply px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 border;
   }
 
-  .badge-indigo { @apply bg-indigo-500/10 text-indigo-300 border-indigo-500/25; }
-  .badge-emerald { @apply bg-emerald-500/10 text-emerald-300 border-emerald-500/25; }
-  .badge-amber { @apply bg-amber-500/10 text-amber-300 border-amber-500/25; }
-  .badge-rose { @apply bg-rose-500/10 text-rose-300 border-rose-500/25; }
-  .badge-cyan { @apply bg-cyan-500/10 text-cyan-400 border-cyan-500/25; }
-  .badge-slate { @apply bg-slate-800 text-slate-300 border-slate-700; }
+  .badge-indigo { @apply bg-indigo-50 text-indigo-700 border-indigo-200; }
+  .badge-emerald { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
+  .badge-amber { @apply bg-amber-50 text-amber-800 border-amber-200; }
+  .badge-rose { @apply bg-rose-50 text-rose-700 border-rose-200; }
+  .badge-cyan { @apply bg-cyan-50 text-cyan-700 border-cyan-200; }
+  .badge-slate { @apply bg-slate-100 text-slate-700 border-slate-200; }
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pulseSlow {
   0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.03); }
+  50% { opacity: 1; transform: scale(1.02); }
 }
 
 .animate-pulse-slow {

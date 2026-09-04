@@ -108,7 +108,7 @@ function ProtectedRoute({ children }) {
         checkAuth();
     }, [token]);
 
-    if (loading) return <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center text-slate-400 font-sans">Authenticating...</div>;
+    if (loading) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center text-slate-500 font-sans">Authenticating...</div>;
     if (!isAllowed) return <Navigate to="/login" replace />;
 
     return children;
@@ -168,25 +168,25 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-indigo-500/30">
-            {/* Desktop Sidebar (Pipesale Style) */}
-            <aside className="hidden md:flex w-64 m-4 mr-0 rounded-2xl flex-col p-5 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border border-slate-800/90 bg-slate-950/80 backdrop-blur-xl">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col md:flex-row font-sans selection:bg-indigo-500/20">
+            {/* Desktop Sidebar (Pipesale Light Style) */}
+            <aside className="hidden md:flex w-64 m-4 mr-0 rounded-2xl flex-col p-5 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border border-slate-200/90 bg-white shadow-xs">
                 <Link to="/dashboard" className="flex items-center gap-3 px-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1">
-                    <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+                    <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
                         <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <span className="text-base font-bold text-white block leading-tight">
+                        <span className="text-base font-bold text-slate-900 block leading-tight">
                             Job Seer
                         </span>
-                        <span className="text-[10px] text-slate-500 block font-mono">Workspace v2.1</span>
+                        <span className="text-[10px] text-slate-400 block font-mono">Workspace v2.2</span>
                     </div>
                 </Link>
 
                 <nav className="flex-1 space-y-5 overflow-y-auto pr-1">
                     {navSections.map((sec) => (
                         <div key={sec.group} className="space-y-1">
-                            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block">{sec.group}</span>
+                            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{sec.group}</span>
                             {sec.items.map((item) => {
                                 const isActive = window.location.pathname === item.path;
                                 return (
@@ -194,11 +194,11 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                                         key={item.label}
                                         to={item.path}
                                         className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${isActive
-                                            ? 'bg-slate-900 text-white border border-slate-700/80 shadow-sm'
-                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-100/80 shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                             }`}
                                     >
-                                        <span className={isActive ? 'text-indigo-400' : 'text-slate-500'}>
+                                        <span className={isActive ? 'text-indigo-600' : 'text-slate-400'}>
                                             {item.icon}
                                         </span>
                                         <span>{item.label}</span>
@@ -209,21 +209,21 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                     ))}
                 </nav>
 
-                <div className="pt-4 border-t border-slate-800/80 space-y-3">
+                <div className="pt-4 border-t border-slate-200 space-y-3">
                     {/* User Identity Chip */}
-                    <div className="flex items-center gap-3 p-2.5 bg-slate-900/60 rounded-xl border border-slate-800">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center border border-indigo-500/30">
+                    <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">
                             {getInitials(user?.full_name)}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-white truncate">{user?.full_name || 'Candidate'}</p>
+                            <p className="text-xs font-bold text-slate-900 truncate">{user?.full_name || 'Candidate'}</p>
                             <p className="text-[10px] text-slate-500 truncate">{user?.email || 'Logged in'}</p>
                         </div>
                     </div>
 
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                     >
                         <LogOut size={16} />
                         <span>Sign Out</span>
@@ -232,17 +232,17 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
             </aside>
 
             {/* Mobile Top Header */}
-            <header className="md:hidden flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-950/90 backdrop-blur-xl sticky top-0 z-40">
+            <header className="md:hidden flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white/95 backdrop-blur-xl sticky top-0 z-40">
                 <Link to="/dashboard" className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
                         <Sparkles size={16} className="text-white" />
                     </div>
-                    <span className="text-base font-bold text-white">Job Seer</span>
+                    <span className="text-base font-bold text-slate-900">Job Seer</span>
                 </Link>
 
                 <button
                     onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-                    className="p-2 text-slate-400 hover:text-white rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    className="p-2 text-slate-600 hover:text-slate-900 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     aria-label="Toggle mobile menu"
                 >
                     {mobileDrawerOpen ? <X size={22} /> : <Menu size={22} />}
@@ -256,20 +256,20 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="md:hidden bg-slate-950/95 border-b border-slate-800 p-6 space-y-4 fixed top-[65px] left-0 w-full z-40 shadow-2xl"
+                        className="md:hidden bg-white border-b border-slate-200 p-6 space-y-4 fixed top-[65px] left-0 w-full z-40 shadow-xl"
                     >
                         <nav className="space-y-4">
                             {navSections.map(sec => (
                                 <div key={sec.group} className="space-y-1">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block px-2">{sec.group}</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-2">{sec.group}</span>
                                     {sec.items.map(item => (
                                         <Link
                                             key={item.label}
                                             to={item.path}
                                             onClick={() => setMobileDrawerOpen(false)}
                                             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${window.location.pathname === item.path
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'text-slate-400 hover:bg-slate-900'
+                                                ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                                : 'text-slate-600 hover:bg-slate-50'
                                                 }`}
                                         >
                                             {item.icon}
@@ -280,11 +280,11 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
                             ))}
                         </nav>
 
-                        <div className="pt-4 border-t border-slate-800 flex justify-between items-center">
-                            <span className="text-xs text-slate-400">{user?.full_name}</span>
+                        <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
+                            <span className="text-xs text-slate-600">{user?.full_name}</span>
                             <button
                                 onClick={handleLogout}
-                                className="px-3 py-1.5 bg-rose-500/10 text-rose-400 rounded-lg text-xs font-semibold flex items-center gap-1.5"
+                                className="px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold flex items-center gap-1.5"
                             >
                                 <LogOut size={14} /> Sign Out
                             </button>

@@ -77,11 +77,11 @@ function Matches() {
                     </div>
                 ) : (
                     matches.map(match => (
-                        <Card key={match.id} variant="interactive" className="p-6 flex flex-col justify-between">
+                        <Card key={match.id} variant="flat" className="p-6 flex flex-col justify-between hover:border-slate-300 transition-all">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <div className="text-4xl font-extrabold text-indigo-400">{match.match_percentage}%</div>
+                                        <div className="text-4xl font-extrabold text-indigo-600">{match.match_percentage}%</div>
                                         <span className="text-xs text-slate-500 font-mono">Explainable AI Score</span>
                                     </div>
                                     <Badge variant={match.match_percentage > 70 ? 'emerald' : 'slate'}>
@@ -89,18 +89,18 @@ function Matches() {
                                     </Badge>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-white mb-1">{match.title}</h3>
-                                <p className="text-slate-400 text-sm mb-4 leading-relaxed">{match.company}</p>
+                                <h3 className="text-lg font-bold text-slate-900 mb-1">{match.title}</h3>
+                                <p className="text-slate-500 text-sm mb-4 leading-relaxed">{match.company}</p>
 
                                 {match.explanation && (
-                                    <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 mb-4">
-                                        <p className="text-xs text-slate-300 leading-relaxed font-mono">{match.explanation}</p>
+                                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 mb-4">
+                                        <p className="text-xs text-slate-700 leading-relaxed font-mono">{match.explanation}</p>
                                     </div>
                                 )}
 
                                 {match.missing_skills?.length > 0 && (
                                     <div className="space-y-2">
-                                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bridge the Gap</p>
+                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bridge the Gap</p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {match.missing_skills.slice(0, 3).map(skill => (
                                                 <Badge key={skill} variant="rose" size="sm">
@@ -112,7 +112,7 @@ function Matches() {
                                 )}
                             </div>
 
-                            <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
                                 <a href={`/resume-hub?jobId=${match.id}`} className="flex-1">
                                     <Button
                                         variant="primary"
@@ -136,10 +136,10 @@ function Matches() {
                     ))
                 )}
 
-                <Card variant="flat" className="p-6 border-dashed border-slate-700 bg-transparent flex flex-col items-center justify-center text-center py-12">
-                    <TrendingUp size={32} className="text-slate-600 mb-4" />
-                    <h4 className="text-slate-300 font-semibold">Want higher match scores?</h4>
-                    <p className="text-xs text-slate-400 mt-1 max-w-[240px]">Update your skills or upload a fresh version of your resume.</p>
+                <Card variant="flat" className="p-6 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center text-center py-12">
+                    <TrendingUp size={32} className="text-slate-400 mb-4" />
+                    <h4 className="text-slate-900 font-semibold">Want higher match scores?</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-[240px]">Update your skills or upload a fresh version of your resume.</p>
                     <Button
                         variant="secondary"
                         size="sm"

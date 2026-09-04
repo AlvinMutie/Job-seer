@@ -16,10 +16,10 @@ export default function Input({
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
     return (
-        <div className="space-y-1.5 w-full">
+        <div className="space-y-1.5 w-full text-left">
             {label && (
-                <label htmlFor={inputId} className="block text-xs font-semibold text-slate-300 ml-0.5">
-                    {label} {required && <span className="text-rose-400">*</span>}
+                <label htmlFor={inputId} className="block text-xs font-semibold text-slate-700 ml-0.5">
+                    {label} {required && <span className="text-rose-500">*</span>}
                 </label>
             )}
             <div className="relative">
@@ -33,21 +33,21 @@ export default function Input({
                     type={type}
                     disabled={disabled}
                     required={required}
-                    className={`w-full bg-slate-900/80 border text-white placeholder-slate-500 rounded-xl py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed ${Icon ? 'pl-10 pr-4' : 'px-4'
+                    className={`w-full bg-white border text-slate-900 placeholder-slate-400 rounded-xl py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed ${Icon ? 'pl-10 pr-4' : 'px-4'
                         } ${error
-                            ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/50'
-                            : 'border-slate-700/80 focus:border-indigo-500 focus:ring-indigo-500/50'
+                            ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/20'
+                            : 'border-slate-300 focus:border-indigo-600 focus:ring-indigo-600/20'
                         } ${className}`}
                     {...props}
                 />
             </div>
             {error && (
-                <p className="text-xs text-rose-400 flex items-center gap-1 mt-1 ml-0.5">
+                <p className="text-xs text-rose-600 flex items-center gap-1 mt-1 ml-0.5">
                     <AlertCircle size={12} /> {error}
                 </p>
             )}
             {helperText && !error && (
-                <p className="text-[11px] text-slate-400 ml-0.5">{helperText}</p>
+                <p className="text-[11px] text-slate-500 ml-0.5">{helperText}</p>
             )}
         </div>
     );

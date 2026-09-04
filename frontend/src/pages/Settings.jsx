@@ -71,12 +71,12 @@ function Settings() {
                 subtitle="Update your technical skills, experience level, and preferred role to optimize AI job matching calculations."
             />
 
-            <Card variant="glass" className="overflow-hidden">
-                <div className="p-6 border-b border-slate-800 bg-slate-900/60 flex justify-between items-center">
-                    <h3 className="font-bold flex items-center gap-2 text-white">
-                        <User className="text-indigo-400" size={18} /> Candidate Career Profile
+            <Card variant="flat" className="overflow-hidden">
+                <div className="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 className="font-bold flex items-center gap-2 text-slate-900">
+                        <User className="text-indigo-600" size={18} /> Candidate Career Profile
                     </h3>
-                    <span className="text-xs text-slate-400">Logged in as <span className="text-indigo-400 font-bold">{currentUser?.full_name}</span></span>
+                    <span className="text-xs text-slate-500">Logged in as <span className="text-indigo-600 font-bold">{currentUser?.full_name}</span></span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-8">
@@ -91,7 +91,7 @@ function Settings() {
                                 onChange={e => setFormData({ ...formData, preferred_role: e.target.value })}
                             />
                             <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <Info size={11} className="text-indigo-400" /> Used to match role title fit (15% match weight).
+                                <Info size={11} className="text-indigo-600" /> Used to match role title fit (15% match weight).
                             </p>
                         </div>
 
@@ -109,7 +109,7 @@ function Settings() {
                                 ]}
                             />
                             <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <Info size={11} className="text-indigo-400" /> Used to evaluate experience alignment (15% match weight).
+                                <Info size={11} className="text-indigo-600" /> Used to evaluate experience alignment (15% match weight).
                             </p>
                         </div>
 
@@ -123,7 +123,7 @@ function Settings() {
                                 onChange={e => setFormData({ ...formData, location_preference: e.target.value })}
                             />
                             <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <Info size={11} className="text-indigo-400" /> Filters job recommendations by work mode and location.
+                                <Info size={11} className="text-indigo-600" /> Filters job recommendations by work mode and location.
                             </p>
                         </div>
 
@@ -137,28 +137,28 @@ function Settings() {
                                 onChange={e => setFormData({ ...formData, salary_expectation: e.target.value })}
                             />
                             <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                                <Info size={11} className="text-indigo-400" /> Stores your compensation benchmark for offer evaluations.
+                                <Info size={11} className="text-indigo-600" /> Stores your compensation benchmark for offer evaluations.
                             </p>
                         </div>
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-slate-300 ml-0.5">
+                        <label className="block text-xs font-semibold text-slate-700 ml-0.5">
                             Technical Skills (Comma Separated)
                         </label>
                         <textarea
-                            className="w-full bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-h-[120px] resize-none"
+                            className="w-full bg-white border border-slate-300 text-slate-900 placeholder-slate-400 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all min-h-[120px] resize-none"
                             placeholder="React, Node.js, Python, PostgreSQL, AWS..."
                             value={formData.skills}
                             onChange={e => setFormData({ ...formData, skills: e.target.value })}
                         ></textarea>
                         <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                            <Info size={11} className="text-indigo-400" /> Evaluated by AI match engine against job listings (40% skills overlap weight).
+                            <Info size={11} className="text-indigo-600" /> Evaluated by AI match engine against job listings (40% skills overlap weight).
                         </p>
                     </div>
 
                     {message.text && (
-                        <div className={`p-4 rounded-2xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'}`}>
+                        <div className={`p-4 rounded-2xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'}`}>
                             {message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
                             <span className="text-sm font-medium">{message.text}</span>
                         </div>
@@ -178,8 +178,8 @@ function Settings() {
                 </form>
             </Card>
 
-            <Card variant="flat" className="p-6 bg-amber-500/5 border-amber-500/10">
-                <p className="text-xs text-amber-400/90 leading-relaxed italic">
+            <Card variant="flat" className="p-6 bg-amber-50 border border-amber-200">
+                <p className="text-xs text-amber-800 leading-relaxed font-medium">
                     Note: Updating your technical skills and preferred role here directly impacts your V2 AI Match Score calculations in the Command Center and Jobs Hub.
                 </p>
             </Card>

@@ -26,7 +26,8 @@ def init_db():
                     "interview_date": "VARCHAR(20)",
                     "follow_up_date": "VARCHAR(20)",
                     "application_url": "VARCHAR(500)",
-                    "notes": "TEXT"
+                    "notes": "TEXT",
+                    "updated_at": "DATETIME"
                 }
                 with engine.connect() as conn:
                     for col_name, col_type in new_cols.items():

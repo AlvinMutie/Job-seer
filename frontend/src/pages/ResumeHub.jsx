@@ -202,14 +202,14 @@ function ResumeHub() {
 
             {/* Contextual Selected Job Target Banner */}
             {currentTargetJob && (
-                <Card variant="glass" className="p-4 bg-indigo-950/40 border-indigo-500/30 flex items-center justify-between gap-4">
+                <Card variant="flat" className="p-4 bg-indigo-50 border border-indigo-200 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-500/20 rounded-xl text-indigo-400">
+                        <div className="p-2 bg-white border border-indigo-200 rounded-xl text-indigo-600">
                             <Target size={20} />
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block">Target Opportunity Context Preserved</span>
-                            <h4 className="text-sm font-bold text-white">{currentTargetJob.title} — <span className="text-slate-300 font-normal">{currentTargetJob.company}</span></h4>
+                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Target Opportunity Context Preserved</span>
+                            <h4 className="text-sm font-bold text-slate-900">{currentTargetJob.title} — <span className="text-slate-600 font-normal">{currentTargetJob.company}</span></h4>
                         </div>
                     </div>
                     <Badge variant="indigo">{currentTargetJob.remote_status}</Badge>
@@ -219,30 +219,30 @@ function ResumeHub() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Left Column: Upload & Quick Tailor Generator */}
                 <div className="lg:col-span-5 space-y-6">
-                    <Card variant="glass" className="p-6 space-y-6">
-                        <h3 className="text-xl font-bold flex items-center gap-2 text-white">
-                            <Upload className="text-indigo-400" size={20} /> Upload Base CV
+                    <Card variant="flat" className="p-6 space-y-6">
+                        <h3 className="text-xl font-bold flex items-center gap-2 text-slate-900">
+                            <Upload className="text-indigo-600" size={20} /> Upload Base CV
                         </h3>
 
                         <form onSubmit={handleUpload} className="space-y-4">
                             <div
                                 onClick={() => document.getElementById('cv-upload-hub').click()}
-                                className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all cursor-pointer group ${file ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900/50'}`}
+                                className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center transition-all cursor-pointer group ${file ? 'border-emerald-500/50 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'}`}
                             >
                                 <input
                                     id="cv-upload-hub" type="file" className="hidden"
                                     onChange={handleFileChange}
                                     accept=".pdf,.doc,.docx,.txt"
                                 />
-                                <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-inner">
-                                    {file ? <Check className="text-emerald-400" size={24} /> : <FileText className="text-indigo-400" size={24} />}
+                                <div className="w-12 h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-xs">
+                                    {file ? <Check className="text-emerald-600" size={24} /> : <FileText className="text-indigo-600" size={24} />}
                                 </div>
-                                <p className="text-sm font-bold text-white text-center">{file ? file.name : 'Select PDF, DOCX or TXT file'}</p>
-                                <p className="text-xs text-slate-400 mt-1 text-center">Max limit 10MB</p>
+                                <p className="text-sm font-bold text-slate-900 text-center">{file ? file.name : 'Select PDF, DOCX or TXT file'}</p>
+                                <p className="text-xs text-slate-500 mt-1 text-center">Max limit 10MB</p>
                             </div>
 
                             {message.text && (
-                                <div className={`p-4 rounded-xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'}`}>
+                                <div className={`p-4 rounded-xl flex items-center gap-3 animate-fade-in ${message.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'}`}>
                                     {message.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
                                     <span className="text-xs font-medium">{message.text}</span>
                                 </div>
@@ -261,16 +261,16 @@ function ResumeHub() {
                     </Card>
 
                     {/* Studio Generators */}
-                    <Card variant="glass" className="p-6 space-y-4 border-indigo-500/20 bg-indigo-500/5">
-                        <h3 className="text-base font-bold flex items-center gap-2 text-indigo-300 uppercase tracking-wider">
+                    <Card variant="flat" className="p-6 space-y-4 border-slate-200 bg-slate-50/50">
+                        <h3 className="text-base font-bold flex items-center gap-2 text-indigo-700 uppercase tracking-wider">
                             <PenTool size={18} /> Studio Generators
                         </h3>
                         
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1">Target Job Listing</label>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Target Job Listing</label>
                                 <select
-                                    className="input-field py-2.5 px-3 text-xs bg-slate-900 border-slate-700 text-slate-200 w-full"
+                                    className="input-field py-2.5 px-3 text-xs bg-white border-slate-300 text-slate-900 w-full"
                                     value={selectedJobId}
                                     onChange={(e) => setSelectedJobId(e.target.value)}
                                 >
@@ -285,14 +285,14 @@ function ResumeHub() {
 
                             {/* Cover Letter Tone Selector */}
                             <div>
-                                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Cover Letter Tone</label>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Cover Letter Tone</label>
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                     {['Professional', 'Enthusiastic', 'Executive', 'Technical'].map(t => (
                                         <button
                                             key={t}
                                             type="button"
                                             onClick={() => setSelectedTone(t)}
-                                            className={`py-2 px-3 rounded-xl border font-semibold transition-all text-center ${selectedTone === t ? 'bg-indigo-600 border-indigo-500 text-white shadow-md' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
+                                            className={`py-2 px-3 rounded-xl border font-semibold transition-all text-center ${selectedTone === t ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
                                         >
                                             {t}
                                         </button>
@@ -329,28 +329,28 @@ function ResumeHub() {
 
                 {/* Right Column: Workspace Tabs */}
                 <div className="lg:col-span-7 space-y-6">
-                    <div className="flex border-b border-slate-800 gap-4 overflow-x-auto">
+                    <div className="flex border-b border-slate-200 gap-4 overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('intelligence')}
-                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'intelligence' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'intelligence' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                         >
                             <ShieldCheck size={18} /> ATS Health
                         </button>
                         <button
                             onClick={() => setActiveTab('tailored_history')}
-                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'tailored_history' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'tailored_history' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                         >
                             <History size={18} /> Tailored CVs ({tailoredResumes.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('cover_letters')}
-                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'cover_letters' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'cover_letters' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                         >
                             <Mail size={18} /> Cover Letters ({coverLetters.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('preview')}
-                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'preview' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'preview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-900'}`}
                         >
                             <FileText size={18} /> Parsed Text
                         </button>
@@ -362,12 +362,12 @@ function ResumeHub() {
                             <LoadingSkeleton variant="card" count={2} />
                         ) : healthReport ? (
                             <div className="space-y-6 animate-fade-in">
-                                <Card variant="glass" className="p-6 flex flex-col md:flex-row justify-between items-center gap-6 bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border-indigo-500/20">
+                                <Card variant="flat" className="p-6 flex flex-col md:flex-row justify-between items-center gap-6 bg-white border-slate-200">
                                     <div className="space-y-1 text-center md:text-left">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">ATS Readiness Health Score</span>
+                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">ATS Readiness Health Score</span>
                                         <div className="flex items-baseline gap-3 justify-center md:justify-start">
-                                            <span className="text-4xl font-extrabold text-white">{healthReport.health_score}</span>
-                                            <span className="text-slate-500 text-lg">/ 100</span>
+                                            <span className="text-4xl font-extrabold text-slate-900">{healthReport.health_score}</span>
+                                            <span className="text-slate-400 text-lg">/ 100</span>
                                         </div>
                                     </div>
                                     <Badge variant={healthReport.health_score >= 85 ? 'emerald' : healthReport.health_score >= 70 ? 'indigo' : 'amber'}>
@@ -375,8 +375,8 @@ function ResumeHub() {
                                     </Badge>
                                 </Card>
 
-                                <Card variant="glass" className="p-5 space-y-3">
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Health Factor Breakdown</h4>
+                                <Card variant="flat" className="p-5 space-y-3">
+                                    <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider">Health Factor Breakdown</h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                                         <HealthMetric label="Completeness" score={healthReport.breakdown.completeness} weight="35%" />
                                         <HealthMetric label="ATS Text Structure" score={healthReport.breakdown.ats_health} weight="30%" />
@@ -405,7 +405,7 @@ function ResumeHub() {
                                 />
                             ) : (
                                 tailoredResumes.map(item => (
-                                    <Card key={item.id} variant="interactive" className="p-5 space-y-4">
+                                    <Card key={item.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 transition-all">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
@@ -414,12 +414,12 @@ function ResumeHub() {
                                                         {new Date(item.created_at).toLocaleDateString()}
                                                     </span>
                                                 </div>
-                                                <h4 className="text-base font-bold text-white">{item.job_title}</h4>
-                                                <p className="text-xs text-slate-400">{item.company}</p>
+                                                <h4 className="text-base font-bold text-slate-900">{item.job_title}</h4>
+                                                <p className="text-xs text-slate-500">{item.company}</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-wrap gap-2 border-t border-slate-800/80 pt-3">
+                                        <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -455,7 +455,7 @@ function ResumeHub() {
                                 />
                             ) : (
                                 coverLetters.map(letter => (
-                                    <Card key={letter.id} variant="interactive" className="p-5 space-y-4">
+                                    <Card key={letter.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 transition-all">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
@@ -465,12 +465,12 @@ function ResumeHub() {
                                                         {new Date(letter.created_at).toLocaleDateString()}
                                                     </span>
                                                 </div>
-                                                <h4 className="text-base font-bold text-white">{letter.job_title}</h4>
-                                                <p className="text-xs text-slate-400">{letter.company}</p>
+                                                <h4 className="text-base font-bold text-slate-900">{letter.job_title}</h4>
+                                                <p className="text-xs text-slate-500">{letter.company}</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-wrap gap-2 border-t border-slate-800/80 pt-3">
+                                        <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                                             <Button
                                                 variant="success"
                                                 size="sm"
@@ -497,13 +497,13 @@ function ResumeHub() {
 
                     {/* Tab 4: Text Preview */}
                     {activeTab === 'preview' && (
-                        <Card variant="glass" className="flex flex-col overflow-hidden h-[550px]">
-                            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
-                                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                                    <FileText className="text-indigo-400" size={16} /> Extracted Plain Text Content
+                        <Card variant="flat" className="flex flex-col overflow-hidden h-[550px]">
+                            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                                    <FileText className="text-indigo-600" size={16} /> Extracted Plain Text Content
                                 </h3>
                             </div>
-                            <div className="flex-1 p-6 overflow-y-auto font-mono text-xs leading-relaxed text-slate-400 bg-slate-950/80 whitespace-pre-wrap">
+                            <div className="flex-1 p-6 overflow-y-auto font-mono text-xs leading-relaxed text-slate-700 bg-slate-50/50 whitespace-pre-wrap">
                                 {user?.profile?.resume_text || "No text content available."}
                             </div>
                         </Card>
@@ -531,11 +531,11 @@ function ResumeHub() {
 function HealthMetric({ label, score, weight }) {
     return (
         <div className="space-y-1">
-            <div className="flex justify-between text-slate-300 font-medium">
-                <span>{label} <span className="text-slate-500">({weight})</span></span>
-                <span className="font-bold text-white font-mono">{score}%</span>
+            <div className="flex justify-between text-slate-700 font-medium">
+                <span>{label} <span className="text-slate-400">({weight})</span></span>
+                <span className="font-bold text-slate-900 font-mono">{score}%</span>
             </div>
-            <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div className={`h-full ${score >= 80 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${score}%` }}></div>
             </div>
         </div>

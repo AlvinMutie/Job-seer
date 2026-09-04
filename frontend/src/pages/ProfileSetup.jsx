@@ -42,22 +42,22 @@ function ProfileSetup() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-8 bg-slate-950">
-            <div className="glass-card w-full max-w-2xl p-10">
+        <div className="min-h-screen flex items-center justify-center p-8 bg-[#f8fafc] text-slate-900">
+            <div className="glass-card w-full max-w-2xl p-10 bg-white border border-slate-200 shadow-xl rounded-2xl">
                 <div className="flex justify-between items-center mb-10">
                     <div>
-                        <h1 className="text-2xl font-bold">Profile Setup</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">Profile Setup</h1>
                         <p className="text-slate-500 mt-1">Let's personalize your career preferences</p>
                     </div>
                     <div className="flex gap-2">
                         {[1, 2].map(i => (
-                            <div key={i} className={`h-2 w-12 rounded-full transition-all ${step >= i ? 'bg-indigo-600' : 'bg-slate-800'}`}></div>
+                            <div key={i} className={`h-2 w-12 rounded-full transition-all ${step >= i ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
                         ))}
                     </div>
                 </div>
 
                 {error && (
-                    <div className="mb-6 p-4 bg-red-500/5 border border-red-500/20 rounded-xl flex gap-3 text-red-400 text-sm">
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex gap-3 text-red-700 text-sm">
                         <AlertCircle size={18} /> {error}
                     </div>
                 )}
@@ -135,20 +135,20 @@ function ProfileSetup() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-400">Latest Resume (PDF or Text)</label>
+                                <label className="text-sm font-medium text-slate-700">Latest Resume (PDF or Text)</label>
                                 <div
                                     onClick={() => document.getElementById('cv-upload').click()}
-                                    className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-colors cursor-pointer group ${file ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-slate-800 hover:border-indigo-500/50'}`}
+                                    className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-colors cursor-pointer group ${file ? 'border-emerald-500/50 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 bg-slate-50/50'}`}
                                 >
                                     <input
                                         id="cv-upload" type="file" className="hidden"
                                         onChange={handleFileChange}
                                         accept=".pdf,.doc,.docx,.txt"
                                     />
-                                    <div className="w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        {file ? <Check className="text-emerald-500" size={24} /> : <Upload className="text-indigo-500" size={24} />}
+                                    <div className="w-12 h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-xs">
+                                        {file ? <Check className="text-emerald-500" size={24} /> : <Upload className="text-indigo-600" size={24} />}
                                     </div>
-                                    <p className="text-sm font-medium">{file ? file.name : 'Click to upload or drag & drop'}</p>
+                                    <p className="text-sm font-medium text-slate-900">{file ? file.name : 'Click to upload or drag & drop'}</p>
                                     <p className="text-xs text-slate-500 mt-1">PDF, DOCX or TXT up to 10MB</p>
                                 </div>
                             </div>
@@ -156,7 +156,7 @@ function ProfileSetup() {
                             <div className="flex gap-4 pt-4">
                                 <button
                                     type="button" onClick={() => setStep(1)}
-                                    className="flex-1 py-3 border border-slate-800 rounded-xl hover:bg-slate-900 transition-all font-medium"
+                                    className="flex-1 py-3 border border-slate-300 rounded-xl hover:bg-slate-100 text-slate-700 transition-all font-medium"
                                 >
                                     Back
                                 </button>

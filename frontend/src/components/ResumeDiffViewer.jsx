@@ -25,27 +25,27 @@ function ResumeDiffViewer({ isOpen, onClose, compareData }) {
 
                 {/* Diff Stats Banner */}
                 <div className="grid grid-cols-3 gap-4 text-center text-xs">
-                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 flex items-center justify-center gap-2 font-semibold">
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 flex items-center justify-center gap-2 font-semibold">
                         <Plus size={16} /> <span className="font-bold">{added_count}</span> Lines Added
                     </div>
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 flex items-center justify-center gap-2 font-semibold">
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 flex items-center justify-center gap-2 font-semibold">
                         <Minus size={16} /> <span className="font-bold">{removed_count}</span> Lines Removed
                     </div>
-                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 flex items-center justify-center gap-2 font-semibold">
+                    <div className="p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-700 flex items-center justify-center gap-2 font-semibold">
                         <FileText size={16} /> <span className="font-bold">{unchanged_count}</span> Lines Unchanged
                     </div>
                 </div>
 
                 {/* Line-by-Line Diff Viewer Container */}
-                <div className="overflow-y-auto font-mono text-xs leading-relaxed space-y-1 p-4 bg-slate-950/90 rounded-2xl border border-slate-800/80 max-h-[500px]">
+                <div className="overflow-y-auto font-mono text-xs leading-relaxed space-y-1 p-4 bg-slate-50 rounded-2xl border border-slate-200 max-h-[500px]">
                     {diff_lines && diff_lines.length > 0 ? (
                         diff_lines.map((item, idx) => (
                             <div
                                 key={idx}
                                 className={`px-3 py-1.5 rounded-lg flex items-start gap-3 transition-colors ${
-                                    item.type === 'added' ? 'bg-emerald-500/15 border-l-4 border-emerald-500 text-emerald-200 font-semibold' :
-                                    item.type === 'removed' ? 'bg-rose-500/15 border-l-4 border-rose-500 text-rose-300 line-through opacity-70' :
-                                    'text-slate-400 hover:text-slate-200'
+                                    item.type === 'added' ? 'bg-emerald-100/70 border-l-4 border-emerald-500 text-emerald-900 font-semibold' :
+                                    item.type === 'removed' ? 'bg-rose-100/70 border-l-4 border-rose-500 text-rose-800 line-through opacity-80' :
+                                    'text-slate-600 hover:text-slate-900'
                                 }`}
                             >
                                 <span className="w-6 text-right select-none opacity-40 font-mono text-[11px]">{idx + 1}</span>
@@ -60,7 +60,7 @@ function ResumeDiffViewer({ isOpen, onClose, compareData }) {
                     )}
                 </div>
 
-                <div className="pt-3 border-t border-slate-800 flex justify-end">
+                <div className="pt-3 border-t border-slate-200 flex justify-end">
                     <Button variant="primary" size="sm" onClick={onClose}>
                         Close Comparison
                     </Button>

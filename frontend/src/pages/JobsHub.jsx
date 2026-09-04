@@ -139,7 +139,7 @@ function JobsHub() {
                 </form>
 
                 {/* Filter Controls Row */}
-                <div className="flex flex-wrap gap-4 items-center justify-between border-t border-slate-800/80 pt-4 text-xs">
+                <div className="flex flex-wrap gap-4 items-center justify-between border-t border-slate-200 pt-4 text-xs">
                     <div className="flex flex-wrap gap-4 items-center">
                         <div className="w-44">
                             <Select
@@ -215,8 +215,8 @@ function JobsHub() {
 
             {/* Pagination Controls */}
             {!loading && jobs.length > 0 && (
-                <Card variant="flat" className="p-4 flex justify-between items-center bg-slate-900/40">
-                    <span className="text-xs text-slate-400 font-mono">Page {page}</span>
+                <Card variant="flat" className="p-4 flex justify-between items-center bg-slate-50/50">
+                    <span className="text-xs text-slate-500 font-mono">Page {page}</span>
                     <div className="flex gap-2">
                         <Button
                             variant="secondary"
@@ -263,10 +263,10 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
     };
 
     return (
-        <Card variant="interactive" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+        <Card variant="flat" className="p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group hover:border-slate-300 transition-all">
             {matchResult && (
                 <div className={`absolute top-0 right-0 px-4 py-1 border-b border-l rounded-bl-xl font-bold text-xs ${
-                    matchResult.match_percentage > 70 ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400'
+                    matchResult.match_percentage > 70 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700'
                 }`}>
                     {matchResult.match_percentage}% Match
                 </div>
@@ -275,11 +275,11 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
             <div className="flex-1 space-y-3">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="text-xl font-bold text-white transition-colors group-hover:text-indigo-400">{job.title}</h3>
-                        <div className="flex items-center gap-3 text-slate-400 text-sm font-medium mt-1">
-                            <span className="flex items-center gap-1.5"><Briefcase size={14} className="text-indigo-400" /> {job.company}</span>
-                            <span className="text-slate-600">•</span>
-                            <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-500" /> {job.location}</span>
+                        <h3 className="text-xl font-bold text-slate-900 transition-colors group-hover:text-indigo-600">{job.title}</h3>
+                        <div className="flex items-center gap-3 text-slate-500 text-sm font-medium mt-1">
+                            <span className="flex items-center gap-1.5"><Briefcase size={14} className="text-indigo-600" /> {job.company}</span>
+                            <span className="text-slate-300">•</span>
+                            <span className="flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" /> {job.location}</span>
                         </div>
                     </div>
                     <div className="flex gap-2">
@@ -288,7 +288,7 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
                     </div>
                 </div>
 
-                <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed">{job.description}</p>
+                <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">{job.description}</p>
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
                     {(job.skills_required || "").split(',').filter(s => s.trim()).map(skill => (
