@@ -12,44 +12,44 @@
 
 ---
 
-## 🎯 Executive Overview (For Recruiters & Hiring Managers)
+## Executive Overview (For Recruiters & Hiring Managers)
 
-In today's competitive job market, candidates often face two major hurdles:
-1. **The "Black Box" ATS**: Resumes are rejected by automated Applicant Tracking Systems without candidates knowing why or how they fell short of the job criteria.
+In today's competitive job market, candidates face two systemic hurdles:
+1. **The "Black Box" ATS**: Resumes are filtered out by automated Applicant Tracking Systems without candidates knowing why or where they fell short of the employer's criteria.
 2. **Fragmented Workflows**: Job seekers juggle disparate job boards, disconnected document versions, generic cover letters, and manual spreadsheets to track their applications.
 
-**Job Seer** solves both problems in a unified, beautifully designed workspace that guides candidates through a continuous 5-stage career acceleration loop:
+**Job Seer** resolves both challenges in a unified, accessible workspace that guides candidates through a continuous 5-stage career acceleration loop:
 $$\text{DISCOVER} \longrightarrow \text{MATCH} \longrightarrow \text{PREPARE} \longrightarrow \text{APPLY} \longrightarrow \text{TRACK}$$
 
 ---
 
-## 🚀 Core Features & Architectural Highlights
+## Core Capabilities & Architectural Highlights
 
-### 1. 🌐 Live Global Job Board Aggregation (Adzuna Developer Integration)
+### 1. Live Global Job Board Aggregation (Adzuna Developer Integration)
 - **Real-World Openings**: Real-time integration with the **Adzuna Global Job Exchange API** replaces static mock data with live openings across the US, UK, Canada, Germany, Australia, and India.
 - **Smart Candidate Fallback**: When syncing without explicit filters, the system automatically uses the candidate's CV-extracted target role, preferred work mode, and core competencies.
-- **Data Normalization Pipeline**: Statically cleans raw HTML descriptions, parses and normalizes salary bounds (`$min - $max` / `$avg`), detects remote vs. hybrid vs. on-site arrangements, and infers senior/mid/junior experience levels.
+- **Data Normalization Pipeline**: Cleans raw HTML descriptions, parses and normalizes salary bounds (`$min - $max` / `$avg`), detects remote vs. hybrid vs. on-site arrangements, and infers senior, mid-level, or junior experience levels.
 - **Automated Skill Ingestion**: Parses incoming job descriptions using NLP keyword matchers and tokenizes technical skills into normalized domain tags.
 - **Deduplication Engine**: Protects the database against duplicate records using composite external IDs and company/title signature hashing.
 
-### 2. 🧠 Explainable Resume-Job Fit Intelligence (Engine V2)
-- **Multi-Factor Weighted Scoring**: Rather than naive keyword count, our V2 Matching Engine computes an explainable composite fit score (0–100%):
-  - **40% Technical Skills Overlap**: Normalized against synonym dictionaries (e.g., *React.js* $\equiv$ *React*, *PostgreSQL* $\equiv$ *Postgres*).
+### 2. Explainable Resume-Job Fit Intelligence (Engine V2)
+- **Multi-Factor Weighted Scoring**: Rather than a naive keyword count, our V2 Matching Engine computes an explainable composite fit score (0–100%):
+  - **40% Technical Skills Overlap**: Normalized against synonym dictionaries (e.g., *React.js* = *React*, *PostgreSQL* = *Postgres*).
   - **30% Semantic Content Similarity**: TF-IDF vectorization with cosine similarity (`scikit-learn` + `spaCy`).
   - **15% Experience Level Calibration**: Penalizes seniority mismatches while rewarding qualified experience.
   - **15% Role Title Alignment**: Evaluates semantic role proximity (e.g., *Frontend Engineer* vs. *Full Stack Developer*).
 - **Transparent Rationale & Skill Breakdown**: Visually classifies matched competencies (green chips) and identifies critical skill gaps (amber chips), empowering candidates to address missing qualifications before applying.
 
-### 3. 🛡️ 10-Layer ATS Health Diagnostic Engine
+### 3. 10-Layer ATS Health Diagnostic Engine
 - **Automated ATS Readiness Score (0–100)**: Evaluates uploaded resumes (`.pdf`, `.docx`, `.txt`) across 10 critical ATS dimensions:
   - Header & Contact Presence (Email, Phone, LinkedIn, GitHub, Portfolio).
   - Essential Section Detection (Summary, Experience, Education, Skills, Projects).
   - Formatting & Structural Readability (Parsability and length checks).
   - Action Verb Density (Measures impactful verbs like *Architected*, *Implemented*, *Optimized*).
-  - Buzzword Penalty Filter (Identifies overused fluff words).
-  - Technical Skill Domain Categorization across 7 technical disciplines (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`).
+  - Buzzword Penalty Filter (Identifies overused filler terms).
+  - Technical Skill Domain Categorization across 7 disciplines (`languages`, `frontend`, `backend`, `databases`, `cloud_devops`, `data_ai`, `other`).
 
-### 4. ✍️ Factual CV Tailoring & Multi-Tone Cover Letter Studio
+### 4. Factual CV Tailoring & Multi-Tone Cover Letter Studio
 - **Versioned Tailored Resumes**: Automatically creates targeted, job-specific CV versions (`v1`, `v2`, `v3`) emphasizing the exact competencies required by the employer without fabricating experience.
 - **Line-by-Line Visual Diff Viewer**: Integrated `difflib` comparison modal displaying highlighted additions, removals, and unchanged lines.
 - **4-Tone Cover Letter Generator**: Generates customized cover letters calibrated to distinct workplace cultures:
@@ -59,14 +59,14 @@ $$\text{DISCOVER} \longrightarrow \text{MATCH} \longrightarrow \text{PREPARE} \l
   - `Technical` (Architecture, system design & engineering depth)
 - **Direct Application Handoff**: Candidates are directed toward submitting their application with a 1-click **"Apply on Official Site"** button (linking directly to the employer's portal via Adzuna redirect links), **"Copy Materials"** buttons, and instant Kanban tracking.
 
-### 5. 📋 Application Pipeline & Kanban Workspace
+### 5. Application Pipeline & Kanban Workspace
 - **Drag-and-Drop Workflow**: Organizes opportunities across 5 career stages:
-  - `Not Applied` $\rightarrow$ `Applied` $\rightarrow$ `Interview` $\rightarrow$ `Offer` $\rightarrow$ `Rejected`
+  - `Not Applied` -> `Applied` -> `Interview` -> `Offer` -> `Rejected`
 - **Optimistic UI with Rollback Safety**: Status movements immediately update client-side state and asynchronously sync with the backend; any network failure safely rolls back the card to its previous column.
 - **Milestone Date Logging**: Records applied dates, interview rounds, and follow-up reminders.
 - **Dual View**: Seamlessly switch between the visual Kanban Board and a high-density tabular List view.
 
-### 6. 🎨 Modern Glassmorphic UI & Dual Theme System
+### 6. Modern Glassmorphic UI & Dual Theme System
 - Built with Vanilla CSS design tokens and Tailwind CSS.
 - **Persistent Theme Toggle**: Seamless light and dark mode with localStorage persistence.
 - High-contrast, vibrant light mode with rich typography and micro-animations via Framer Motion.
@@ -74,7 +74,7 @@ $$\text{DISCOVER} \longrightarrow \text{MATCH} \longrightarrow \text{PREPARE} \l
 
 ---
 
-## 🏗️ System Architecture & Technology Stack
+## System Architecture & Technology Stack
 
 ```mermaid
 graph TD
@@ -105,7 +105,7 @@ graph TD
 ### Backend Architecture
 - **Language & Runtime**: Python 3.11+ / 3.14 compatible
 - **API Framework**: **FastAPI** (Asynchronous endpoints, automatic OpenAPI / Swagger documentation)
-- **ORM & Database**: **SQLAlchemy 2.0+** with Alembic migrations; tested on SQLite (dev) and PostgreSQL (prod)
+- **ORM & Database**: **SQLAlchemy 2.0+** with SQLite / PostgreSQL support
 - **NLP & Text Analysis**:
   - `spaCy` (`en_core_web_sm`) for tokenization and entity recognition
   - `scikit-learn` (`TfidfVectorizer`) for content vectorization and cosine similarity
@@ -125,9 +125,9 @@ graph TD
 
 ---
 
-## 🧪 Testing & Code Quality Metrics
+## Testing & Code Quality Metrics
 
-Every layer of the system is rigorously tested with automated test suites:
+Every layer of the system is tested with automated test suites:
 
 ```bash
 # Backend Automated Suite (177 tests passing)
@@ -148,15 +148,15 @@ npm run build
 
 | Component | Metric | Status |
 |---|---|---|
-| **Backend Test Suite** | **177 / 177 Passed (100%)** | ✅ Fully Passing |
-| **External Job Ingestion Tests** | **6 / 6 Passed (100%)** | ✅ Verified Live |
-| **Security & Rate Limiting Tests** | **12 / 12 Passed (100%)** | ✅ Hardened |
-| **Frontend Unit Tests** | **6 / 6 Passed (100%)** | ✅ Fully Passing |
-| **Vite Production Bundle** | **0 Errors, 0 Warnings** | ✅ Optimized |
+| **Backend Test Suite** | **177 / 177 Passed (100%)** | Passed (100%) |
+| **External Job Ingestion Tests** | **6 / 6 Passed (100%)** | Passed (100%) |
+| **Security & Rate Limiting Tests** | **12 / 12 Passed (100%)** | Passed (100%) |
+| **Frontend Unit Tests** | **6 / 6 Passed (100%)** | Passed (100%) |
+| **Vite Production Bundle** | **0 Errors, 0 Warnings** | Optimized |
 
 ---
 
-## ⚡ Quickstart Guide
+## Quickstart Guide
 
 ### Prerequisites
 - Python 3.11 or higher
@@ -203,7 +203,7 @@ Frontend will be live at `http://localhost:3000` (or `3001`).
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 Smart-Job-Hunter/
@@ -233,9 +233,9 @@ Smart-Job-Hunter/
 
 ---
 
-## 👨‍💻 Key Takeaways for Technical Recruiters
+## Key Takeaways for Technical Recruiters
 
 - **Full-Stack Proficiency**: Seamless communication between an asynchronous Python backend (FastAPI) and a modern, responsive React 18 single-page application.
 - **Applied Data Science & NLP**: Practical, production-grade text processing using TF-IDF vectorization, cosine similarity, and regex/token-based skill taxonomy mapping.
-- **Third-Party API Integration**: Robust external service querying with rate-limit protection, HTML sanitation, error fallback, and smart database deduplication.
+- **Third-Party API Integration**: Robust external service querying with rate-limit protection, HTML sanitation, error fallback, and database deduplication.
 - **Production Engineering**: Built with end-to-end security (OWASP headers, rate limiting, HttpOnly cookies), automated migration checks, and a comprehensive 177-test suite.
