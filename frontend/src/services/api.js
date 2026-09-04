@@ -158,7 +158,9 @@ export const templateService = {
         if (params.tailored_resume_id) formData.append('tailored_resume_id', params.tailored_resume_id);
         return api.post('/resume/format-structure', formData).then(res => res.data);
     },
+    importCanva: (data) => api.post('/resume/import-canva', data).then(res => res.data),
 };
 
 export default api;
+
 

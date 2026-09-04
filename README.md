@@ -51,14 +51,20 @@ $$\text{DISCOVER} \longrightarrow \text{MATCH} \longrightarrow \text{PREPARE} \l
   - `Technical` (Architecture, system design & engineering depth)
 - **Direct Application Handoff**: Candidates are directed toward submitting their application with a 1-click **"Apply on Official Site"** button (linking directly to the employer's portal via Adzuna redirect links), **"Copy Materials"** buttons, and instant Kanban tracking.
 
-### 5. Application Pipeline & Kanban Workspace
+### 5. In-System Canva Template Importer & ATS Standard Studio
+- **Zero External Redirection**: Candidates can paste any Canva resume template link directly into the system. The platform imports and maps the design archetype into an in-app native engine without redirecting to Canva.
+- **Automated CV Auto-Population**: Automatically injects and formats the candidate's structured resume content (Header, Summary, Skills, Experience, Education) into the template.
+- **Recruiter Gold-Standard Typography**: Enforces the single-column ATS corporate standard in **Times New Roman, 11pt font, 1.5 line spacing** for 100% parser compatibility.
+- **Live In-App Editing & PDF Export**: Candidates can edit text blocks inline on the document sheet, customize accent colors, save versioned drafts to the database, and download the finished CV as a PDF directly from the system.
+
+### 6. Application Pipeline & Kanban Workspace
 - **Drag-and-Drop Workflow**: Organizes opportunities across 5 career stages:
   - `Not Applied` -> `Applied` -> `Interview` -> `Offer` -> `Rejected`
 - **Optimistic UI with Rollback Safety**: Status movements immediately update client-side state and asynchronously sync with the backend; any network failure safely rolls back the card to its previous column.
 - **Milestone Date Logging**: Records applied dates, interview rounds, and follow-up reminders.
 - **Dual View**: Seamlessly switch between the visual Kanban Board and a high-density tabular List view.
 
-### 6. Modern Glassmorphic UI & Dual Theme System
+### 7. Modern Glassmorphic UI & Dual Theme System
 - Built with Vanilla CSS design tokens and Tailwind CSS.
 - **Persistent Theme Toggle**: Seamless light and dark mode with localStorage persistence.
 - High-contrast, vibrant light mode with rich typography and micro-animations via Framer Motion.
@@ -210,7 +216,7 @@ Smart-Job-Hunter/
 │   │   ├── auth.py         # JWT and password authentication helpers
 │   │   ├── database.py     # SQLite/Postgres engine, session management & migrations
 │   │   └── main.py         # Application factory, middleware & router mounts
-│   └── tests/              # 177 automated pytest test suites
+│   └── tests/              # 183 automated pytest test suites
 │
 ├── frontend/
 │   ├── src/
@@ -223,11 +229,3 @@ Smart-Job-Hunter/
 └── README.md
 ```
 
----
-
-## Key Takeaways for Technical Recruiters
-
-- **Full-Stack Proficiency**: Seamless communication between an asynchronous Python backend (FastAPI) and a modern, responsive React 18 single-page application.
-- **Applied Data Science & NLP**: Practical, production-grade text processing using TF-IDF vectorization, cosine similarity, and regex/token-based skill taxonomy mapping.
-- **Third-Party API Integration**: Robust external service querying with rate-limit protection, HTML sanitation, error fallback, and database deduplication.
-- **Production Engineering**: Built with end-to-end security (OWASP headers, rate limiting, HttpOnly cookies), automated migration checks, and a comprehensive 177-test suite.

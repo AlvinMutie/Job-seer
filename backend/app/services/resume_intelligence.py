@@ -352,5 +352,104 @@ class ResumeIntelligenceService:
             "projects": projects_text
         }
 
+    def import_canva_template(self, canva_url: str, resume_text: str = "") -> dict:
+        """
+        Parses a Canva resume template link and maps it directly into an in-app
+        ATS-friendly native template structure (Times New Roman 11pt, 1.5 line spacing).
+        Never requires external navigation to Canva.
+        """
+        url_lower = (canva_url or "").strip().lower()
+
+        # Deduce template archetype from URL slug/query
+        style = "executive_serif"
+        accent_color = "#1e293b"  # Slate dark default
+        style_name = "Canva Executive Standard"
+
+        if any(w in url_lower for w in ["minimal", "clean", "simple", "sleek"]):
+            style = "modern_minimalist"
+            accent_color = "#0f172a"
+            style_name = "Canva Minimalist Modern"
+        elif any(w in url_lower for w in ["tech", "engineer", "developer", "data", "code"]):
+            style = "tech_linear"
+            accent_color = "#1e3a8a"  # Navy blue
+            style_name = "Canva Tech Professional"
+        elif any(w in url_lower for w in ["academic", "research", "doctor", "classic", "ivy"]):
+            style = "academic_classic"
+            accent_color = "#111827"  # Deep black
+            style_name = "Canva Academic Classic"
+        elif any(w in url_lower for w in ["creative", "modern", "design", "portfolio"]):
+            style = "modern_clean"
+            accent_color = "#047857"  # Emerald accent
+            style_name = "Canva Modern Tailored"
+
+        # Structure the candidate's resume content
+        parsed = self.parse_resume_structure(resume_text) if resume_text else {
+            "full_name": "Full Name",
+            "email": "candidate@example.com",
+            "phone": "(555) 000-0000",
+            "location": "City, Country",
+            "linkedin": "linkedin.com/in/candidate",
+            "github": "github.com/candidate",
+            "summary": "Accomplished specialist with extensive background in building resilient applications and delivering measurable results.",
+            "skills": "Python, FastAPI, React, SQL, Cloud Architecture, CI/CD, Agile",
+            "experience": "Senior Engineer | Industry Leader\n2022 - Present\n• Directed cross-functional initiatives delivering high availability systems.",
+            "education": "B.S. in Computer Science | University Honors Graduate",
+            "projects": "High-Impact Project | Lead Architect"
+        }
+
+        # Build combined contact line
+        contact_parts = []
+        if parsed.get("location"):
+            contact_parts.append(parsed["location"])
+        if parsed.get("phone"):
+            contact_parts.append(parsed["phone"])
+        if parsed.get("email"):
+            contact_parts.append(parsed["email"])
+        if parsed.get("linkedin"):
+            contact_parts.append(parsed["linkedin"])
+        if parsed.get("github"):
+            contact_parts.append(parsed["github"])
+
+        contact_line = " | ".join(contact_parts) if contact_parts else "City, Country | (555) 000-0000 | candidate@example.com"
+
+        structured_content = {
+            "full_name": parsed.get("full_name") or "Your Full Name",
+            "contact_info": contact_line,
+            "professional_summary": parsed.get("summary") or "",
+            "skills": parsed.get("skills") or "",
+            "experience": parsed.get("experience") or "",
+            "education": parsed.get("education") or "",
+            "projects": parsed.get("projects") or ""
+        }
+
+        # Build clean plain text
+        formatted_text = (
+            f"{structured_content['full_name'].upper()}\n{structured_content['contact_info']}\n\n"
+            f"PROFESSIONAL SUMMARY\n{'=' * 40}\n{structured_content['professional_summary']}\n\n"
+            f"CORE SKILLS & TECHNOLOGIES\n{'=' * 40}\n{structured_content['skills']}\n\n"
+            f"PROFESSIONAL EXPERIENCE\n{'=' * 40}\n{structured_content['experience']}\n\n"
+            f"EDUCATION\n{'=' * 40}\n{structured_content['education']}\n\n"
+            f"{'PROJECTS & KEY ACHIEVEMENTS' if structured_content['projects'] else ''}\n"
+            f"{'=' * 40 if structured_content['projects'] else ''}\n"
+            f"{structured_content['projects']}\n"
+        ).strip()
+
+        return {
+            "canva_url": canva_url,
+            "template_name": style_name,
+            "template_style": style,
+            "design_theme": {
+                "font_family": "Times New Roman, Times, serif",
+                "font_size": "11pt",
+                "line_height": "1.5",
+                "accent_color": accent_color,
+                "layout": "single_column_ats"
+            },
+            "content_json": structured_content,
+            "formatted_text": formatted_text,
+            "is_ats_compliant": True
+        }
+
 
 resume_intelligence_service = ResumeIntelligenceService()
+

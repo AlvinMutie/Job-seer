@@ -141,3 +141,28 @@ class ResumeStructureResponse(BaseModel):
     experience: str
     education: str
     projects: str
+
+
+class CanvaImportRequest(BaseModel):
+    canva_url: str
+    raw_text: Optional[str] = None
+    tailored_resume_id: Optional[int] = None
+
+
+class CanvaDesignTheme(BaseModel):
+    font_family: str = "Times New Roman, Times, serif"
+    font_size: str = "11pt"
+    line_height: str = "1.5"
+    accent_color: str = "#1e293b"
+    layout: str = "single_column_ats"
+
+
+class CanvaImportResponse(BaseModel):
+    canva_url: str
+    template_name: str
+    template_style: str
+    design_theme: CanvaDesignTheme
+    content_json: dict
+    formatted_text: str
+    is_ats_compliant: bool = True
+

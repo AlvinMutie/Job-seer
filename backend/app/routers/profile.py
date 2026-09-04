@@ -17,7 +17,9 @@ from app.schemas.profile import (
     FormattedTemplateSaveRequest,
     FormattedTemplateUpdateRequest,
     FormattedTemplateResponse,
-    ResumeStructureResponse
+    ResumeStructureResponse,
+    CanvaImportRequest,
+    CanvaImportResponse
 )
 from app.utils.file_handling import validate_upload_file, save_user_resume
 from app.services.resume_intelligence import resume_intelligence_service
@@ -588,3 +590,44 @@ async def get_structured_resume_sections(
 
     structure = resume_intelligence_service.parse_resume_structure(text_to_parse)
     return structure
+
+
+@router.post("/resume/import-canva", response_model=CanvaImportResponse)
+async def import_canva_template_endpoint(
+    req: CanvaImportRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Imports and maps a Canva template link directly into our native, ATS-friendly
+    in-app template engine (Times New Roman 11pt, 1.5 spacing).
+    Never redirects away to Canva. Auto-injects candidate resume text.
+    """
+    if not req.canva_url or not req.canva_url.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Canva template URL is required."
+        )
+
+    text_to_format = req.raw_text
+
+    if not text_to_format and req.tailored_resume_id:
+        tailored = (
+            db.query(TailoredResume)
+            .filter(TailoredResume.id == req.tailored_resume_id, TailoredResume.user_id == current_user.id)
+            .first()
+        )
+        if tailored:
+            text_to_format = tailored.tailored_resume_text
+
+    if not text_to_format:
+        profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+        if profile and profile.resume_text:
+            text_to_format = profile.resume_text
+
+    result = resume_intelligence_service.import_canva_template(
+        canva_url=req.canva_url.strip(),
+        resume_text=text_to_format or ""
+    )
+    return result
+

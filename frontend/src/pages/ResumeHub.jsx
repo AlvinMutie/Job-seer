@@ -651,16 +651,9 @@ function ResumeHub() {
                                                 </div>
                                                 <h4 className="text-base font-bold text-slate-900 dark:text-white">{tpl.name}</h4>
                                                 {tpl.canva_reference_url && (
-                                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400">
+                                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium">
                                                         <Link2 size={13} />
-                                                        <a
-                                                            href={tpl.canva_reference_url}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="hover:underline flex items-center gap-1"
-                                                        >
-                                                            Canva Template Reference <ExternalLink size={11} />
-                                                        </a>
+                                                        <span>Canva Source: In-System Template</span>
                                                     </div>
                                                 )}
                                             </div>

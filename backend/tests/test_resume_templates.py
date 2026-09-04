@@ -123,3 +123,46 @@ def test_template_crud_lifecycle(client, test_user, db_session):
 
     # Verify deleted
     assert db_session.query(SavedResumeTemplate).filter(SavedResumeTemplate.id == template_id).first() is None
+
+
+def test_import_canva_template_service():
+    # 1. Tech template URL
+    tech_url = "https://www.canva.com/templates/EAF123-tech-engineer-developer-resume/"
+    res_tech = resume_intelligence_service.import_canva_template(tech_url, "Alice Engineer\nalice@tech.com\nSummary\nCloud Developer\nSkills\nGo, Kubernetes")
+    assert res_tech["template_style"] == "tech_linear"
+    assert res_tech["design_theme"]["font_family"] == "Times New Roman, Times, serif"
+    assert res_tech["design_theme"]["font_size"] == "11pt"
+    assert res_tech["design_theme"]["line_height"] == "1.5"
+    assert res_tech["is_ats_compliant"] is True
+    assert "ALICE ENGINEER" in res_tech["formatted_text"]
+
+    # 2. Minimalist template URL
+    min_url = "https://www.canva.com/templates/EAE987-minimalist-clean-cv/"
+    res_min = resume_intelligence_service.import_canva_template(min_url)
+    assert res_min["template_style"] == "modern_minimalist"
+    assert res_min["design_theme"]["accent_color"] == "#0f172a"
+
+
+def test_import_canva_endpoint(client, test_user):
+    token = test_user["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Unauthenticated rejected
+    unauth = client.post("/resume/import-canva", json={"canva_url": "https://canva.com/templates/123"})
+    assert unauth.status_code == 401
+
+    # Authenticated success
+    payload = {
+        "canva_url": "https://www.canva.com/templates/EAFabc-creative-portfolio-cv/",
+        "raw_text": "Bob Builder\nbob@build.com\nSummary\nLead Solutions Architect\nSkills\nPython, Docker"
+    }
+    res = client.post("/resume/import-canva", json=payload, headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["template_style"] == "modern_clean"
+    assert data["design_theme"]["font_family"] == "Times New Roman, Times, serif"
+    assert data["design_theme"]["font_size"] == "11pt"
+    assert data["design_theme"]["line_height"] == "1.5"
+    assert "BOB BUILDER" in data["formatted_text"]
+    assert data["content_json"]["full_name"] == "Bob Builder"
+
