@@ -4,10 +4,10 @@
 
 :root {
   /* Brand Colors */
-  --brand-primary: #6366f1;
-  --brand-primary-hover: #4f46e5;
-  --brand-secondary: #8b5cf6;
-  --brand-cyan: #0891b2;
+  --brand-primary: #4f46e5;
+  --brand-primary-hover: #4338ca;
+  --brand-secondary: #7c3aed;
+  --brand-cyan: #0284c7;
 
   /* Surface & Background Hierarchy (Light Mode Default) */
   --bg-app: #f8fafc;
@@ -15,78 +15,93 @@
   --bg-surface-hover: #f1f5f9;
   --bg-elevated: #ffffff;
   --border-default: #e2e8f0;
-  --border-hover: rgba(99, 102, 241, 0.4);
+  --border-hover: rgba(79, 70, 229, 0.4);
 
   /* Typography Colors */
-  --text-main: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-main: #020617;
+  --text-secondary: #1e293b;
+  --text-muted: #475569;
 
   /* Semantic Feedback Colors */
-  --color-success: #10b981;
-  --color-success-bg: rgba(16, 185, 129, 0.1);
-  --color-warning: #f59e0b;
-  --color-warning-bg: rgba(245, 158, 11, 0.1);
-  --color-error: #ef4444;
-  --color-error-bg: rgba(239, 68, 68, 0.1);
+  --color-success: #059669;
+  --color-success-bg: rgba(16, 185, 129, 0.12);
+  --color-warning: #d97706;
+  --color-warning-bg: rgba(245, 158, 11, 0.12);
+  --color-error: #dc2626;
+  --color-error-bg: rgba(239, 68, 68, 0.12);
   --color-info: #0284c7;
-  --color-info-bg: rgba(2, 132, 199, 0.1);
+  --color-info-bg: rgba(2, 132, 199, 0.12);
+}
+
+html.dark {
+  /* Dark Mode Surfaces */
+  --bg-app: #030712;
+  --bg-surface: #0f172a;
+  --bg-surface-hover: #1e293b;
+  --bg-elevated: #111827;
+  --border-default: #1e293b;
+  --border-hover: rgba(99, 102, 241, 0.5);
+
+  /* Dark Typography Colors */
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 }
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] text-slate-900 antialiased font-['Outfit',sans-serif] selection:bg-indigo-500/20;
+    @apply bg-[#f8fafc] text-slate-950 dark:bg-[#030712] dark:text-slate-100 antialiased font-['Outfit',sans-serif] selection:bg-indigo-500/30 transition-colors duration-200;
   }
 
   /* Accessibility Focus Rings */
   *:focus-visible {
-    @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-indigo-600 ring-offset-2 ring-offset-white dark:ring-offset-slate-950;
   }
 }
 
 @layer components {
   /* Cards */
   .glass-card {
-    @apply bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-sm transition-all duration-200;
+    @apply bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-2xl shadow-sm transition-all duration-200;
   }
   
   .glass-card:hover {
-    @apply border-indigo-300 shadow-md;
+    @apply border-indigo-400 dark:border-indigo-500/50 shadow-md;
   }
 
   /* Form Control Base */
   .input-field {
-    @apply w-full bg-white border border-slate-300 text-slate-900 placeholder-slate-400 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Standardized Buttons */
   .btn-primary {
-    @apply px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    @apply px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .btn-secondary {
-    @apply px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-5 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50;
+    @apply px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50;
   }
 
   .btn-destructive {
-    @apply px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl transition-all text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50;
+    @apply px-5 py-2.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-800 rounded-xl transition-all text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50;
   }
 
   /* Badges */
   .badge {
-    @apply px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 border;
+    @apply px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 border tracking-wide;
   }
 
-  .badge-indigo { @apply bg-indigo-50 text-indigo-700 border-indigo-200; }
-  .badge-emerald { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
-  .badge-amber { @apply bg-amber-50 text-amber-800 border-amber-200; }
-  .badge-rose { @apply bg-rose-50 text-rose-700 border-rose-200; }
-  .badge-cyan { @apply bg-cyan-50 text-cyan-700 border-cyan-200; }
-  .badge-slate { @apply bg-slate-100 text-slate-700 border-slate-200; }
+  .badge-indigo { @apply bg-indigo-100/90 text-indigo-800 border-indigo-300 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30; }
+  .badge-emerald { @apply bg-emerald-100/90 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30; }
+  .badge-amber { @apply bg-amber-100/90 text-amber-900 border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30; }
+  .badge-rose { @apply bg-rose-100/90 text-rose-800 border-rose-300 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30; }
+  .badge-cyan { @apply bg-cyan-100/90 text-cyan-800 border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/30; }
+  .badge-slate { @apply bg-slate-200/80 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700; }
 }
 
 /* Animations */
