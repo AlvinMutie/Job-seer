@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Copy, Check, Trash2 } from 'lucide-react';
+import { FileText, Copy, Check, Trash2, ExternalLink } from 'lucide-react';
 import Modal from './ui/Modal';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
@@ -9,7 +9,7 @@ function CoverLetterViewer({ isOpen, onClose, letterData, onDelete }) {
 
     if (!isOpen || !letterData) return null;
 
-    const { id, job_title, company, tone, version, content, created_at } = letterData;
+    const { id, job_title, company, tone, version, content, created_at, application_url } = letterData;
 
     const handleCopy = () => {
         if (content) {
@@ -37,12 +37,12 @@ function CoverLetterViewer({ isOpen, onClose, letterData, onDelete }) {
                 </div>
 
                 {/* Content Box */}
-                <div className="overflow-y-auto font-sans text-sm leading-relaxed p-6 bg-slate-50 rounded-2xl border border-slate-200 text-slate-800 whitespace-pre-wrap max-h-[480px]">
+                <div className="overflow-y-auto font-sans text-sm leading-relaxed p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 whitespace-pre-wrap max-h-[480px]">
                     {content}
                 </div>
 
                 {/* Footer Controls */}
-                <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
                     {onDelete ? (
                         <Button
                             variant="destructive"
@@ -50,20 +50,33 @@ function CoverLetterViewer({ isOpen, onClose, letterData, onDelete }) {
                             icon={Trash2}
                             onClick={() => { onDelete(id); onClose(); }}
                         >
-                            Delete Cover Letter
+                            Delete
                         </Button>
                     ) : <div></div>}
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 ml-auto">
                         <Button
                             variant="outline"
                             size="sm"
                             icon={copied ? Check : Copy}
                             onClick={handleCopy}
                         >
-                            {copied ? 'Copied to Clipboard!' : 'Copy Text'}
+                            {copied ? 'Copied to Clipboard!' : 'Copy Letter'}
                         </Button>
-                        <Button variant="primary" size="sm" onClick={onClose}>
+
+                        {application_url && (
+                            <a
+                                href={application_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button variant="primary" size="sm" icon={ExternalLink} className="shadow-xs">
+                                    Apply on Official Site
+                                </Button>
+                            </a>
+                        )}
+
+                        <Button variant="secondary" size="sm" onClick={onClose}>
                             Close
                         </Button>
                     </div>

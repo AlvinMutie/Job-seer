@@ -165,6 +165,7 @@ class ExternalJobService:
                     experience_level=experience_level,
                     skills_required=skills_required,
                     salary_range=salary_range,
+                    application_url=item.get("redirect_url"),
                     posted_at=posted_at
                 )
                 db.add(new_job)

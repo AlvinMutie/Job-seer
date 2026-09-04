@@ -34,19 +34,15 @@ def init_db():
                         if col_name not in existing_cols:
                             conn.execute(text(f"ALTER TABLE application_tracker ADD COLUMN {col_name} {col_type}"))
                     conn.commit()
+
+            if "jobs" in inspector.get_table_names():
+                existing_job_cols = {col["name"] for col in inspector.get_columns("jobs")}
+                if "application_url" not in existing_job_cols:
+                    with engine.connect() as conn:
+                        conn.execute(text("ALTER TABLE jobs ADD COLUMN application_url VARCHAR(500)"))
+                        conn.commit()
         except Exception:
             pass
-
-    # Auto-seed initial jobs if jobs table is empty
-    try:
-        from app.models.models import Job
-        db = SessionLocal()
-        if db.query(Job).count() == 0:
-            from seed_jobs import seed_jobs
-            seed_jobs()
-        db.close()
-    except Exception:
-        pass
 
 def get_db():
     db = SessionLocal()

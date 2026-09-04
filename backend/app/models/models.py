@@ -47,6 +47,7 @@ class Job(Base):
     experience_level = Column(String, index=True)
     skills_required = Column(Text)  # Comma separated or JSON
     salary_range = Column(String, nullable=True)
+    application_url = Column(String, nullable=True)
     posted_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc), index=True)
 
 class Resume(Base):
@@ -76,6 +77,10 @@ class TailoredResume(Base):
     user = relationship("User")
     job = relationship("Job")
 
+    @property
+    def application_url(self):
+        return self.job.application_url if self.job else None
+
     __table_args__ = (
         Index("idx_tailored_resumes_user_job", "user_id", "job_id"),
     )
@@ -97,6 +102,10 @@ class CoverLetter(Base):
     user = relationship("User")
     job = relationship("Job")
     tailored_resume = relationship("TailoredResume")
+
+    @property
+    def application_url(self):
+        return self.job.application_url if self.job else None
 
     __table_args__ = (
         Index("idx_cover_letters_user_job", "user_id", "job_id"),

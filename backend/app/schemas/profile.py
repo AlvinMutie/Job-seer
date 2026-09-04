@@ -56,6 +56,7 @@ class TailoredResumeResponse(BaseModel):
     match_score: Optional[float] = None
     job_title: Optional[str] = None
     company: Optional[str] = None
+    application_url: Optional[str] = None
     created_at: datetime.datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -72,6 +73,7 @@ class TailoredResumeCompareResponse(BaseModel):
     version: int
     job_title: Optional[str] = None
     company: Optional[str] = None
+    application_url: Optional[str] = None
     diff_lines: List[DiffLineItem]
     added_count: int
     removed_count: int
@@ -88,6 +90,7 @@ class CoverLetterResponse(BaseModel):
     version: int
     job_title: Optional[str] = None
     company: Optional[str] = None
+    application_url: Optional[str] = None
     created_at: datetime.datetime
     updated_at: datetime.datetime
 

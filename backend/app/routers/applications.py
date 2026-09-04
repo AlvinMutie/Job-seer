@@ -162,6 +162,10 @@ async def create_application(
     follow_up_dt = parse_date_str(app_data.follow_up_date)
     app_url = validate_application_url(app_data.application_url)
 
+    job = db.query(Job).filter(Job.id == app_data.job_id).first()
+    if not app_url and job and getattr(job, "application_url", None):
+        app_url = job.application_url
+
     existing = db.query(ApplicationTracker).filter(
         ApplicationTracker.user_id == current_user.id,
         ApplicationTracker.job_id == app_data.job_id

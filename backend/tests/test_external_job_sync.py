@@ -57,6 +57,7 @@ def test_sync_external_jobs_mocked_ingestion(db_session):
             "description": "We need a Senior engineer proficient in Python, Docker, Kubernetes, and PostgreSQL.",
             "salary_min": 150000,
             "salary_max": 180000,
+            "redirect_url": "https://www.adzuna.com/land/ad/mock-101",
             "created": "2026-09-01T12:00:00Z"
         }
     ]
@@ -78,6 +79,7 @@ def test_sync_external_jobs_mocked_ingestion(db_session):
         assert job.title == "Mock Lead Engineer"
         assert job.company == "MockCo Inc"
         assert job.experience_level == "Senior"
+        assert job.application_url == "https://www.adzuna.com/land/ad/mock-101"
 
         # Deduplication test: running same sync again should add 0 new jobs
         result_dup = asyncio.run(external_job_service.sync_external_jobs(

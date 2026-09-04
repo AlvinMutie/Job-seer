@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Sparkles, AlertCircle, Target, CheckCircle, Scissors, Globe, RefreshCw, Check } from 'lucide-react';
+import { Search, MapPin, Briefcase, Filter, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Sparkles, AlertCircle, Target, CheckCircle, Scissors, Globe, RefreshCw, Check, ExternalLink } from 'lucide-react';
 import { jobService, trackerService, authService, getApiErrorMessage } from '../services/api';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
@@ -248,8 +248,17 @@ function JobsHub() {
                     <EmptyState
                         icon={Briefcase}
                         title="No opportunities found"
-                        description="Try adjusting your keyword search, location, or experience filters to find matching open roles."
-                        action={<Button variant="secondary" onClick={() => { setSearch(''); setLocation(''); setRemoteStatus(''); setExperienceLevel(''); fetchJobs(); }}>Reset All Filters</Button>}
+                        description="Query the Adzuna global job exchange to sync live opportunities tailored to your target role and resume."
+                        action={
+                            <div className="flex gap-2.5">
+                                <Button variant="primary" icon={Globe} onClick={() => setIsSyncModalOpen(true)}>
+                                    Sync Live Jobs
+                                </Button>
+                                <Button variant="secondary" onClick={() => { setSearch(''); setLocation(''); setRemoteStatus(''); setExperienceLevel(''); fetchJobs(); }}>
+                                    Reset Filters
+                                </Button>
+                            </div>
+                        }
                     />
                 ) : (
                     jobs.map(job => (
@@ -462,9 +471,22 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
                 </div>
             </div>
 
-            <div className="flex flex-col justify-center gap-2.5 min-w-[150px]">
+            <div className="flex flex-col justify-center gap-2.5 min-w-[155px]">
+                {job.application_url && (
+                    <a href={job.application_url} target="_blank" rel="noopener noreferrer">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            icon={ExternalLink}
+                            className="w-full font-bold shadow-xs"
+                        >
+                            Apply on Site
+                        </Button>
+                    </a>
+                )}
+
                 <Button
-                    variant="primary"
+                    variant={job.application_url ? "secondary" : "primary"}
                     size="sm"
                     onClick={onMatch}
                     isLoading={isMatching}
@@ -485,14 +507,14 @@ function JobCardHub({ job, onMatch, isMatching, matchResult, hasResume }) {
                 </a>
 
                 <Button
-                    variant={applied ? 'success' : 'secondary'}
+                    variant={applied ? 'success' : 'ghost'}
                     size="sm"
                     icon={applied ? CheckCircle : null}
                     onClick={handleApply}
                     isLoading={applying}
                     disabled={applied}
                 >
-                    {applied ? 'Applied' : 'Quick Apply'}
+                    {applied ? 'Applied' : 'Quick Track'}
                 </Button>
             </div>
         </Card>

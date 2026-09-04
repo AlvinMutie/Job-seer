@@ -257,6 +257,7 @@ async def compare_tailored_resume(
         "version": record.version,
         "job_title": record.job_title,
         "company": record.company,
+        "application_url": record.job.application_url if record.job else None,
         "diff_lines": diff_data["diff_lines"],
         "added_count": diff_data["added_count"],
         "removed_count": diff_data["removed_count"],

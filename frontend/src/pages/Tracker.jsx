@@ -247,9 +247,20 @@ function Tracker() {
                                                     </div>
                                                 )}
 
-                                                <div className="border-t border-slate-100 pt-2 flex items-center justify-between text-[11px] text-indigo-600 font-semibold group-hover:underline">
-                                                    <span>{getStageActionLabel(columnStatus)}</span>
-                                                    <ArrowRight size={12} />
+                                                <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                                                    <span className="group-hover:underline flex items-center gap-1">{getStageActionLabel(columnStatus)} <ArrowRight size={11} /></span>
+                                                    {app.application_url && (
+                                                        <a
+                                                            href={app.application_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-0.5"
+                                                            title="Open Original Job Posting"
+                                                        >
+                                                            <ExternalLink size={13} />
+                                                        </a>
+                                                    )}
                                                 </div>
                                             </Card>
                                         ))
@@ -317,9 +328,23 @@ function Tracker() {
                                         </td>
                                         <td className="px-6 py-4 text-xs font-mono text-slate-500">{app.applied_date || app.date}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="p-2 text-slate-400 hover:text-slate-700 transition-colors">
-                                                <MoreVertical size={18} />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                {app.application_url && (
+                                                    <a
+                                                        href={app.application_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                                        title="Open Original Job Posting"
+                                                    >
+                                                        <ExternalLink size={16} />
+                                                    </a>
+                                                )}
+                                                <button className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                                                    <MoreVertical size={18} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

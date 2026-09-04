@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target } from 'lucide-react';
-import { authService, jobService, tailoredResumeService, coverLetterService, getApiErrorMessage } from '../services/api';
+import { Upload, FileText, Check, AlertCircle, Loader2, Sparkles, Activity, ShieldCheck, CheckCircle2, AlertTriangle, Layers, Mail, Cpu, GitCompare, History, Trash2, Plus, ArrowRight, PenTool, Target, ExternalLink, Copy, CheckCircle } from 'lucide-react';
+import { authService, jobService, trackerService, tailoredResumeService, coverLetterService, getApiErrorMessage } from '../services/api';
 import ResumeDiffViewer from '../components/ResumeDiffViewer';
 import CoverLetterViewer from '../components/CoverLetterViewer';
 import PageHeader from '../components/ui/PageHeader';
@@ -30,6 +30,12 @@ function ResumeHub() {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [activeTab, setActiveTab] = useState('intelligence');
+
+    // Directional action states after tailoring/generating
+    const [latestTailoredRecord, setLatestTailoredRecord] = useState(null);
+    const [copiedResumeId, setCopiedResumeId] = useState(null);
+    const [trackingJobId, setTrackingJobId] = useState(null);
+    const [trackedJobs, setTrackedJobs] = useState({});
 
     // Modal States
     const [compareData, setCompareData] = useState(null);
@@ -110,6 +116,34 @@ function ResumeHub() {
         }
     };
 
+    const handleTrackApplication = async (job, matchScore = 0) => {
+        if (!job) return;
+        setTrackingJobId(job.id);
+        try {
+            await trackerService.addApplication({
+                job_id: job.id,
+                status: 'Applied',
+                match_score: matchScore || 0,
+                application_url: job.application_url || undefined
+            });
+            setTrackedJobs(prev => ({ ...prev, [job.id]: true }));
+            setMessage({ type: 'success', text: `Tracked application for ${job.title} at ${job.company} in your Kanban Pipeline!` });
+        } catch (err) {
+            console.error("Failed to track application:", err);
+            setMessage({ type: 'error', text: getApiErrorMessage(err) });
+        } finally {
+            setTrackingJobId(null);
+        }
+    };
+
+    const handleCopyResumeText = (text, id) => {
+        if (text) {
+            navigator.clipboard.writeText(text);
+            setCopiedResumeId(id);
+            setTimeout(() => setCopiedResumeId(null), 2500);
+        }
+    };
+
     const handleGenerateTailored = async (e) => {
         e.preventDefault();
         if (!selectedJobId) return;
@@ -118,7 +152,11 @@ function ResumeHub() {
         setMessage({ type: '', text: '' });
         try {
             const record = await tailoredResumeService.generate(selectedJobId);
-            setMessage({ type: 'success', text: `Tailored version v${record.version} for ${record.job_title} generated & saved!` });
+            setLatestTailoredRecord(record);
+            setMessage({ 
+                type: 'success', 
+                text: `Tailored version v${record.version} for ${record.job_title} generated! You can now copy the text and apply directly on the job portal.` 
+            });
             const list = await tailoredResumeService.list();
             setTailoredResumes(list);
             setActiveTab('tailored_history');
@@ -142,10 +180,15 @@ function ResumeHub() {
                 selectedTone, 
                 selectedTailoredId ? parseInt(selectedTailoredId) : null
             );
-            setMessage({ type: 'success', text: `${record.tone} Cover Letter v${record.version} for ${record.job_title} created & saved!` });
+            const matchingJob = jobs.find(j => String(j.id) === String(selectedJobId));
+            const letterWithUrl = { ...record, application_url: record.application_url || matchingJob?.application_url };
+            setMessage({ 
+                type: 'success', 
+                text: `${record.tone} Cover Letter v${record.version} created! Click 'Apply on Official Site' to submit your materials.` 
+            });
             const list = await coverLetterService.list();
             setCoverLetters(list);
-            setActiveCoverLetter(record);
+            setActiveCoverLetter(letterWithUrl);
             setIsLetterModalOpen(true);
             setActiveTab('cover_letters');
         } catch (error) {
@@ -200,19 +243,97 @@ function ResumeHub() {
                 subtitle="Upload base CVs, run ATS readiness checks, generate versioned tailored resumes, and format multi-tone cover letters."
             />
 
-            {/* Contextual Selected Job Target Banner */}
+            {/* Contextual Selected Job Target Banner with Direct Application Link */}
             {currentTargetJob && (
-                <Card variant="flat" className="p-4 bg-indigo-50 border border-indigo-200 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white border border-indigo-200 rounded-xl text-indigo-600">
-                            <Target size={20} />
+                <Card variant="flat" className="p-5 bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                        <div className="p-3 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 rounded-xl text-indigo-600 dark:text-indigo-400 shrink-0 shadow-xs">
+                            <Target size={22} />
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Target Opportunity Context Preserved</span>
-                            <h4 className="text-sm font-bold text-slate-900">{currentTargetJob.title} — <span className="text-slate-600 font-normal">{currentTargetJob.company}</span></h4>
+                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider block">Target Job Opportunity</span>
+                                <Badge variant="indigo" size="sm">{currentTargetJob.remote_status}</Badge>
+                                {currentTargetJob.salary_range && <Badge variant="slate" size="sm">{currentTargetJob.salary_range}</Badge>}
+                            </div>
+                            <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                                {currentTargetJob.title} <span className="text-slate-500 font-normal">at {currentTargetJob.company}</span>
+                            </h4>
                         </div>
                     </div>
-                    <Badge variant="indigo">{currentTargetJob.remote_status}</Badge>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        {currentTargetJob.application_url && (
+                            <a
+                                href={currentTargetJob.application_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button variant="primary" size="sm" icon={ExternalLink} className="shadow-xs font-bold">
+                                    Apply on Job Board
+                                </Button>
+                            </a>
+                        )}
+                        <Button
+                            variant={trackedJobs[currentTargetJob.id] ? "success" : "secondary"}
+                            size="sm"
+                            icon={trackedJobs[currentTargetJob.id] ? CheckCircle : Plus}
+                            onClick={() => handleTrackApplication(currentTargetJob)}
+                            isLoading={trackingJobId === currentTargetJob.id}
+                            disabled={trackedJobs[currentTargetJob.id]}
+                        >
+                            {trackedJobs[currentTargetJob.id] ? "Tracked in Pipeline" : "Track Application"}
+                        </Button>
+                    </div>
+                </Card>
+            )}
+
+            {/* Next Steps: Apply with Generated Material Callout */}
+            {latestTailoredRecord && (
+                <Card variant="flat" className="p-5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/60 rounded-xl text-emerald-700 dark:text-emerald-300 shrink-0">
+                            <Sparkles size={22} />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">Application Ready • Next Step</span>
+                            <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-100">
+                                CV v{latestTailoredRecord.version} tailored for {latestTailoredRecord.job_title} at {latestTailoredRecord.company}
+                            </h4>
+                            <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5">
+                                Copy the tailored text below and submit directly via the job application portal.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            icon={copiedResumeId === latestTailoredRecord.id ? Check : Copy}
+                            onClick={() => handleCopyResumeText(latestTailoredRecord.tailored_resume_text, latestTailoredRecord.id)}
+                            className="bg-white dark:bg-slate-900 font-semibold"
+                        >
+                            {copiedResumeId === latestTailoredRecord.id ? "Copied to Clipboard!" : "Copy Tailored CV"}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={GitCompare}
+                            onClick={() => handleCompare(latestTailoredRecord.id)}
+                        >
+                            Review Diff
+                        </Button>
+                        {latestTailoredRecord.application_url && (
+                            <a
+                                href={latestTailoredRecord.application_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button variant="primary" size="sm" icon={ExternalLink} className="shadow-xs font-bold">
+                                    Fill Out Application
+                                </Button>
+                            </a>
+                        )}
+                    </div>
                 </Card>
             )}
 
@@ -404,42 +525,81 @@ function ResumeHub() {
                                     description="Select a target job on the left panel to generate your first versioned tailored resume."
                                 />
                             ) : (
-                                tailoredResumes.map(item => (
-                                    <Card key={item.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 transition-all">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <Badge variant="indigo" size="sm">v{item.version}</Badge>
-                                                    <span className="text-xs text-slate-500 font-mono">
-                                                        {new Date(item.created_at).toLocaleDateString()}
-                                                    </span>
+                                tailoredResumes.map(item => {
+                                    const matchingJob = jobs.find(j => j.id === item.job_id);
+                                    const jobAppUrl = item.application_url || matchingJob?.application_url;
+                                    return (
+                                        <Card key={item.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                        <Badge variant="indigo" size="sm">v{item.version}</Badge>
+                                                        {item.match_score && (
+                                                            <Badge variant={item.match_score > 70 ? "emerald" : "indigo"} size="sm">
+                                                                {Math.round(item.match_score)}% Fit
+                                                            </Badge>
+                                                        )}
+                                                        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                                            {new Date(item.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-base font-bold text-slate-900 dark:text-white">{item.job_title}</h4>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.company}</p>
                                                 </div>
-                                                <h4 className="text-base font-bold text-slate-900">{item.job_title}</h4>
-                                                <p className="text-xs text-slate-500">{item.company}</p>
+                                                {jobAppUrl && (
+                                                    <a
+                                                        href={jobAppUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <Button variant="primary" size="sm" icon={ExternalLink} className="shadow-xs font-bold">
+                                                            Apply on Job Site
+                                                        </Button>
+                                                    </a>
+                                                )}
                                             </div>
-                                        </div>
 
-                                        <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                icon={GitCompare}
-                                                onClick={() => handleCompare(item.id)}
-                                            >
-                                                Compare Diff
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                icon={Trash2}
-                                                className="ml-auto"
-                                                onClick={() => handleDeleteTailored(item.id)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </Card>
-                                ))
+                                            <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    icon={copiedResumeId === item.id ? Check : Copy}
+                                                    onClick={() => handleCopyResumeText(item.tailored_resume_text, item.id)}
+                                                    className="font-medium"
+                                                >
+                                                    {copiedResumeId === item.id ? "Copied!" : "Copy CV"}
+                                                </Button>
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    icon={GitCompare}
+                                                    onClick={() => handleCompare(item.id)}
+                                                >
+                                                    Compare Diff
+                                                </Button>
+                                                <Button
+                                                    variant={trackedJobs[item.job_id] ? "success" : "ghost"}
+                                                    size="sm"
+                                                    icon={trackedJobs[item.job_id] ? CheckCircle : Plus}
+                                                    onClick={() => handleTrackApplication(matchingJob || { id: item.job_id, title: item.job_title, company: item.company, application_url: jobAppUrl }, item.match_score)}
+                                                    isLoading={trackingJobId === item.job_id}
+                                                    disabled={trackedJobs[item.job_id]}
+                                                >
+                                                    {trackedJobs[item.job_id] ? "Tracked" : "Track Application"}
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    icon={Trash2}
+                                                    className="ml-auto"
+                                                    onClick={() => handleDeleteTailored(item.id)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    );
+                                })
                             )}
                         </div>
                     )}
@@ -454,43 +614,58 @@ function ResumeHub() {
                                     description="Select a target job and tone on the left panel to format your first targeted cover letter."
                                 />
                             ) : (
-                                coverLetters.map(letter => (
-                                    <Card key={letter.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 transition-all">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <Badge variant="indigo" size="sm">v{letter.version}</Badge>
-                                                    <Badge variant="cyan" size="sm">{letter.tone} Tone</Badge>
-                                                    <span className="text-xs text-slate-500 font-mono">
-                                                        {new Date(letter.created_at).toLocaleDateString()}
-                                                    </span>
+                                coverLetters.map(letter => {
+                                    const matchingJob = jobs.find(j => j.id === letter.job_id);
+                                    const jobAppUrl = letter.application_url || matchingJob?.application_url;
+                                    return (
+                                        <Card key={letter.id} variant="flat" className="p-5 space-y-4 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                        <Badge variant="indigo" size="sm">v{letter.version}</Badge>
+                                                        <Badge variant="cyan" size="sm">{letter.tone} Tone</Badge>
+                                                        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                                            {new Date(letter.created_at).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-base font-bold text-slate-900 dark:text-white">{letter.job_title}</h4>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400">{letter.company}</p>
                                                 </div>
-                                                <h4 className="text-base font-bold text-slate-900">{letter.job_title}</h4>
-                                                <p className="text-xs text-slate-500">{letter.company}</p>
+                                                {jobAppUrl && (
+                                                    <a
+                                                        href={jobAppUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <Button variant="primary" size="sm" icon={ExternalLink} className="shadow-xs font-bold">
+                                                            Apply on Job Site
+                                                        </Button>
+                                                    </a>
+                                                )}
                                             </div>
-                                        </div>
 
-                                        <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
-                                            <Button
-                                                variant="success"
-                                                size="sm"
-                                                icon={FileText}
-                                                onClick={() => { setActiveCoverLetter(letter); setIsLetterModalOpen(true); }}
-                                            >
-                                                View & Copy
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                icon={Trash2}
-                                                className="ml-auto"
-                                                onClick={() => handleDeleteCoverLetter(letter.id)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </Card>
-                                ))
+                                            <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                                                <Button
+                                                    variant="success"
+                                                    size="sm"
+                                                    icon={FileText}
+                                                    onClick={() => { setActiveCoverLetter({ ...letter, application_url: jobAppUrl }); setIsLetterModalOpen(true); }}
+                                                >
+                                                    View & Copy
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    icon={Trash2}
+                                                    className="ml-auto"
+                                                    onClick={() => handleDeleteCoverLetter(letter.id)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    );
+                                })
                             )}
                         </div>
                     )}
