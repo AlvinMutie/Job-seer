@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
-import ThemeToggle from '../components/ThemeToggle';
 import Button from '../components/ui/Button';
 import Logo from '../components/Logo';
 
@@ -79,16 +78,13 @@ function Login() {
 
                 {/* Right Form Container */}
                 <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-between">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white tracking-tight">
-                                Candidate Sign In
-                            </h1>
-                            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
-                                Access your personalized workspace
-                            </p>
-                        </div>
-                        <ThemeToggle />
+                    <div className="mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                            Candidate Sign In
+                        </h1>
+                        <p className="text-sm font-medium text-slate-600 mt-1">
+                            Access your personalized workspace
+                        </p>
                     </div>
 
                     {error && (

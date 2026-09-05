@@ -7,71 +7,30 @@ const ThemeContext = createContext({
 });
 
 export function ThemeProvider({ children }) {
-    const [theme, setThemeState] = useState(() => {
-        try {
-            const saved = localStorage.getItem('job_seer_theme');
-            if (saved === 'dark' || saved === 'light') return saved;
-            if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                return 'dark';
-            }
-            return 'light';
-        } catch {
-            return 'light';
-        }
-    });
+    const [theme] = useState('light');
 
-    const applyTheme = (targetTheme) => {
-        if (typeof document === 'undefined') return;
-        const root = document.documentElement;
-        const body = document.body;
-        if (targetTheme === 'dark') {
-            root.classList.add('dark');
-            root.classList.remove('light');
-            root.setAttribute('data-theme', 'dark');
-            if (body) {
-                body.classList.add('dark');
-                body.classList.remove('light');
-                body.setAttribute('data-theme', 'dark');
-            }
-        } else {
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            const root = document.documentElement;
             root.classList.remove('dark');
             root.classList.add('light');
             root.setAttribute('data-theme', 'light');
-            if (body) {
-                body.classList.remove('dark');
-                body.classList.add('light');
-                body.setAttribute('data-theme', 'light');
+            if (document.body) {
+                document.body.classList.remove('dark');
+                document.body.classList.add('light');
+                document.body.setAttribute('data-theme', 'light');
             }
+            try {
+                localStorage.setItem('job_seer_theme', 'light');
+            } catch (e) {}
         }
-        try {
-            localStorage.setItem('job_seer_theme', targetTheme);
-        } catch (e) {
-            console.error('Failed to save theme preference', e);
-        }
-    };
+    }, []);
 
-    useEffect(() => {
-        applyTheme(theme);
-    }, [theme]);
-
-    const toggleTheme = (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        setThemeState(prev => {
-            const next = prev === 'dark' ? 'light' : 'dark';
-            applyTheme(next);
-            return next;
-        });
-    };
-
-    const setTheme = (newTheme) => {
-        if (newTheme === 'dark' || newTheme === 'light') {
-            applyTheme(newTheme);
-            setThemeState(newTheme);
-        }
-    };
+    const toggleTheme = () => {};
+    const setTheme = () => {};
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+        <ThemeContext.Provider value={{ theme: 'light', toggleTheme, setTheme }}>
             {children}
         </ThemeContext.Provider>
     );

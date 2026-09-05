@@ -13,7 +13,6 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import SpotlightCard from '../components/SpotlightCard';
-import ThemeToggle from '../components/ThemeToggle';
 import Logo from '../components/Logo';
 
 function Landing() {
@@ -54,14 +53,14 @@ function Landing() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-[#030712] text-slate-950 dark:text-slate-100 font-sans selection:bg-indigo-500/30 relative overflow-x-hidden transition-colors duration-200">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-950 font-sans selection:bg-indigo-500/30 relative overflow-x-hidden">
             {/* Ambient Lighting Gradients */}
-            <div className="absolute top-0 left-0 w-[550px] h-[550px] bg-indigo-200/50 dark:bg-indigo-950/40 rounded-full blur-[130px] pointer-events-none -translate-x-1/3 -translate-y-1/3" />
-            <div className="absolute top-[25%] right-0 w-[650px] h-[650px] bg-cyan-200/40 dark:bg-cyan-950/30 rounded-full blur-[150px] pointer-events-none translate-x-1/4" />
-            <div className="absolute top-[65%] left-[5%] w-[550px] h-[550px] bg-purple-200/40 dark:bg-purple-950/30 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute top-0 left-0 w-[550px] h-[550px] bg-indigo-200/50 rounded-full blur-[130px] pointer-events-none -translate-x-1/3 -translate-y-1/3" />
+            <div className="absolute top-[25%] right-0 w-[650px] h-[650px] bg-cyan-200/40 rounded-full blur-[150px] pointer-events-none translate-x-1/4" />
+            <div className="absolute top-[65%] left-[5%] w-[550px] h-[550px] bg-purple-200/40 rounded-full blur-[140px] pointer-events-none" />
 
             {/* 1. Header / Navigation */}
-            <header className="fixed top-0 w-full z-50 px-6 sm:px-10 lg:px-16 xl:px-20 py-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-all">
+            <header className="fixed top-0 w-full z-50 px-6 sm:px-10 lg:px-16 xl:px-20 py-4 bg-white/95 backdrop-blur-xl border-b border-slate-200 transition-all">
                 <div className="max-w-[1680px] mx-auto flex justify-between items-center">
                     {/* Brand Wordmark */}
                     <Link to="/" className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl p-1">
@@ -69,30 +68,28 @@ function Landing() {
                     </Link>
 
                     {/* Navigation Anchor Links (Desktop) */}
-                    <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-700 dark:text-slate-300">
-                        <a href="#how-it-works" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">How It Works</a>
-                        <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Features</a>
-                        <a href="#why-job-seer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Why Job Seer</a>
-                        <a href="#faq" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">FAQ</a>
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-700">
+                        <a href="#how-it-works" className="hover:text-indigo-600 transition-colors">How It Works</a>
+                        <a href="#features" className="hover:text-indigo-600 transition-colors">Features</a>
+                        <a href="#why-job-seer" className="hover:text-indigo-600 transition-colors">Why Job Seer</a>
+                        <a href="#faq" className="hover:text-indigo-600 transition-colors">FAQ</a>
                     </nav>
 
                     {/* Header Action Buttons (Desktop) */}
                     <div className="hidden md:flex items-center gap-3">
-                        <ThemeToggle />
                         <Link to="/login">
-                            <Button variant="ghost" size="sm" className="text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white font-bold">Sign In</Button>
+                            <Button variant="ghost" size="sm" className="text-slate-800 hover:text-indigo-600 font-bold">Sign In</Button>
                         </Link>
                         <Link to="/register">
                             <Button variant="primary" size="sm" icon={ChevronRight} className="font-bold">Get Started</Button>
                         </Link>
                     </div>
 
-                    {/* Mobile Menu Toggle & Theme Toggle */}
+                    {/* Mobile Menu Toggle */}
                     <div className="flex items-center gap-2 md:hidden">
-                        <ThemeToggle size="sm" />
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="p-2 text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                            className="p-2 text-slate-700 hover:text-slate-950 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             aria-label="Toggle navigation menu"
                         >
                             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
