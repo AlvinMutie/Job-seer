@@ -36,15 +36,14 @@ if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
 
+from app.services.spatial_pdf_parser import spatial_pdf_parser
+
 def extract_text(file_path: str) -> str:
     ext = os.path.splitext(file_path)[1].lower()
     text = ""
     try:
         if ext == ".pdf":
-            doc = fitz.open(file_path)
-            for page in doc:
-                text += page.get_text()
-            doc.close()
+            text = spatial_pdf_parser.extract_structured_text(file_path)
         elif ext in [".docx", ".doc"]:
             import docx2txt
             text = docx2txt.process(file_path)
