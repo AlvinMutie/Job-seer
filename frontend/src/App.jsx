@@ -236,7 +236,7 @@ const DashboardLayout = ({ children, pageTitle }) => {
             </aside>
 
             {/* Mobile Top Header */}
-            <header className="md:hidden flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white/95 backdrop-blur-xl sticky top-0 z-40">
+            <header className="md:hidden flex justify-between items-center px-5 py-2.5 border-b border-slate-200 bg-white/95 backdrop-blur-xl sticky top-0 z-40">
                 <Link to="/dashboard" className="flex items-center">
                     <Logo size="sm" />
                 </Link>

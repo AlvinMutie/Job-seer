@@ -1,0 +1,3 @@
+John Doe
+Experienced Python Engineer
+Skills: Python, FastAPI, AWS, PostgreSQL

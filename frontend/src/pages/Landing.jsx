@@ -60,11 +60,11 @@ function Landing() {
             <div className="absolute top-[65%] left-[5%] w-[550px] h-[550px] bg-purple-200/40 rounded-full blur-[140px] pointer-events-none" />
 
             {/* 1. Header / Navigation */}
-            <header className="fixed top-0 w-full z-50 px-6 sm:px-10 lg:px-16 xl:px-20 py-4 bg-white/95 backdrop-blur-xl border-b border-slate-200 transition-all">
+            <header className="fixed top-0 w-full z-50 px-6 sm:px-10 lg:px-16 xl:px-20 py-2 sm:py-2.5 bg-white/95 backdrop-blur-xl border-b border-slate-200 transition-all shadow-xs">
                 <div className="max-w-[1680px] mx-auto flex justify-between items-center">
                     {/* Brand Wordmark */}
-                    <Link to="/" className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl p-1">
-                        <Logo size="lg" />
+                    <Link to="/" className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-0.5">
+                        <Logo size="md" />
                     </Link>
 
                     {/* Navigation Anchor Links (Desktop) */}
@@ -92,7 +92,7 @@ function Landing() {
                             className="p-2 text-slate-700 hover:text-slate-950 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             aria-label="Toggle navigation menu"
                         >
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
                         </button>
                     </div>
                 </div>
@@ -104,9 +104,9 @@ function Landing() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="md:hidden pt-4 pb-6 px-4 border-t border-slate-200 dark:border-slate-800 mt-4 space-y-4 bg-white dark:bg-slate-900"
+                            className="md:hidden pt-3 pb-5 px-4 border-t border-slate-200 mt-2.5 space-y-3 bg-white"
                         >
-                            <nav className="flex flex-col space-y-3 text-sm font-bold text-slate-800 dark:text-slate-200">
+                            <nav className="flex flex-col space-y-2 text-sm font-bold text-slate-800">
                                 <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="hover:text-indigo-600 p-2">How It Works</a>
                                 <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-indigo-600 p-2">Features</a>
                                 <a href="#why-job-seer" onClick={() => setMobileMenuOpen(false)} className="hover:text-indigo-600 p-2">Why Job Seer</a>

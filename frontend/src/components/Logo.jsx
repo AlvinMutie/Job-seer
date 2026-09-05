@@ -9,19 +9,19 @@ export default function Logo({
     subtext = null,
     variant = 'default'
 }) {
-    // Dimension presets for the borderless, transparent logo image
+    // Balanced, elegant size presets for the borderless logo
     const sizeMap = {
-        xs: { img: 'w-8 h-8', text: 'text-base font-extrabold', sub: 'text-[9px]' },
-        sm: { img: 'w-12 h-12', text: 'text-lg font-black', sub: 'text-[10px]' },
-        md: { img: 'w-16 h-16', text: 'text-2xl font-black', sub: 'text-xs' },
-        lg: { img: 'w-24 h-24', text: 'text-3xl sm:text-4xl font-black', sub: 'text-sm' },
-        xl: { img: 'w-32 h-32', text: 'text-4xl sm:text-5xl font-black', sub: 'text-base' }
+        xs: { img: 'w-5 h-5', text: 'text-sm font-bold', sub: 'text-[9px]' },
+        sm: { img: 'w-7 h-7', text: 'text-base font-bold', sub: 'text-[10px]' },
+        md: { img: 'w-8 h-8', text: 'text-lg font-extrabold', sub: 'text-[10px]' },
+        lg: { img: 'w-11 h-11', text: 'text-xl font-black', sub: 'text-xs' },
+        xl: { img: 'w-16 h-16', text: 'text-2xl font-black', sub: 'text-sm' }
     };
 
     const cfg = sizeMap[size] || sizeMap.md;
 
     return (
-        <div className={`inline-flex items-center gap-3.5 select-none group ${className}`}>
+        <div className={`inline-flex items-center gap-3 select-none group ${className}`}>
             {/* Borderless Seamless Logo Emblem */}
             <div className="relative flex items-center justify-center shrink-0">
                 <img 
@@ -42,7 +42,7 @@ export default function Logo({
                         Job Seer
                     </span>
                     {subtext && (
-                        <span className={`font-mono tracking-tight leading-tight mt-1.5 ${
+                        <span className={`font-mono tracking-tight leading-tight mt-1 ${
                             variant === 'white' 
                                 ? 'text-indigo-200' 
                                 : 'text-slate-500'
