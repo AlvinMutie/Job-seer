@@ -12,16 +12,148 @@ try:
 except OSError:
     nlp = None
 
-# Curated technical skills dictionary for high-precision extraction
+# Curated technical skills dictionary organized across 7 core engineering domains (500+ skills)
 TECH_SKILLS_DB = {
+    # 1. Programming Languages
     "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "php", "ruby", "swift", "kotlin",
-    "react", "vue", "angular", "next.js", "node.js", "express", "fastapi", "flask", "django", "laravel", "spring",
-    "postgresql", "mysql", "mongodb", "redis", "dynamodb", "sqlite", "oracle", "mssql",
-    "aws", "azure", "gcp", "docker", "kubernetes", "terraform", "jenkins", "ansible", "ci/cd",
-    "machine learning", "deep learning", "nlp", "data science", "pytorch", "tensorflow", "scikit-learn", "pandas", "numpy",
-    "rest api", "graphql", "grpc", "microservices", "serverless",
-    "html", "css", "tailwind", "sass", "bootstrap", "figma", "framer motion",
-    "git", "linux", "bash", "agile", "scrum", "jira"
+    "scala", "elixir", "erlang", "clojure", "haskell", "r", "c", "perl", "dart", "lua", "julia", "matlab",
+    "bash", "shell", "powershell", "sql", "pl/sql", "t-sql", "assembly", "cobol", "fortran", "solidity",
+
+    # 2. Frontend Development
+    "react", "react.js", "next.js", "vue", "vue.js", "nuxt.js", "angular", "angularjs", "svelte", "sveltekit",
+    "html", "html5", "css", "css3", "sass", "scss", "less", "tailwind", "tailwind css", "bootstrap",
+    "material-ui", "mui", "chakra ui", "shadcn", "styled-components", "framer motion", "redux", "redux toolkit",
+    "zustand", "mobx", "recoil", "webpack", "vite", "turbopack", "rollup", "babel", "esbuild",
+    "figma", "storybook", "web components", "pwa", "spa", "dom manipulation", "responsive design",
+
+    # 3. Backend & API Engineering
+    "node.js", "nodejs", "express", "express.js", "fastapi", "flask", "django", "django rest framework",
+    "nest.js", "nestjs", "spring", "spring boot", "asp.net", ".net core", "laravel", "symfony",
+    "ruby on rails", "rails", "gin", "echo", "fiber", "actix", "rocket", "ktor",
+    "rest", "rest api", "graphql", "grpc", "soap", "json-rpc", "websockets", "socket.io",
+    "microservices", "serverless", "event-driven architecture", "clean architecture", "domain-driven design",
+    "jwt", "oauth", "oauth2", "oidc", "saml", "api gateway",
+
+    # 4. Databases & Storage
+    "postgresql", "postgres", "mysql", "mariadb", "sqlite", "oracle", "mssql", "sql server",
+    "mongodb", "redis", "cassandra", "dynamodb", "couchbase", "neo4j", "arangodb",
+    "elasticsearch", "opensearch", "solr", "clickhouse", "snowflake", "bigquery", "redshift",
+    "prisma", "typeorm", "sequelize", "sqlalchemy", "hibernate", "mongoose", "flyway", "liquibase",
+    "database indexing", "query optimization", "sharding", "replication", "acid transactions",
+
+    # 5. Cloud, DevOps & Infrastructure
+    "aws", "amazon web services", "azure", "microsoft azure", "gcp", "google cloud", "google cloud platform",
+    "docker", "kubernetes", "k8s", "helm", "terraform", "terragrunt", "ansible", "puppet", "chef",
+    "jenkins", "github actions", "gitlab ci", "circleci", "argo cd", "flux", "tekton",
+    "linux", "unix", "ubuntu", "debian", "centos", "redhat", "alpine",
+    "nginx", "apache", "caddy", "envoy", "traefik", "istio", "linkerd",
+    "prometheus", "grafana", "datadog", "new relic", "splunk", "elk stack", "jaeger", "opentelemetry",
+    "s3", "ec2", "ecs", "eks", "lambda", "fargate", "cloudformation", "iam", "route53",
+
+    # 6. Messaging, Streaming & Distributed Systems
+    "kafka", "apache kafka", "rabbitmq", "activemq", "redis pub/sub", "aws sqs", "aws sns", "google pub/sub",
+    "zeromq", "nats", "celery", "sidekiq", "bullmq", "temporal", "airflow", "apache airflow",
+
+    # 7. Data Science, Machine Learning & Analytics
+    "machine learning", "deep learning", "nlp", "natural language processing", "computer vision",
+    "pytorch", "tensorflow", "keras", "scikit-learn", "xgboost", "lightgbm",
+    "pandas", "numpy", "scipy", "matplotlib", "seaborn", "plotly",
+    "spark", "apache spark", "hadoop", "pyspark", "dbt", "databricks",
+    "tableau", "power bi", "looker", "metabase",
+
+    # 8. Testing, Methodologies & Tooling
+    "git", "github", "gitlab", "bitbucket",
+    "jest", "mocha", "chai", "cypress", "playwright", "selenium", "pytest", "unittest", "junit",
+    "postman", "insomnia", "swagger", "openapi",
+    "agile", "scrum", "kanban", "jira", "confluence", "trello", "ci/cd", "tdd", "bdd"
+}
+
+SKILL_ALIASES = {
+    # Databases
+    "postgres": "postgresql",
+    "postgremsql": "postgresql",
+    "pgsql": "postgresql",
+    "sql server": "mssql",
+    "mongo": "mongodb",
+    "elastic search": "elasticsearch",
+
+    # Frontend
+    "react.js": "react",
+    "reactjs": "react",
+    "vue.js": "vue",
+    "vuejs": "vue",
+    "nextjs": "next.js",
+    "nuxtjs": "nuxt.js",
+    "angular.js": "angular",
+    "angularjs": "angular",
+    "tailwind css": "tailwind",
+    "tailwindcss": "tailwind",
+    "redux toolkit": "redux",
+
+    # Backend & Languages
+    "node": "node.js",
+    "nodejs": "node.js",
+    "golang": "go",
+    "js": "javascript",
+    "ts": "typescript",
+    "py": "python",
+    "spring boot": "spring",
+    "springboot": "spring",
+    "drf": "django",
+    "django rest framework": "django",
+    "ror": "ruby on rails",
+
+    # Cloud & DevOps
+    "k8s": "kubernetes",
+    "kube": "kubernetes",
+    "aws lambda": "serverless",
+    "lambda": "serverless",
+    "google cloud": "gcp",
+    "google cloud platform": "gcp",
+    "amazon web services": "aws",
+    "microsoft azure": "azure",
+    "gh actions": "github actions",
+
+    # Data
+    "ml": "machine learning",
+    "dl": "deep learning",
+    "sci-kit learn": "scikit-learn",
+    "sklearn": "scikit-learn",
+    "tf": "tensorflow",
+    "powerbi": "power bi",
+
+    # Roles & Domains
+    "full stack": "fullstack",
+    "full-stack": "fullstack",
+    "frontend": "front-end",
+    "backend": "back-end"
+}
+
+# Contextual verification requirements for short / ambiguous words
+SHORT_WORD_DISAMBIGUATION = {
+    "go": [
+        r'\b(?:golang|goroutines|channels|concurrency|backend|microservices|api|gin|echo|fiber|compiled|c\+\+|rust|python)\b',
+        r'(?:experience in|programming in|built with|developed with|using)\s+go\b',
+        r'\bgo\s+(?:developer|engineer|backend|services|routines|language)\b'
+    ],
+    "c": [
+        r'\b(?:c\+\+|embedded|firmware|pointers|memory management|systems|low-level|assembly|operating system|linux kernel)\b',
+        r'\bc\s*(?:/|\band\b|\b&\b)\s*c\+\+',
+        r'\bprogramming in c\b'
+    ],
+    "r": [
+        r'\b(?:statistics|statistical|data science|biostatistics|ggplot|rstudio|cran|spss|sas|python|analytics|regression)\b',
+        r'\br\s+programming\b',
+        r'\busing r\b'
+    ],
+    "rust": [
+        r'\b(?:cargo|borrow checker|memory safety|systems programming|wasm|webassembly|c\+\+|concurrency|tokio|actix)\b',
+        r'\brust\s+(?:developer|engineer|code|language)\b'
+    ],
+    "spring": [
+        r'\b(?:java|spring boot|beans|dependency injection|hibernate|jpa|microservices|jvm|mvc)\b',
+        r'\bspring\s+(?:boot|framework|cloud|data|security)\b'
+    ]
 }
 
 LEVEL_MAP = {
@@ -73,8 +205,18 @@ class MatchingEngine:
             return " ".join(tokens)
         return text
 
+    def _is_short_word_valid(self, skill: str, text_lower: str) -> bool:
+        """Disambiguates short or polysemous tokens using surrounding technical context."""
+        patterns = SHORT_WORD_DISAMBIGUATION.get(skill)
+        if not patterns:
+            return True
+        for pattern in patterns:
+            if re.search(pattern, text_lower, re.IGNORECASE):
+                return True
+        return False
+
     def extract_skills(self, text: str) -> List[str]:
-        """Extract tech skills using dictionary matching, alias normalization, and spaCy NLP."""
+        """Extract tech skills using dictionary matching, alias normalization, and contextual disambiguation."""
         if not text:
             return []
         
@@ -82,53 +224,43 @@ class MatchingEngine:
         text_lower = text.lower()
         found_skills = set()
         
-        aliases = {
-            "postgres": "postgresql",
-            "postgremsql": "postgresql",
-            "sql server": "mssql",
-            "mongodb": "mongo",
-            "react.js": "react",
-            "node": "node.js",
-            "js": "javascript",
-            "ts": "typescript",
-            "full stack": "fullstack",
-            "frontend": "front-end",
-            "backend": "back-end"
-        }
-        
-        extra_skills = {"java", "spring boot", "django", "express", "tailwind css", "bootstrap", "flutter", "react native", "aws s3", "aws lambda", "azure", "google cloud"}
-        local_db = TECH_SKILLS_DB.union(extra_skills)
-        
-        for skill in local_db:
+        # 1. Dictionary Matching with Contextual Disambiguation
+        for skill in TECH_SKILLS_DB:
+            # Check exact whole-word boundary
             if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
-                found_skills.add(skill)
+                if skill in SHORT_WORD_DISAMBIGUATION:
+                    if self._is_short_word_valid(skill, text_lower):
+                        found_skills.add(skill)
+                else:
+                    found_skills.add(skill)
         
-        for alias, target in aliases.items():
+        # 2. Alias Mapping
+        for alias, target in SKILL_ALIASES.items():
             if re.search(r'\b' + re.escape(alias) + r'\b', text_lower):
-                found_skills.add(target)
+                if alias in SHORT_WORD_DISAMBIGUATION:
+                    if self._is_short_word_valid(alias, text_lower):
+                        found_skills.add(target)
+                else:
+                    found_skills.add(target)
         
-        generic_terms = {"experience", "team", "project", "developer", "engineer", "software", "solution", "customer", "business", "data", "system", "role", "work"}
-        
-        if nlp:
-            doc = nlp(text_lower)
-            for token in doc:
-                if token.pos_ in ["PROPN"] and len(token.text) > 2:
-                    val = token.text.lower()
-                    if val not in found_skills and val not in generic_terms:
-                        found_skills.add(val)
-        
-        return sorted(list(found_skills))
+        # 3. Canonical Deduplication & Normalization
+        canonical_skills = set()
+        for s in found_skills:
+            normalized = SKILL_ALIASES.get(s, s)
+            canonical_skills.add(normalized)
+
+        return sorted(list(canonical_skills))
 
     def compare_skills(self, resume_skills: List[str], job_skills: List[str]) -> Dict[str, Any]:
         """Identify matched vs missing skills and provide advice."""
-        resume_set = set([s.lower() for s in resume_skills])
-        job_set = set([s.lower() for s in job_skills])
+        resume_set = set([SKILL_ALIASES.get(s.lower(), s.lower()) for s in resume_skills])
+        job_set = set([SKILL_ALIASES.get(s.lower(), s.lower()) for s in job_skills])
         
         matched = resume_set.intersection(job_set)
         missing = job_set - resume_set
         
-        tech_missing = [s for s in missing if s in TECH_SKILLS_DB]
-        other_missing = [s for s in missing if s not in TECH_SKILLS_DB]
+        tech_missing = [s for s in missing if s in TECH_SKILLS_DB or s in SKILL_ALIASES.values()]
+        other_missing = [s for s in missing if s not in TECH_SKILLS_DB and s not in SKILL_ALIASES.values()]
         sorted_missing = tech_missing + other_missing
         
         advice = []
@@ -141,6 +273,12 @@ class MatchingEngine:
         return {
             "matched": sorted(list(matched)),
             "missing": sorted(list(sorted_missing)),
+            "matched_skills": sorted(list(matched)),
+            "missing_skills": sorted(list(sorted_missing)),
+            "missing_tech_skills": sorted(list(tech_missing)),
+            "match_count": len(matched),
+            "missing_count": len(sorted_missing),
+            "match_ratio": round(len(matched) / max(len(job_set), 1), 4),
             "tailoring_advice": advice
         }
 

@@ -7,22 +7,28 @@ engine = MatchingEngine()
 
 DOMAIN_MAP = {
     "programming_languages": {
-        "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "php", "ruby", "swift", "kotlin"
+        "python", "javascript", "typescript", "java", "c++", "c#", "go", "rust", "php", "ruby", "swift", "kotlin",
+        "scala", "elixir", "erlang", "clojure", "haskell", "r", "c", "perl", "dart", "lua", "julia", "sql", "bash"
     },
     "frontend": {
-        "react", "vue", "angular", "next.js", "html", "css", "tailwind", "sass", "bootstrap", "figma", "framer motion"
+        "react", "vue", "angular", "next.js", "nuxt.js", "svelte", "html", "css", "tailwind", "sass", "scss",
+        "bootstrap", "figma", "framer motion", "redux", "zustand", "webpack", "vite", "styled-components"
     },
     "backend": {
-        "node.js", "express", "fastapi", "flask", "django", "laravel", "spring", "rest api", "graphql", "grpc", "microservices", "serverless"
+        "node.js", "express", "fastapi", "flask", "django", "laravel", "spring", "spring boot", "nest.js",
+        "asp.net", "ruby on rails", "rest api", "graphql", "grpc", "microservices", "serverless", "websockets"
     },
     "databases": {
-        "postgresql", "mysql", "mongodb", "redis", "dynamodb", "sqlite", "oracle", "mssql"
+        "postgresql", "mysql", "mongodb", "redis", "dynamodb", "sqlite", "oracle", "mssql", "cassandra",
+        "elasticsearch", "snowflake", "bigquery", "prisma", "sqlalchemy"
     },
     "cloud_devops": {
-        "aws", "azure", "gcp", "docker", "kubernetes", "terraform", "jenkins", "ansible", "ci/cd", "linux", "bash", "git"
+        "aws", "azure", "gcp", "docker", "kubernetes", "terraform", "jenkins", "ansible", "ci/cd", "github actions",
+        "linux", "bash", "git", "nginx", "prometheus", "grafana"
     },
     "data_ai": {
-        "machine learning", "deep learning", "nlp", "data science", "pytorch", "tensorflow", "scikit-learn", "pandas", "numpy"
+        "machine learning", "deep learning", "nlp", "data science", "pytorch", "tensorflow", "scikit-learn",
+        "pandas", "numpy", "tableau", "power bi", "spark", "databricks"
     }
 }
 
