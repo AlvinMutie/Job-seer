@@ -63,13 +63,8 @@ function Landing() {
             <header className="fixed top-0 w-full z-50 px-6 sm:px-10 lg:px-16 xl:px-20 py-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 transition-all">
                 <div className="max-w-[1680px] mx-auto flex justify-between items-center">
                     {/* Brand Wordmark */}
-                    <Link to="/" className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl p-1">
-                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
-                            <Sparkles size={20} className="text-white" />
-                        </div>
-                        <span className="text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-                            Job Seer
-                        </span>
+                    <Link to="/" className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl p-1">
+                        <Logo size="lg" />
                     </Link>
 
                     {/* Navigation Anchor Links (Desktop) */}
@@ -749,10 +744,7 @@ function Landing() {
 
             {/* 9. Footer */}
             <footer className="py-12 px-6 sm:px-10 lg:px-16 xl:px-20 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold max-w-[1680px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <Sparkles size={16} className="text-indigo-600" />
-                    <span>Job Seer &bull; Intelligent Career Companion &bull; v2.2</span>
-                </div>
+                <Logo size="sm" subtext="Intelligent Career Companion • v2.2" />
                 <div>
                     Built with strict privacy, factual integrity, and explainable match fit.
                 </div>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, User, Sparkles, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Target, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, CheckCircle2, ShieldCheck, Target, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
 import ThemeToggle from '../components/ThemeToggle';
 import Button from '../components/ui/Button';
+import Logo from '../components/Logo';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -31,16 +32,29 @@ function Register() {
         }
 
         setLoading(true);
+
         try {
-            const { access_token } = await authService.register({
+            await authService.register({
                 full_name: formData.full_name,
                 email: formData.email,
                 password: formData.password
             });
-            localStorage.setItem('token', access_token);
-            window.location.href = '/profile-setup';
+
+            // Automatically log in after successful registration
+            const params = new URLSearchParams();
+            params.append('username', formData.email);
+            params.append('password', formData.password);
+            const { access_token } = await authService.login(params);
+            
+            if (access_token) {
+                localStorage.setItem('token', access_token);
+                window.location.href = '/profile-setup';
+            } else {
+                window.location.href = '/login';
+            }
         } catch (err) {
-            setError(getApiErrorMessage(err));
+            console.error("Registration failed:", err);
+            setError(getApiErrorMessage(err, "Registration failed. This email may already be in use."));
         } finally {
             setLoading(false);
         }
@@ -58,11 +72,8 @@ function Register() {
                     <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
                     <div>
-                        <Link to="/" className="inline-flex items-center gap-2.5 mb-8 group">
-                            <div className="w-10 h-10 bg-white text-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                                <Sparkles size={20} />
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-white">Job Seer</span>
+                        <Link to="/" className="inline-flex items-center mb-8 group">
+                            <Logo size="lg" variant="white" />
                         </Link>
 
                         <div className="inline-block px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-indigo-100 text-xs font-bold uppercase tracking-wider mb-4 border border-white/20">

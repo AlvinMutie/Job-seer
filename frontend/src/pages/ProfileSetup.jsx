@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, MapPin, DollarSign, Target, Upload, Check, Loader2, AlertCircle } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
+import Logo from '../components/Logo';
 
 function ProfileSetup() {
     const [step, setStep] = useState(1);
@@ -44,16 +45,17 @@ function ProfileSetup() {
     return (
         <div className="min-h-screen flex items-center justify-center p-8 bg-[#f8fafc] text-slate-900">
             <div className="glass-card w-full max-w-2xl p-10 bg-white border border-slate-200 shadow-xl rounded-2xl">
-                <div className="flex justify-between items-center mb-10">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Profile Setup</h1>
-                        <p className="text-slate-500 mt-1">Let's personalize your career preferences</p>
-                    </div>
+                <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-100">
+                    <Logo size="md" subtext="Personalization" />
                     <div className="flex gap-2">
                         {[1, 2].map(i => (
                             <div key={i} className={`h-2 w-12 rounded-full transition-all ${step >= i ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
                         ))}
                     </div>
+                </div>
+                <div className="mb-8">
+                    <h1 className="text-2xl font-bold text-slate-900">Profile Setup</h1>
+                    <p className="text-slate-500 mt-1">Let's personalize your career preferences</p>
                 </div>
 
                 {error && (

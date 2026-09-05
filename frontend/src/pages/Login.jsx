@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, Sparkles, AlertCircle, Loader2, ArrowRight, Target, ShieldCheck, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { authService, getApiErrorMessage } from '../services/api';
 import ThemeToggle from '../components/ThemeToggle';
 import Button from '../components/ui/Button';
+import Logo from '../components/Logo';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -23,16 +24,21 @@ function Login() {
             params.append('password', password);
 
             const { access_token } = await authService.login(params);
-            localStorage.setItem('token', access_token);
-
-            const user = await authService.getMe();
-            if (!user.is_profile_complete) {
-                window.location.href = '/profile-setup';
+            if (access_token) {
+                localStorage.setItem('token', access_token);
+                // Also fetch user to check profile completion status
+                const user = await authService.getMe();
+                if (!user.is_profile_complete) {
+                    window.location.href = '/profile-setup';
+                } else {
+                    window.location.href = '/dashboard';
+                }
             } else {
-                window.location.href = '/dashboard';
+                throw new Error("No access token returned.");
             }
         } catch (err) {
-            setError(getApiErrorMessage(err));
+            console.error("Login attempt failed:", err);
+            setError(getApiErrorMessage(err, "Invalid email or password. Please verify your credentials."));
         } finally {
             setLoading(false);
         }
@@ -50,11 +56,8 @@ function Login() {
                     <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
                     <div>
-                        <Link to="/" className="inline-flex items-center gap-2.5 mb-8 group">
-                            <div className="w-10 h-10 bg-white text-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                                <Sparkles size={20} />
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-white">Job Seer</span>
+                        <Link to="/" className="inline-flex items-center mb-8 group">
+                            <Logo size="lg" variant="white" />
                         </Link>
 
                         <div className="inline-block px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-indigo-100 text-xs font-bold uppercase tracking-wider mb-4 border border-white/20">

@@ -16,6 +16,7 @@ import Settings from './pages/Settings';
 import JobsHub from './pages/JobsHub';
 import { authService } from './services/api';
 import ThemeToggle from './components/ThemeToggle';
+import Logo from './components/Logo';
 
 import Lenis from 'lenis';
 
@@ -59,11 +60,11 @@ function App() {
 
                 <Route path="/matches" element={
                     <ProtectedRoute>
-                        <DashboardLayout pageTitle="Matches"><Matches /></DashboardLayout>
+                        <DashboardLayout pageTitle="Semantic Matches"><Matches /></DashboardLayout>
                     </ProtectedRoute>
                 } />
 
-                <Route path="/resume-hub" element={
+                <Route path="/resume" element={
                     <ProtectedRoute>
                         <DashboardLayout pageTitle="Resume Hub"><ResumeHub /></DashboardLayout>
                     </ProtectedRoute>
@@ -71,13 +72,13 @@ function App() {
 
                 <Route path="/ats-portal" element={
                     <ProtectedRoute>
-                        <DashboardLayout pageTitle="ATS Portal"><AtsPortal /></DashboardLayout>
+                        <DashboardLayout pageTitle="ATS Standard Studio"><AtsPortal /></DashboardLayout>
                     </ProtectedRoute>
                 } />
 
                 <Route path="/settings" element={
                     <ProtectedRoute>
-                        <DashboardLayout pageTitle="Settings"><Settings /></DashboardLayout>
+                        <DashboardLayout pageTitle="Settings & Preferences"><Settings /></DashboardLayout>
                     </ProtectedRoute>
                 } />
 
@@ -87,86 +88,77 @@ function App() {
     );
 }
 
-// Higher-order component for protected routes
-function ProtectedRoute({ children }) {
-    const token = localStorage.getItem('token');
-    const [loading, setLoading] = useState(true);
-    const [isAllowed, setIsAllowed] = useState(false);
+// Global Protected Route Wrapper
+const ProtectedRoute = ({ children }) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
 
     useEffect(() => {
         const checkAuth = async () => {
-            if (!token) {
-                setIsAllowed(false);
-                setLoading(false);
-                return;
-            }
             try {
-                const user = await authService.getMe();
-                if (!user.is_profile_complete && window.location.pathname !== '/profile-setup') {
-                    window.location.href = '/profile-setup';
-                    return;
-                }
-                setIsAllowed(true);
+                const user = await authService.getCurrentUser();
+                setIsAuthenticated(!!user);
             } catch (err) {
-                localStorage.removeItem('token');
-                setIsAllowed(false);
+                setIsAuthenticated(false);
             }
-            setLoading(false);
         };
         checkAuth();
-    }, [token]);
+    }, []);
 
-    if (loading) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center text-slate-500 font-sans">Authenticating...</div>;
-    if (!isAllowed) return <Navigate to="/login" replace />;
+    if (isAuthenticated === null) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
 
     return children;
-}
+};
 
-function DashboardLayout({ children, pageTitle = 'Workspace' }) {
-    const [user, setUser] = useState(null);
+// Sidebar Layout Wrapper for Authenticated Pages
+const DashboardLayout = ({ children, pageTitle }) => {
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        authService.getMe().then(setUser).catch(() => null);
+        authService.getCurrentUser().then(setUser).catch(() => { });
     }, []);
 
     const handleLogout = async () => {
         try {
             await authService.logout();
-        } catch (e) {
-            console.error("Logout request error:", e);
-        } finally {
-            localStorage.removeItem('token');
-            window.location.href = '/';
+            window.location.href = '/login';
+        } catch (err) {
+            console.error('Logout error:', err);
+            window.location.href = '/login';
         }
     };
 
     const navSections = [
         {
-            group: 'Core Workspace',
+            group: 'Explore & Match',
             items: [
-                { icon: <LayoutDashboard size={17} />, label: 'Dashboard', path: '/dashboard' },
-                { icon: <Briefcase size={17} />, label: 'Jobs Hub', path: '/jobs' },
-                { icon: <Trophy size={17} />, label: 'Matches', path: '/matches' }
+                { icon: <LayoutDashboard size={18} />, label: 'Dashboard', path: '/dashboard' },
+                { icon: <Briefcase size={18} />, label: 'Live Jobs Hub', path: '/jobs' },
+                { icon: <Trophy size={18} />, label: 'Matches', path: '/matches' },
             ]
         },
         {
-            group: 'Pipeline & Tracking',
+            group: 'Resume & Materials',
             items: [
-                { icon: <Clock size={17} />, label: 'Tracker', path: '/tracker' }
+                { icon: <FileText size={18} />, label: 'Resume Hub', path: '/resume' },
+                { icon: <Sparkles size={18} />, label: 'ATS Standard Studio', path: '/ats-portal' },
             ]
         },
         {
-            group: 'Career Assets',
+            group: 'Manage & Plan',
             items: [
-                { icon: <FileText size={17} />, label: 'Resume Hub', path: '/resume-hub' },
-                { icon: <Sparkles size={17} />, label: 'ATS Portal', path: '/ats-portal' }
-            ]
-        },
-        {
-            group: 'Preferences',
-            items: [
-                { icon: <SettingsIcon size={17} />, label: 'Settings', path: '/settings' }
+                { icon: <Clock size={18} />, label: 'Application Tracker', path: '/tracker' },
+                { icon: <SettingsIcon size={18} />, label: 'Settings', path: '/settings' },
             ]
         }
     ];
@@ -181,16 +173,8 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-64 m-4 mr-0 rounded-2xl flex-col p-5 space-y-6 h-[calc(100vh-2rem)] sticky top-4 border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
                 <div className="flex items-center justify-between px-1">
-                    <Link to="/dashboard" className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1">
-                        <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
-                            <Sparkles className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                            <span className="text-base font-bold text-slate-900 dark:text-white block leading-tight">
-                                Job Seer
-                            </span>
-                            <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">Workspace v2.2</span>
-                        </div>
+                    <Link to="/dashboard" className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1">
+                        <Logo size="md" subtext="Workspace v2.2" />
                     </Link>
                     <ThemeToggle size="sm" />
                 </div>
@@ -245,11 +229,8 @@ function DashboardLayout({ children, pageTitle = 'Workspace' }) {
 
             {/* Mobile Top Header */}
             <header className="md:hidden flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl sticky top-0 z-40">
-                <Link to="/dashboard" className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                        <Sparkles size={16} className="text-white" />
-                    </div>
-                    <span className="text-base font-bold text-slate-900 dark:text-white">Job Seer</span>
+                <Link to="/dashboard" className="flex items-center">
+                    <Logo size="sm" />
                 </Link>
 
                 <div className="flex items-center gap-2">
