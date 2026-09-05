@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
     Target, Clock, ChevronRight, FileText,
@@ -11,47 +11,41 @@ import {
     CheckSquare, AlertCircle, FileCheck, Split, Binary, Braces,
     Kanban, Workflow, Columns, Table as TableIcon, GitBranch,
     Plus, MoreHorizontal, User, Briefcase, ChevronRight as ChevronRightIcon,
-    Sliders, CheckCircle, HelpCircle, ArrowRightLeft, Sparkle
+    Sliders, CheckCircle, HelpCircle, ArrowRightLeft, Sparkle,
+    Building2, MapPin, DollarSign, Bookmark, Share2, Star, CheckCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import Button from '../components/ui/Button';
 import Logo from '../components/Logo';
 
+// Animated Micro-Interaction Icon Wrapper Component
+const AnimatedIcon = ({ icon: Icon, className = "w-5 h-5", variant = "bounce" }) => {
+    const variants = {
+        bounce: { whileHover: { scale: 1.18, rotate: [0, -6, 6, 0], transition: { duration: 0.35, ease: "easeOut" } } },
+        pulse: { whileHover: { scale: 1.2, transition: { duration: 0.2, yoyo: Infinity } } },
+        spin: { whileHover: { rotate: 360, transition: { duration: 0.6, ease: "easeInOut" } } },
+        float: { whileHover: { y: -4, transition: { duration: 0.25, ease: "easeOut" } } }
+    };
+
+    return (
+        <motion.div {...variants[variant]} className="inline-flex items-center justify-center cursor-pointer">
+            <Icon className={className} />
+        </motion.div>
+    );
+};
+
 function Landing() {
     // Mobile navigation state
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    // Attio Hero Workspace View State
-    const [activeHeroView, setActiveHeroView] = useState('table'); // 'table' | 'kanban' | 'automation' | 'objects'
+    // Interactive Workspace View: 'jobs' | 'pipeline' | 'diagnostic' | 'tailoring'
+    const [activeWorkspaceTab, setActiveWorkspaceTab] = useState('jobs');
 
     // Table view filter state
-    const [tableFilter, setTableFilter] = useState('all'); // 'all' | 'high_match' | 'remote' | 'tailor_ready'
+    const [jobFilter, setJobFilter] = useState('all'); // 'all' | 'high_match' | 'remote' | 'top_salary'
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedJobIndex, setSelectedJobIndex] = useState(0);
-
-    // Interactive Formula Sliders State
-    const [weights, setWeights] = useState({
-        skills: 40,
-        vector: 30,
-        experience: 15,
-        title: 15
-    });
-
-    const sampleScores = { skills: 94, vector: 88, experience: 95, title: 90 };
-    const totalWeight = weights.skills + weights.vector + weights.experience + weights.title;
-    const computedScore = Math.round(
-        (weights.skills * sampleScores.skills +
-         weights.vector * sampleScores.vector +
-         weights.experience * sampleScores.experience +
-         weights.title * sampleScores.title) / (totalWeight || 1)
-    );
-
-    // Spatial coordinate inspector state
-    const [inspectedBox, setInspectedBox] = useState(null);
-
-    // 10-Layer ATS Diagnostic Active Item
-    const [activeDiagnosticLayer, setActiveDiagnosticLayer] = useState(0);
+    const [selectedJobId, setSelectedJobId] = useState('job-01');
 
     // FAQ Accordion State
     const [openFaq, setOpenFaq] = useState(null);
@@ -60,267 +54,210 @@ function Landing() {
         setOpenFaq(openFaq === index ? null : index);
     };
 
-    // Realistic CRM dataset for Attio-style Table & Kanban
-    const datasetJobs = [
+    // Curated Opportunities Data
+    const curatedJobs = [
         {
             id: 'job-01',
             role: 'Senior Full-Stack Engineer',
             company: 'Vercel',
-            companyDomain: 'vercel.com',
-            location: 'San Francisco, CA',
-            remote: true,
+            location: 'San Francisco, CA (Remote)',
             salary: '$165,000 - $195,000',
             matchScore: 96,
-            atsHealth: 98,
-            stage: 'Screening',
-            directSkills: ['React', 'TypeScript', 'Node.js', 'Next.js', 'TailwindCSS'],
-            skillGaps: ['Rust (Wasm)'],
+            atsScore: 98,
             status: 'Ready to Apply',
-            vectorSimilarity: '0.942 Cosine',
-            updatedAt: '12m ago',
+            skills: ['React', 'TypeScript', 'Next.js', 'Node.js', 'TailwindCSS'],
+            missingSkills: ['Rust (Wasm)'],
+            stage: 'Screening',
+            type: 'Full-time &bull; Remote',
+            posted: '2 hours ago',
             externalUrl: 'https://adzuna.com'
         },
         {
             id: 'job-02',
-            role: 'Staff Python Backend Architect',
+            role: 'Staff Backend Architect',
             company: 'Stripe',
-            companyDomain: 'stripe.com',
-            location: 'New York, NY',
-            remote: false,
+            location: 'New York, NY (Hybrid)',
             salary: '$190,000 - $230,000',
             matchScore: 92,
-            atsHealth: 95,
-            stage: 'Applied',
-            directSkills: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Redis'],
-            skillGaps: ['gRPC', 'Distributed Locks'],
+            atsScore: 95,
             status: 'High Match',
-            vectorSimilarity: '0.918 Cosine',
-            updatedAt: '1h ago',
+            skills: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Redis'],
+            missingSkills: ['Distributed Transactions'],
+            stage: 'Applied',
+            type: 'Full-time &bull; Hybrid',
+            posted: '5 hours ago',
             externalUrl: 'https://adzuna.com'
         },
         {
             id: 'job-03',
-            role: 'Lead ML / NLP Platform Engineer',
+            role: 'Lead ML / NLP Engineer',
             company: 'Cohere',
-            companyDomain: 'cohere.com',
-            location: 'London, UK',
-            remote: true,
+            location: 'London, UK (Remote)',
             salary: '£130,000 - £155,000',
             matchScore: 89,
-            atsHealth: 91,
+            atsScore: 91,
+            status: 'Tailoring Ready',
+            skills: ['PyTorch', 'FastAPI', 'TF-IDF', 'Scikit-Learn', 'Transformers'],
+            missingSkills: ['vLLM', 'Triton'],
             stage: 'Interviewing',
-            directSkills: ['PyTorch', 'FastAPI', 'TF-IDF', 'Scikit-Learn', 'HuggingFace'],
-            skillGaps: ['vLLM', 'Triton'],
-            status: 'Needs Tailoring',
-            vectorSimilarity: '0.887 Cosine',
-            updatedAt: '3h ago',
+            type: 'Full-time &bull; Remote',
+            posted: '1 day ago',
             externalUrl: 'https://adzuna.com'
         },
         {
             id: 'job-04',
             role: 'Principal Security Engineer',
             company: 'Datadog',
-            companyDomain: 'datadoghq.com',
-            location: 'Boston, MA',
-            remote: true,
+            location: 'Boston, MA (Remote)',
             salary: '$180,000 - $215,000',
-            matchScore: 84,
-            atsHealth: 94,
-            stage: 'Screening',
-            directSkills: ['Python', 'Linux', 'OAuth2/JWT', 'CI/CD', 'Docker'],
-            skillGaps: ['eBPF', 'Kernel Tracing'],
+            matchScore: 85,
+            atsScore: 94,
             status: 'Skill Gap Warning',
-            vectorSimilarity: '0.841 Cosine',
-            updatedAt: '5h ago',
+            skills: ['Python', 'Linux', 'OAuth2/JWT', 'CI/CD', 'Docker'],
+            missingSkills: ['eBPF', 'Kernel Auditing'],
+            stage: 'Screening',
+            type: 'Full-time &bull; Remote',
+            posted: '2 days ago',
             externalUrl: 'https://adzuna.com'
         },
         {
             id: 'job-05',
-            role: 'Senior Distributed Data Engineer',
+            role: 'Senior Data Platform Engineer',
             company: 'Snowflake',
-            companyDomain: 'snowflake.com',
-            location: 'Seattle, WA',
-            remote: false,
+            location: 'Seattle, WA (On-site)',
             salary: '$175,000 - $210,000',
             matchScore: 88,
-            atsHealth: 96,
-            stage: 'Offered',
-            directSkills: ['SQL', 'Python', 'PostgreSQL', 'Data Pipelines', 'PyMuPDF'],
-            skillGaps: ['Apache Spark', 'Kafka Streams'],
+            atsScore: 96,
             status: 'High Match',
-            vectorSimilarity: '0.879 Cosine',
-            updatedAt: '1d ago',
+            skills: ['SQL', 'Python', 'PostgreSQL', 'Data Pipelines', 'PyMuPDF'],
+            missingSkills: ['Apache Spark', 'Kafka'],
+            stage: 'Offer Extended',
+            type: 'Full-time &bull; On-site',
+            posted: '3 days ago',
             externalUrl: 'https://adzuna.com'
         }
     ];
 
-    // Filtered records
+    // Filtered Job Records
     const filteredJobs = useMemo(() => {
-        return datasetJobs.filter(job => {
+        return curatedJobs.filter(job => {
             const matchesSearch = searchQuery === '' ||
                 job.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                job.directSkills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+                job.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
 
             if (!matchesSearch) return false;
-            if (tableFilter === 'high_match') return job.matchScore >= 90;
-            if (tableFilter === 'remote') return job.remote;
-            if (tableFilter === 'tailor_ready') return job.status === 'Ready to Apply' || job.status === 'High Match';
+            if (jobFilter === 'high_match') return job.matchScore >= 90;
+            if (jobFilter === 'remote') return job.location.includes('Remote');
+            if (jobFilter === 'top_salary') return job.salary.includes('190') || job.salary.includes('230') || job.salary.includes('215');
             return true;
         });
-    }, [tableFilter, searchQuery]);
+    }, [jobFilter, searchQuery]);
 
-    // 10-Layer ATS Diagnostic Inspection Items
-    const diagnosticLayers = [
+    // Active Selected Job
+    const selectedJob = curatedJobs.find(j => j.id === selectedJobId) || curatedJobs[0];
+
+    // 10 ATS Diagnostic Checks
+    const diagnosticAuditItems = [
         {
-            id: '01',
-            name: 'Spatial Bounding Geometry',
-            category: 'Layout & Parsing',
-            status: 'PASSED',
-            score: '100 / 100',
-            metric: 'PyMuPDF [x0, y0, x1, y1]',
-            description: 'Extracts dual-column Canva/Figma text blocks without horizontal text interweaving.'
+            title: "Multi-Column Layout Safety",
+            category: "Document Structure",
+            desc: "Parses complex two-column Canva and Figma templates without text scramble or sidebar bleed.",
+            score: "100%",
+            passed: true
         },
         {
-            id: '02',
-            name: 'Contact & Social Vector Extraction',
-            category: 'Candidate Identification',
-            status: 'PASSED',
-            score: '100 / 100',
-            metric: 'RFC-5322 & E.164 Clean',
-            description: 'Validates presence of normalized email, phone, location, and verified GitHub/LinkedIn links.'
+            title: "Contact & Portfolio Extraction",
+            category: "Identity Verification",
+            desc: "Detects and verifies clean email, phone, location, LinkedIn, and GitHub links.",
+            score: "100%",
+            passed: true
         },
         {
-            id: '03',
-            name: 'Action Verb Impact Density',
-            category: 'Linguistic Structure',
-            status: 'PASSED',
-            score: '94 / 100',
-            metric: '28 Deterministic Power Verbs',
-            description: 'Verifies leading power verbs (Architected, Engineered, Optimized) in bullet points.'
+            title: "Action Verb Impact Density",
+            category: "Linguistic Quality",
+            desc: "Validates high-impact power verbs at the beginning of each experience bullet.",
+            score: "94%",
+            passed: true
         },
         {
-            id: '04',
-            name: 'Metric Quantification Ratio',
-            category: 'Accomplishment Validation',
-            status: 'PASSED',
-            score: '88 / 100',
-            metric: '72% Metric Ratio',
-            description: 'Detects presence of measurable business outcomes (%, $, latency, throughput scale).'
+            title: "Metric Quantification Rate",
+            category: "Achievement Proof",
+            desc: "Identifies measurable business results (%, $, throughput, and latency improvements).",
+            score: "88%",
+            passed: true
         },
         {
-            id: '05',
-            name: 'Font Encoding & Glyph Integrity',
-            category: 'Binary Safety',
-            status: 'PASSED',
-            score: '100 / 100',
-            metric: 'Zero CID-Font Corruption',
-            description: 'Validates UTF-8 encoding with zero broken ligatures or corrupted character codes.'
+            title: "Skill Taxonomy & Synonym Normalization",
+            category: "Keyword Optimization",
+            desc: "Maps technical synonyms (e.g., React.js to React, K8s to Kubernetes) across 500+ skills.",
+            score: "96%",
+            passed: true
         },
         {
-            id: '06',
-            name: 'Section Taxonomy Normalization',
-            category: 'ATS Schema',
-            status: 'PASSED',
-            score: '100 / 100',
-            metric: '5 / 5 Standard Headers Found',
-            description: 'Maps non-standard headings to canonical ATS standard section schemas.'
-        },
-        {
-            id: '07',
-            name: '500+ Skill Alias Normalization',
-            category: 'Taxonomy Engine',
-            status: 'PASSED',
-            score: '96 / 100',
-            metric: '18 Canonical Skills Mapped',
-            description: 'Normalizes synonyms and versions (e.g. React.js -> React, K8s -> Kubernetes).'
-        },
-        {
-            id: '08',
-            name: 'Boundary & Storage Security',
-            category: 'Security Vault',
-            status: 'PASSED',
-            score: '100 / 100',
-            metric: '10MB Cap / UUID Sanitized',
-            description: 'Enforces magic-byte MIME validation, strict 10MB limits, and per-user storage isolation.'
-        },
-        {
-            id: '09',
-            name: 'TF-IDF Keyword Proximity',
-            category: 'Vector Similarity',
-            status: 'PASSED',
-            score: '91 / 100',
-            metric: 'Cosine Vector 0.912',
-            description: 'Calculates unigram and bigram term frequency-inverse document frequency vectors.'
-        },
-        {
-            id: '10',
-            name: 'Claim Grounding Integrity',
-            category: 'Factual Guardrail',
-            status: 'VERIFIED',
-            score: '100% Grounded',
-            metric: 'Zero Hallucination Verified',
-            description: 'Enforces diff guardrails to prevent fabrication of non-existent employers or titles.'
+            title: "Recruiter Section Hierarchy",
+            category: "ATS Standard Schema",
+            desc: "Validates canonical section headings for seamless recruiter ATS ingestion.",
+            score: "100%",
+            passed: true
         }
     ];
 
-    const faqItems = [
+    const faqList = [
         {
-            q: "How does the explainable 4-factor match engine calculate compatibility?",
-            a: "Unlike opaque black-box scoring, Smart Job Hunter evaluates four transparent mathematical vectors: Skills Overlap (40%), TF-IDF Vector Content Similarity (30%), Experience Level Alignment (15%), and Role Title Matching (15%) with complete arithmetic breakdown."
+            q: "How does Smart Job Hunter calculate job match compatibility?",
+            a: "Instead of generic keyword counting, our matching engine evaluates transparent criteria: Direct Skill Overlap, Semantic Content Alignment, Experience Level Fit, and Role Seniority. Every match includes a detailed breakdown of your strengths and specific missing skills."
         },
         {
-            q: "How does the spatial coordinate parser resolve dual-column Canva resumes?",
-            a: "Smart Job Hunter uses PyMuPDF bounding box coordinates [x0, y0, x1, y1] to analyze physical coordinate density across page width thresholds. It extracts the left column top-to-bottom first, then the right column, completely preventing text interleaving."
+            q: "Can I upload Canva, Figma, or modern two-column resumes?",
+            a: "Yes. Smart Job Hunter uses coordinate-aware spatial parsing that reads columns in natural human reading order. Unlike traditional ATS parsers that scramble multi-column layouts into unreadable text, your design is parsed accurately."
         },
         {
-            q: "Does the factual tailoring engine invent false experience or metrics?",
-            a: "No. Smart Job Hunter enforces 100% factual grounding. The tailoring engine only restructures and emphasizes your verified technical skills and real projects without fabricating fake companies or degrees."
+            q: "Does the resume tailoring feature invent false experience?",
+            a: "Never. We enforce 100% factual grounding guardrails. The platform restructures, clarifies, and highlights your real technical skills and accomplishments to match target role requirements without fabricating companies, dates, or metrics."
         },
         {
-            q: "How are external job openings ingested and synchronized?",
-            a: "The backend connects directly to the live Adzuna API, querying global job boards. Job descriptions are parsed with our 500+ skill taxonomy, salaries are normalized, and direct employer apply links are provided."
+            q: "Where do the job openings come from?",
+            a: "We connect directly to live global job feeds (US, UK, CA, DE, AU, IN), continuously refreshing verified listings with normalized salary bands and direct application links."
         },
         {
-            q: "What security and privacy isolation boundaries are enforced?",
-            a: "All candidate resumes and application tracking pipelines are strictly isolated per account using database resource-owner boundaries. Your resume content is never sold or used for external model training."
+            q: "Is my personal data and resume kept private?",
+            a: "Yes. Your resume and application tracking data are strictly private and isolated to your account. Your documents are never sold or used for external model training."
         }
     ];
 
     return (
-        <div className="min-h-screen bg-[#FAF9F5] text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white relative antialiased">
-            {/* 1. ATTIO MINIMALIST TOPBAR */}
-            <header className="sticky top-0 z-50 bg-[#FAF9F5]/90 backdrop-blur-md border-b border-[#E5E5E0] transition-all">
-                <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    {/* Brand Emblem */}
-                    <div className="flex items-center gap-8">
+        <div className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-neutral-900 selection:text-white antialiased relative overflow-x-hidden">
+            {/* Ambient Dot Matrix Procedural Background Pattern (Stripe/Linear Style) */}
+            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-60 z-0" />
+
+            {/* Top Navigation */}
+            <header className="sticky top-0 z-50 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#EAEAE6] transition-all">
+                <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative z-10">
+                    {/* Brand */}
+                    <div className="flex items-center gap-10">
                         <Link to="/" className="flex items-center group focus:outline-none">
                             <Logo size="sm" />
                         </Link>
-                        {/* Navigation Links */}
-                        <nav className="hidden md:flex items-center gap-6 text-[13px] font-medium text-neutral-600">
+                        {/* Nav Links */}
+                        <nav className="hidden md:flex items-center gap-7 text-[13px] font-medium text-neutral-600">
                             <a href="#workspace" className="hover:text-neutral-950 transition-colors">Workspace</a>
-                            <a href="#features" className="hover:text-neutral-950 transition-colors">Data Engine</a>
-                            <a href="#automations" className="hover:text-neutral-950 transition-colors">Automations</a>
-                            <a href="#diagnostic" className="hover:text-neutral-950 transition-colors">10-Layer Audit</a>
+                            <a href="#features" className="hover:text-neutral-950 transition-colors">Features</a>
+                            <a href="#diagnostic" className="hover:text-neutral-950 transition-colors">ATS Health Check</a>
                             <a href="#faq" className="hover:text-neutral-950 transition-colors">FAQ</a>
                         </nav>
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Action Controls */}
                     <div className="hidden md:flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white border border-[#E5E5E0] text-[11px] font-mono text-neutral-600 shadow-sm mr-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>V2.4 STABLE</span>
-                        </div>
                         <Link to="/login">
-                            <button className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100/70 rounded-md transition-all">
+                            <button className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/50 rounded-md transition-all">
                                 Sign In
                             </button>
                         </Link>
                         <Link to="/register">
                             <button className="px-4 py-1.5 text-[13px] font-semibold text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-all shadow-sm flex items-center gap-1.5 group">
-                                <span>Start Building</span>
+                                <span>Get Started Free</span>
                                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                             </button>
                         </Link>
@@ -330,8 +267,8 @@ function Landing() {
                     <div className="flex md:hidden items-center">
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="p-2 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/50 rounded-md border border-[#E5E5E0]"
-                            aria-label="Toggle navigation menu"
+                            className="p-2 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200/50 rounded-md border border-[#EAEAE6]"
+                            aria-label="Toggle menu"
                         >
                             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </button>
@@ -340,104 +277,102 @@ function Landing() {
 
                 {/* Mobile Navigation Dropdown */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden border-b border-[#E5E5E0] bg-[#FAF9F5] px-4 py-4 space-y-3 text-sm font-medium">
+                    <div className="md:hidden border-b border-[#EAEAE6] bg-[#FAF9F6] px-4 py-4 space-y-3 text-sm font-medium relative z-20">
                         <a href="#workspace" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">Workspace</a>
-                        <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">Data Engine</a>
-                        <a href="#automations" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">Automations</a>
-                        <a href="#diagnostic" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">10-Layer Audit</a>
+                        <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">Features</a>
+                        <a href="#diagnostic" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">ATS Health Check</a>
                         <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-neutral-700">FAQ</a>
                         <div className="pt-2 flex flex-col gap-2">
-                            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-neutral-800 border border-[#E5E5E0] bg-white rounded-md">Sign In</Link>
-                            <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-white bg-neutral-900 rounded-md">Start Building Free</Link>
+                            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-neutral-800 border border-[#EAEAE6] bg-white rounded-md">Sign In</Link>
+                            <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-white bg-neutral-900 rounded-md">Get Started Free</Link>
                         </div>
                     </div>
                 )}
             </header>
 
-            <main>
-                {/* 2. ATTIO HERO SECTION */}
-                <section className="pt-16 pb-12 md:pt-24 md:pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <main className="relative z-10">
+                {/* 1. HERO SECTION */}
+                <section className="pt-16 pb-12 md:pt-20 md:pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
 
-
-                    {/* Attio Massive Editorial Headline */}
+                    {/* Editorial Headline */}
                     <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-bold tracking-[-0.035em] text-neutral-950 leading-[1.02] max-w-5xl mx-auto mb-6">
-                        The career platform built for <br />
-                        <span className="text-neutral-400 font-normal">the age of</span> precision intelligence.
+                        The intelligent workspace for <br />
+                        <span className="text-neutral-400 font-normal">your entire</span> career search.
                     </h1>
 
                     {/* Subtitle */}
                     <p className="text-base sm:text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed mb-8">
-                        Extract multi-column Canva resumes with PyMuPDF spatial geometry, verify 10 discrete ATS diagnostic vectors, and synchronize live Adzuna applications.
+                        Audit your resume against strict recruiter ATS standards, discover mathematically scored job opportunities, and tailor applications in seconds with zero fabrication.
                     </p>
 
-                    {/* CTA Buttons */}
+                    {/* CTAs */}
                     <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
                         <Link to="/register">
-                            <Button size="lg" className="bg-neutral-900 text-white hover:bg-neutral-800 text-sm px-6 py-3 rounded-md shadow-sm flex items-center gap-2 font-medium">
+                            <Button size="lg" className="bg-neutral-900 text-white hover:bg-neutral-800 text-sm px-6 py-3 rounded-md shadow-sm flex items-center gap-2 font-medium group">
                                 <span>Start Building Free</span>
-                                <ArrowRight className="w-4 h-4" />
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                             </Button>
                         </Link>
                         <a href="#workspace">
-                            <Button variant="outline" size="lg" className="border-[#E5E5E0] bg-white text-neutral-800 hover:bg-neutral-50 text-sm px-6 py-3 rounded-md shadow-sm">
-                                <span>Explore Interactive Canvas</span>
+                            <Button variant="outline" size="lg" className="border-[#EAEAE6] bg-white text-neutral-800 hover:bg-neutral-50 text-sm px-6 py-3 rounded-md shadow-sm">
+                                <span>Explore Live Workspace</span>
                             </Button>
                         </a>
                     </div>
 
-                    {/* 3. ATTIO INTERACTIVE CANVAS WORKSPACE (TABLE, KANBAN, AUTOMATIONS, OBJECTS) */}
-                    <div id="workspace" className="bg-white border border-[#E5E5E0] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04),0_20px_40px_rgba(0,0,0,0.03)] overflow-hidden text-left">
-                        {/* Attio Window Chrome / Toolbar */}
-                        <div className="p-3 sm:p-4 border-b border-[#E5E5E0] bg-[#FAF9F5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    {/* 2. ATTIO-STYLE INTERACTIVE WORKSPACE PREVIEW */}
+                    <div id="workspace" className="bg-white border border-[#EAEAE6] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04),0_20px_40px_rgba(0,0,0,0.03)] overflow-hidden text-left">
+                        {/* Workspace View Header Tabs */}
+                        <div className="p-3 sm:p-4 border-b border-[#EAEAE6] bg-[#FAF9F5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             {/* View Switchers */}
                             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                                 <button
-                                    onClick={() => setActiveHeroView('table')}
+                                    onClick={() => setActiveWorkspaceTab('jobs')}
                                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                                        activeHeroView === 'table'
-                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#E5E5E0] font-semibold'
+                                        activeWorkspaceTab === 'jobs'
+                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#EAEAE6] font-semibold'
                                             : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
                                     }`}
                                 >
-                                    <TableIcon className="w-3.5 h-3.5 text-neutral-500" />
-                                    <span>Table View</span>
+                                    <AnimatedIcon icon={TableIcon} className="w-3.5 h-3.5 text-neutral-500" variant="float" />
+                                    <span>Opportunities</span>
                                 </button>
                                 <button
-                                    onClick={() => setActiveHeroView('kanban')}
+                                    onClick={() => setActiveWorkspaceTab('pipeline')}
                                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                                        activeHeroView === 'kanban'
-                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#E5E5E0] font-semibold'
+                                        activeWorkspaceTab === 'pipeline'
+                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#EAEAE6] font-semibold'
                                             : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
                                     }`}
                                 >
-                                    <Kanban className="w-3.5 h-3.5 text-neutral-500" />
-                                    <span>Pipeline Kanban</span>
+                                    <AnimatedIcon icon={Kanban} className="w-3.5 h-3.5 text-neutral-500" variant="bounce" />
+                                    <span>Application Pipeline</span>
                                 </button>
                                 <button
-                                    onClick={() => setActiveHeroView('automation')}
+                                    onClick={() => setActiveWorkspaceTab('diagnostic')}
                                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                                        activeHeroView === 'automation'
-                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#E5E5E0] font-semibold'
+                                        activeWorkspaceTab === 'diagnostic'
+                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#EAEAE6] font-semibold'
                                             : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
                                     }`}
                                 >
-                                    <Workflow className="w-3.5 h-3.5 text-indigo-500" />
-                                    <span>Automations</span>
+                                    <AnimatedIcon icon={CheckSquare} className="w-3.5 h-3.5 text-emerald-600" variant="pulse" />
+                                    <span>ATS Diagnostic Check</span>
                                 </button>
                                 <button
-                                    onClick={() => setActiveHeroView('objects')}
+                                    onClick={() => setActiveWorkspaceTab('tailoring')}
                                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                                        activeHeroView === 'objects'
-                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#E5E5E0] font-semibold'
+                                        activeWorkspaceTab === 'tailoring'
+                                            ? 'bg-white text-neutral-950 shadow-sm border border-[#EAEAE6] font-semibold'
                                             : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
                                     }`}
                                 >
-                                    <Database className="w-3.5 h-3.5 text-neutral-500" />
-                                    <span>Object Models</span>
+                                    <AnimatedIcon icon={FileCheck} className="w-3.5 h-3.5 text-indigo-500" variant="float" />
+                                    <span>Grounded Tailoring</span>
                                 </button>
                             </div>
 
-                            {/* Attio Filters & Search */}
+                            {/* Search & Filter */}
                             <div className="flex items-center gap-2">
                                 <div className="relative">
                                     <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -445,200 +380,184 @@ function Landing() {
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search records or skills..."
-                                        className="pl-8 pr-3 py-1 bg-white border border-[#E5E5E0] rounded-md text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 w-full sm:w-48"
+                                        placeholder="Search roles or skills..."
+                                        className="pl-8 pr-3 py-1 bg-white border border-[#EAEAE6] rounded-md text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-400 w-full sm:w-48"
                                     />
                                 </div>
-                                <div className="hidden sm:flex items-center gap-1 text-xs text-neutral-600 bg-white border border-[#E5E5E0] px-2.5 py-1 rounded-md">
+                                <div className="hidden sm:flex items-center gap-1 text-xs text-neutral-600 bg-white border border-[#EAEAE6] px-2.5 py-1 rounded-md">
                                     <Filter className="w-3.5 h-3.5 text-neutral-400" />
-                                    <span>Filter:</span>
                                     <select
-                                        value={tableFilter}
-                                        onChange={(e) => setTableFilter(e.target.value)}
+                                        value={jobFilter}
+                                        onChange={(e) => setJobFilter(e.target.value)}
                                         className="bg-transparent text-neutral-900 font-medium focus:outline-none cursor-pointer"
                                     >
-                                        <option value="all">All Records</option>
-                                        <option value="high_match">Match &ge;90%</option>
+                                        <option value="all">All Roles</option>
+                                        <option value="high_match">Match &ge; 90%</option>
                                         <option value="remote">Remote Only</option>
-                                        <option value="tailor_ready">Tailoring Ready</option>
+                                        <option value="top_salary">Top Salary Bands</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
-                        {/* VIEW 1: ATTIO-GRADE TABLE VIEW */}
-                        {activeHeroView === 'table' && (
+                        {/* TAB 1: OPPORTUNITIES TABLE */}
+                        {activeWorkspaceTab === 'jobs' && (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse text-[13px]">
                                     <thead>
-                                        <tr className="bg-[#FAF9F5] border-b border-[#E5E5E0] text-neutral-500 text-xs font-medium">
+                                        <tr className="bg-[#FAF9F5] border-b border-[#EAEAE6] text-neutral-500 text-xs font-medium">
                                             <th className="py-2.5 px-4">Opportunity &amp; Company</th>
-                                            <th className="py-2.5 px-4">Match Vector</th>
-                                            <th className="py-2.5 px-4">ATS Health</th>
-                                            <th className="py-2.5 px-4">Direct Skills (Taxonomy)</th>
+                                            <th className="py-2.5 px-4">Match Compatibility</th>
+                                            <th className="py-2.5 px-4">ATS Readability</th>
+                                            <th className="py-2.5 px-4">Matched Skills</th>
                                             <th className="py-2.5 px-4">Skill Gap</th>
-                                            <th className="py-2.5 px-4">Pipeline Stage</th>
                                             <th className="py-2.5 px-4">Compensation</th>
-                                            <th className="py-2.5 px-4 text-right">Action</th>
+                                            <th className="py-2.5 px-4 text-right">Apply</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-[#E5E5E0] bg-white">
-                                        {filteredJobs.map((job, idx) => (
-                                            <tr
-                                                key={job.id}
-                                                onClick={() => setSelectedJobIndex(idx)}
-                                                className={`cursor-pointer transition-colors ${
-                                                    selectedJobIndex === idx ? 'bg-indigo-50/40' : 'hover:bg-neutral-50/70'
-                                                }`}
-                                            >
-                                                <td className="py-3.5 px-4">
-                                                    <div className="font-semibold text-neutral-950 flex items-center gap-1.5">
-                                                        <span>{job.role}</span>
-                                                        {job.remote && (
-                                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">
-                                                                Remote
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-neutral-500 text-xs flex items-center gap-1 mt-0.5">
-                                                        <span className="font-medium text-neutral-700">{job.company}</span>
-                                                        <span>&bull;</span>
-                                                        <span>{job.location}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 px-4">
-                                                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-semibold">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                        <span>{job.matchScore}% Match</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 px-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-16 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                                                            <div
-                                                                className="h-full bg-neutral-900 rounded-full"
-                                                                style={{ width: `${job.atsHealth}%` }}
-                                                            />
+                                    <tbody className="divide-y divide-[#EAEAE6] bg-white">
+                                        {filteredJobs.map((job) => {
+                                            const isSelected = selectedJobId === job.id;
+                                            return (
+                                                <tr
+                                                    key={job.id}
+                                                    onClick={() => setSelectedJobId(job.id)}
+                                                    className={`cursor-pointer transition-colors ${
+                                                        isSelected ? 'bg-indigo-50/40' : 'hover:bg-neutral-50/70'
+                                                    }`}
+                                                >
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="font-semibold text-neutral-950 flex items-center gap-1.5">
+                                                            <span>{job.role}</span>
+                                                            {job.location.includes('Remote') && (
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">
+                                                                    Remote
+                                                                </span>
+                                                            )}
                                                         </div>
-                                                        <span className="text-xs font-mono text-neutral-700">{job.atsHealth}%</span>
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 px-4">
-                                                    <div className="flex flex-wrap gap-1 max-w-xs">
-                                                        {job.directSkills.slice(0, 3).map((sk, sIdx) => (
-                                                            <span key={sIdx} className="px-1.5 py-0.5 bg-neutral-100 border border-neutral-200/70 rounded text-[11px] text-neutral-700 font-mono">
-                                                                {sk}
-                                                            </span>
-                                                        ))}
-                                                        {job.directSkills.length > 3 && (
-                                                            <span className="text-[11px] text-neutral-400 font-mono">+{job.directSkills.length - 3}</span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 px-4">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {job.skillGaps.map((gap, gIdx) => (
-                                                            <span key={gIdx} className="px-1.5 py-0.5 bg-amber-50 border border-amber-200/80 rounded text-[11px] text-amber-800 font-mono">
-                                                                {gap}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3.5 px-4">
-                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                                                        job.stage === 'Offered' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                                                        job.stage === 'Interviewing' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                                                        job.stage === 'Screening' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                                                        'bg-neutral-100 text-neutral-700 border border-neutral-200'
-                                                    }`}>
-                                                        <span>{job.stage}</span>
-                                                    </span>
-                                                </td>
-                                                <td className="py-3.5 px-4 font-mono text-xs text-neutral-700 whitespace-nowrap">
-                                                    {job.salary}
-                                                </td>
-                                                <td className="py-3.5 px-4 text-right">
-                                                    <a
-                                                        href={job.externalUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-neutral-900 text-white rounded text-xs font-medium hover:bg-neutral-800 transition-colors"
-                                                    >
-                                                        <span>Apply</span>
-                                                        <ArrowUpRight className="w-3 h-3" />
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                        <div className="text-neutral-500 text-xs flex items-center gap-1 mt-0.5">
+                                                            <span className="font-medium text-neutral-700">{job.company}</span>
+                                                            <span>&bull;</span>
+                                                            <span>{job.location}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-semibold">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                            <span>{job.matchScore}% Match</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-16 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className="h-full bg-neutral-900 rounded-full"
+                                                                    style={{ width: `${job.atsScore}%` }}
+                                                                />
+                                                            </div>
+                                                            <span className="text-xs font-mono text-neutral-700">{job.atsScore}%</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="flex flex-wrap gap-1 max-w-xs">
+                                                            {job.skills.slice(0, 3).map((s, idx) => (
+                                                                <span key={idx} className="px-1.5 py-0.5 bg-neutral-100 border border-neutral-200/70 rounded text-[11px] text-neutral-700 font-mono">
+                                                                    {s}
+                                                                </span>
+                                                            ))}
+                                                            {job.skills.length > 3 && (
+                                                                <span className="text-[11px] text-neutral-400 font-mono">+{job.skills.length - 3}</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {job.missingSkills.map((gap, idx) => (
+                                                                <span key={idx} className="px-1.5 py-0.5 bg-amber-50 border border-amber-200/80 rounded text-[11px] text-amber-800 font-mono">
+                                                                    {gap}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4 font-mono text-xs text-neutral-700 whitespace-nowrap">
+                                                        {job.salary}
+                                                    </td>
+                                                    <td className="py-3.5 px-4 text-right">
+                                                        <a
+                                                            href={job.externalUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-neutral-900 text-white rounded text-xs font-medium hover:bg-neutral-800 transition-colors"
+                                                        >
+                                                            <span>Apply</span>
+                                                            <ArrowUpRight className="w-3 h-3" />
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
 
-                                {/* Active Record Inspector Bar */}
-                                {datasetJobs[selectedJobIndex] && (
-                                    <div className="p-4 bg-[#FAF9F5] border-t border-[#E5E5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                        <div className="flex items-center gap-3">
-                                            <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                                            <span>
-                                                Selected Record: <strong>{datasetJobs[selectedJobIndex].role}</strong> at <strong>{datasetJobs[selectedJobIndex].company}</strong>
-                                            </span>
-                                            <span className="text-neutral-300">|</span>
-                                            <span className="font-mono text-neutral-600">Cosine Similarity: {datasetJobs[selectedJobIndex].vectorSimilarity}</span>
-                                        </div>
-                                        <Link to="/register">
-                                            <button className="px-3 py-1 bg-neutral-900 text-white rounded font-medium hover:bg-neutral-800 transition-colors">
-                                                Tailor Resume for Role &rarr;
-                                            </button>
-                                        </Link>
+                                {/* Active Job Footer Drawer */}
+                                <div className="p-4 bg-[#FAF9F5] border-t border-[#EAEAE6] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                                        <span>
+                                            Selected: <strong>{selectedJob.role}</strong> at <strong>{selectedJob.company}</strong>
+                                        </span>
+                                        <span className="text-neutral-300">|</span>
+                                        <span className="text-neutral-500">{selectedJob.type}</span>
                                     </div>
-                                )}
+                                    <Link to="/register">
+                                        <button className="px-3.5 py-1.5 bg-neutral-900 text-white rounded font-medium hover:bg-neutral-800 transition-colors">
+                                            Tailor Resume for this Role &rarr;
+                                        </button>
+                                    </Link>
+                                </div>
                             </div>
                         )}
 
-                        {/* VIEW 2: PIPELINE KANBAN BOARD */}
-                        {activeHeroView === 'kanban' && (
+                        {/* TAB 2: APPLICATION PIPELINE (KANBAN) */}
+                        {activeWorkspaceTab === 'pipeline' && (
                             <div className="p-4 sm:p-6 bg-[#FAF9F5] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* Column 1: Sourced / Ingested */}
+                                {/* Column 1: Sourced */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#E5E5E0]">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#EAEAE6]">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-2 h-2 rounded-full bg-neutral-400" />
-                                            <span>Sourced / Ingested (2)</span>
+                                            <span>Sourced (2)</span>
                                         </div>
-                                        <Plus className="w-3.5 h-3.5 text-neutral-400 cursor-pointer" />
                                     </div>
-
-                                    <div className="p-3 bg-white border border-[#E5E5E0] rounded-lg shadow-sm space-y-2">
+                                    <div className="p-3 bg-white border border-[#EAEAE6] rounded-lg shadow-sm space-y-2">
                                         <div className="text-xs font-semibold text-neutral-950">Senior Full-Stack Engineer</div>
                                         <div className="text-[11px] text-neutral-500">Vercel &bull; Remote</div>
                                         <div className="flex items-center justify-between pt-1">
                                             <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold">96% Match</span>
-                                            <span className="text-[10px] font-mono text-neutral-400">Adzuna Sync</span>
+                                            <span className="text-[10px] font-mono text-neutral-400">$165k-$195k</span>
                                         </div>
                                     </div>
-
-                                    <div className="p-3 bg-white border border-[#E5E5E0] rounded-lg shadow-sm space-y-2">
+                                    <div className="p-3 bg-white border border-[#EAEAE6] rounded-lg shadow-sm space-y-2">
                                         <div className="text-xs font-semibold text-neutral-950">Principal Security Engineer</div>
                                         <div className="text-[11px] text-neutral-500">Datadog &bull; Boston</div>
                                         <div className="flex items-center justify-between pt-1">
-                                            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold">84% Match</span>
-                                            <span className="text-[10px] font-mono text-neutral-400">Adzuna Sync</span>
+                                            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold">85% Match</span>
+                                            <span className="text-[10px] font-mono text-neutral-400">$180k-$215k</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Column 2: ATS Diagnostic Passed */}
+                                {/* Column 2: Applied */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#E5E5E0]">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#EAEAE6]">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-2 h-2 rounded-full bg-amber-400" />
-                                            <span>ATS Audit Ready (1)</span>
+                                            <span>Applied (1)</span>
                                         </div>
-                                        <Plus className="w-3.5 h-3.5 text-neutral-400 cursor-pointer" />
                                     </div>
-
-                                    <div className="p-3 bg-white border border-[#E5E5E0] rounded-lg shadow-sm space-y-2">
-                                        <div className="text-xs font-semibold text-neutral-950">Staff Python Architect</div>
+                                    <div className="p-3 bg-white border border-[#EAEAE6] rounded-lg shadow-sm space-y-2">
+                                        <div className="text-xs font-semibold text-neutral-950">Staff Backend Architect</div>
                                         <div className="text-[11px] text-neutral-500">Stripe &bull; NYC</div>
                                         <div className="flex items-center justify-between pt-1">
                                             <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold">95/100 ATS</span>
@@ -649,35 +568,31 @@ function Landing() {
 
                                 {/* Column 3: Interviewing */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#E5E5E0]">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#EAEAE6]">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-2 h-2 rounded-full bg-blue-500" />
                                             <span>Interviewing (1)</span>
                                         </div>
-                                        <Plus className="w-3.5 h-3.5 text-neutral-400 cursor-pointer" />
                                     </div>
-
-                                    <div className="p-3 bg-white border border-[#E5E5E0] rounded-lg shadow-sm space-y-2">
+                                    <div className="p-3 bg-white border border-[#EAEAE6] rounded-lg shadow-sm space-y-2">
                                         <div className="text-xs font-semibold text-neutral-950">Lead ML / NLP Engineer</div>
                                         <div className="text-[11px] text-neutral-500">Cohere &bull; London</div>
                                         <div className="flex items-center justify-between pt-1">
                                             <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold">Round 3 Scheduled</span>
-                                            <span className="text-[10px] font-mono text-neutral-400">12 Sep</span>
+                                            <span className="text-[10px] font-mono text-neutral-400">14 Sep</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Column 4: Offer Extended */}
+                                {/* Column 4: Offered */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#E5E5E0]">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-600 pb-2 border-b border-[#EAEAE6]">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-2 h-2 rounded-full bg-purple-500" />
-                                            <span>Offer Extended (1)</span>
+                                            <span>Offered (1)</span>
                                         </div>
-                                        <Plus className="w-3.5 h-3.5 text-neutral-400 cursor-pointer" />
                                     </div>
-
-                                    <div className="p-3 bg-white border border-[#E5E5E0] rounded-lg shadow-sm space-y-2">
+                                    <div className="p-3 bg-white border border-[#EAEAE6] rounded-lg shadow-sm space-y-2">
                                         <div className="text-xs font-semibold text-neutral-950">Senior Data Engineer</div>
                                         <div className="text-[11px] text-neutral-500">Snowflake &bull; Seattle</div>
                                         <div className="flex items-center justify-between pt-1">
@@ -689,262 +604,167 @@ function Landing() {
                             </div>
                         )}
 
-                        {/* VIEW 3: ATTIO AUTOMATION WORKFLOW BUILDER */}
-                        {activeHeroView === 'automation' && (
-                            <div className="p-6 sm:p-8 bg-[#FAF9F5]">
-                                <div className="max-w-2xl mx-auto space-y-4">
-                                    {/* Trigger Node */}
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg shadow-sm flex items-start gap-4">
-                                        <div className="p-2 bg-indigo-50 rounded-md text-indigo-600">
-                                            <Globe className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="text-xs font-mono text-indigo-600 font-semibold uppercase">Trigger 01</div>
-                                            <div className="text-sm font-bold text-neutral-950">New Job Ingested via Adzuna API Stream</div>
-                                            <p className="text-xs text-neutral-500 mt-1">Queries global feeds every 60 minutes for Senior / Staff engineering titles.</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Connector Line */}
-                                    <div className="flex justify-center">
-                                        <div className="w-0.5 h-6 bg-[#E5E5E0]" />
-                                    </div>
-
-                                    {/* Condition Node */}
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg shadow-sm flex items-start gap-4">
-                                        <div className="p-2 bg-amber-50 rounded-md text-amber-600">
-                                            <Sliders className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="text-xs font-mono text-amber-600 font-semibold uppercase">Condition 02</div>
-                                            <div className="text-sm font-bold text-neutral-950">If Deterministic Match Score &ge; 85% &amp; ATS Health &ge; 90%</div>
-                                            <p className="text-xs text-neutral-500 mt-1">Evaluates 4-factor scoring weights (Skills Overlap + TF-IDF Cosine Vector).</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Connector Line */}
-                                    <div className="flex justify-center">
-                                        <div className="w-0.5 h-6 bg-[#E5E5E0]" />
-                                    </div>
-
-                                    {/* Action Node */}
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg shadow-sm flex items-start gap-4">
-                                        <div className="p-2 bg-emerald-50 rounded-md text-emerald-600">
-                                            <FileCheck className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="text-xs font-mono text-emerald-600 font-semibold uppercase">Action 03</div>
-                                            <div className="text-sm font-bold text-neutral-950">Generate Grounded CV Tailoring &amp; Dispatch Alert</div>
-                                            <p className="text-xs text-neutral-500 mt-1">Formats experience bullet diff matrix with 100% factual integrity guardrails.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* VIEW 4: ATTIO OBJECT MODEL INSPECTOR */}
-                        {activeHeroView === 'objects' && (
-                            <div className="p-6 sm:p-8 bg-[#FAF9F5] font-mono text-xs">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg space-y-2">
-                                        <div className="text-neutral-400 text-[10px]">OBJECT 01 // ENTITY</div>
-                                        <div className="font-bold text-neutral-950 text-sm font-sans">Candidate Profile</div>
-                                        <div className="text-neutral-600 text-[11px] space-y-1 pt-2 border-t border-[#E5E5E0]">
-                                            <div>&bull; id: UUID (PK)</div>
-                                            <div>&bull; verified_skills: String[]</div>
-                                            <div>&bull; target_roles: String[]</div>
-                                            <div>&bull; ats_diagnostics: Ref(Audit)</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg space-y-2">
-                                        <div className="text-neutral-400 text-[10px]">OBJECT 02 // PARSER</div>
-                                        <div className="font-bold text-neutral-950 text-sm font-sans">Spatial Bounding Box</div>
-                                        <div className="text-neutral-600 text-[11px] space-y-1 pt-2 border-t border-[#E5E5E0]">
-                                            <div>&bull; engine: PyMuPDF-1.24</div>
-                                            <div>&bull; bbox: [x0, y0, x1, y1]</div>
-                                            <div>&bull; column_split: 0.35W</div>
-                                            <div>&bull; text_block: String</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg space-y-2">
-                                        <div className="text-neutral-400 text-[10px]">OBJECT 03 // VECTOR</div>
-                                        <div className="font-bold text-neutral-950 text-sm font-sans">4-Factor Match Record</div>
-                                        <div className="text-neutral-600 text-[11px] space-y-1 pt-2 border-t border-[#E5E5E0]">
-                                            <div>&bull; w1_skills_overlap: Float</div>
-                                            <div>&bull; w2_tf_idf_vector: Float</div>
-                                            <div>&bull; w3_experience_fit: Float</div>
-                                            <div>&bull; composite_score: Integer</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* 4. ATTIO FEATURE SHOWCASE BENTO GRID */}
-                <section id="features" className="py-20 border-y border-[#E5E5E0] bg-white">
-                    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
-                        {/* Section Header */}
-                        <div className="max-w-3xl mb-16">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-xs font-medium text-neutral-700 mb-4">
-                                <span className="w-1.5 h-1.5 rounded-full bg-neutral-900" />
-                                <span>Platform Architecture</span>
-                            </div>
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-neutral-950 leading-tight">
-                                Powerful by design. <br />
-                                Flexible for every candidate workflow.
-                            </h2>
-                        </div>
-
-                        {/* Bento Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Card 1: 4-Factor Formula Engine */}
-                            <div className="p-8 bg-[#FAF9F5] border border-[#E5E5E0] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow">
-                                <div>
-                                    <div className="w-10 h-10 rounded-lg bg-white border border-[#E5E5E0] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
-                                        <SlidersHorizontal className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-neutral-950 mb-2">4-Factor Match Engine</h3>
-                                    <p className="text-sm text-neutral-600 leading-relaxed mb-6">
-                                        Evaluate candidate compatibility with transparent mathematical weights: 40% Skills, 30% TF-IDF Cosine, 15% Experience, and 15% Title fit.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg font-mono text-xs text-neutral-700 space-y-1.5">
-                                    <div className="text-neutral-400 text-[10px]">LIVE EVALUATION RATIONALE</div>
-                                    <div className="text-emerald-700 font-semibold">S_total = &sum; w_i &times; S_i = 96%</div>
-                                    <div className="text-neutral-500 text-[11px]">18 Normalized Skills Matched</div>
-                                </div>
-                            </div>
-
-                            {/* Card 2: PyMuPDF Spatial Geometry Parser */}
-                            <div className="p-8 bg-[#FAF9F5] border border-[#E5E5E0] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow">
-                                <div>
-                                    <div className="w-10 h-10 rounded-lg bg-white border border-[#E5E5E0] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
-                                        <Split className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-neutral-950 mb-2">Spatial Coordinate Geometry</h3>
-                                    <p className="text-sm text-neutral-600 leading-relaxed mb-6">
-                                        Process complex dual-column Canva and Figma PDF templates with coordinate bounding boxes [x0, y0, x1, y1] with zero column-bleed.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg font-mono text-xs text-neutral-700 space-y-1.5">
-                                    <div className="text-neutral-400 text-[10px]">COORDINATE EXTRACTION</div>
-                                    <div className="text-indigo-700 font-semibold">[36.0, 72.0, 195.0, 180.0]</div>
-                                    <div className="text-neutral-500 text-[11px]">Zero CID Font Corruptions Detected</div>
-                                </div>
-                            </div>
-
-                            {/* Card 3: 10-Layer ATS Diagnostic */}
-                            <div className="p-8 bg-[#FAF9F5] border border-[#E5E5E0] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow">
-                                <div>
-                                    <div className="w-10 h-10 rounded-lg bg-white border border-[#E5E5E0] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
-                                        <CheckSquare className="w-5 h-5" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-neutral-950 mb-2">10-Layer ATS Diagnostic</h3>
-                                    <p className="text-sm text-neutral-600 leading-relaxed mb-6">
-                                        Audit resumes across 10 deterministic compliance layers including contact vectors, action verbs, metric ratios, and file security.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-white border border-[#E5E5E0] rounded-lg font-mono text-xs text-neutral-700 space-y-1.5">
-                                    <div className="text-neutral-400 text-[10px]">AUDIT INTEGRITY</div>
-                                    <div className="text-emerald-700 font-semibold">10 / 10 Compliance Checks Passed</div>
-                                    <div className="text-neutral-500 text-[11px]">72% Metric Quantification Ratio</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* 5. 10-LAYER ATS COMPLIANCE MATRIX SECTION */}
-                <section id="diagnostic" className="py-20 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-4 border-b border-[#E5E5E0] gap-4">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#E5E5E0] text-xs font-medium text-neutral-700 shadow-sm mb-3">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                <span>Deterministic Validation</span>
-                            </div>
-                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-950">
-                                10-Layer ATS Diagnostic Matrix
-                            </h2>
-                        </div>
-                        <div className="text-xs font-mono text-neutral-500">
-                            CLICK ANY ROW TO VIEW SPECIFIC TECHNICAL MECHANISM
-                        </div>
-                    </div>
-
-                    <div className="bg-white border border-[#E5E5E0] rounded-xl overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr className="bg-[#FAF9F5] border-b border-[#E5E5E0] text-neutral-600 font-medium">
-                                        <th className="py-3 px-4">#</th>
-                                        <th className="py-3 px-4">Audit Vector Layer</th>
-                                        <th className="py-3 px-4">Category</th>
-                                        <th className="py-3 px-4">Status</th>
-                                        <th className="py-3 px-4">Measured Metric</th>
-                                        <th className="py-3 px-4">Technical Mechanism</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-[#E5E5E0]">
-                                    {diagnosticLayers.map((layer, idx) => (
-                                        <tr
-                                            key={layer.id}
-                                            onClick={() => setActiveDiagnosticLayer(idx)}
-                                            className={`cursor-pointer transition-colors ${
-                                                activeDiagnosticLayer === idx ? 'bg-indigo-50/50 font-medium' : 'hover:bg-neutral-50/70 bg-white'
-                                            }`}
-                                        >
-                                            <td className="py-3.5 px-4 font-mono text-neutral-400">[{layer.id}]</td>
-                                            <td className="py-3.5 px-4 font-bold text-neutral-950 text-[13px]">{layer.name}</td>
-                                            <td className="py-3.5 px-4 text-neutral-600">{layer.category}</td>
-                                            <td className="py-3.5 px-4">
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-[10px] font-bold">
+                        {/* TAB 3: ATS DIAGNOSTIC CHECK */}
+                        {activeWorkspaceTab === 'diagnostic' && (
+                            <div className="p-6 bg-white space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {diagnosticAuditItems.map((item, idx) => (
+                                        <div key={idx} className="p-4 rounded-lg border border-[#EAEAE6] bg-[#FAF9F5] flex items-start justify-between gap-3">
+                                            <div>
+                                                <div className="text-[11px] font-mono text-neutral-400 uppercase">{item.category}</div>
+                                                <div className="font-bold text-neutral-950 text-sm mt-0.5">{item.title}</div>
+                                                <p className="text-xs text-neutral-600 mt-1 leading-relaxed">{item.desc}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
                                                     <Check className="w-3 h-3" />
-                                                    <span>{layer.status}</span>
+                                                    <span>{item.score}</span>
                                                 </span>
-                                            </td>
-                                            <td className="py-3.5 px-4 font-mono text-neutral-800 font-semibold">{layer.metric}</td>
-                                            <td className="py-3.5 px-4 text-neutral-600 leading-relaxed">{layer.description}</td>
-                                        </tr>
+                                            </div>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 4: GROUNDED TAILORING DIFF */}
+                        {activeWorkspaceTab === 'tailoring' && (
+                            <div className="p-6 bg-white space-y-4 text-xs font-mono">
+                                <div className="p-3 bg-neutral-100 border border-neutral-200 rounded-md text-neutral-700 flex items-center justify-between">
+                                    <span>Target Role: <strong>Senior Full-Stack Engineer at Vercel</strong></span>
+                                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">100% Factual Integrity Guardrail</span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-md">
+                                        <div className="text-[10px] uppercase text-rose-500 font-bold mb-1">// Before Tailoring (Generic)</div>
+                                        &bull; Worked on backend services and improved database queries for the web application team.
+                                    </div>
+                                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-md">
+                                        <div className="text-[10px] uppercase text-emerald-600 font-bold mb-1">// After Tailoring (Quantified &amp; Targeted)</div>
+                                        &bull; Architected asynchronous FastAPI endpoints with PostgreSQL indexing, reducing p99 response times by 42% across 10M records.
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* 3. VALUE PROPOSITION PILLARS WITH ANIMATED LUCIDE MICRO-INTERACTIONS */}
+                <section id="features" className="py-20 border-y border-[#EAEAE6] bg-white">
+                    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="max-w-3xl mb-16">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-neutral-950 leading-tight">
+                                Built for candidates who value <br />
+                                precision, speed, and real results.
+                            </h2>
                         </div>
 
-                        {/* Active Diagnostic Bar */}
-                        <div className="p-4 bg-[#FAF9F5] border-t border-[#E5E5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                            <div>
-                                <span className="font-bold text-neutral-950">Active Layer [{diagnosticLayers[activeDiagnosticLayer].id}]: {diagnosticLayers[activeDiagnosticLayer].name}</span> &mdash;{' '}
-                                <span className="text-neutral-600">{diagnosticLayers[activeDiagnosticLayer].description}</span>
-                            </div>
-                            <Link to="/register">
-                                <button className="px-3.5 py-1.5 bg-neutral-900 text-white rounded font-medium hover:bg-neutral-800 transition-colors whitespace-nowrap">
-                                    Audit Your Resume &rarr;
-                                </button>
-                            </Link>
+                        {/* 3-Column Bento with Micro-Animated Icons */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* Pillar 1 */}
+                            <motion.div
+                                whileHover={{ y: -4 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
+                                className="p-8 bg-[#FAF9F5] border border-[#EAEAE6] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow"
+                            >
+                                <div>
+                                    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAEAE6] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
+                                        <AnimatedIcon icon={Split} className="w-6 h-6 text-neutral-900" variant="bounce" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-neutral-950 mb-3">Multi-Column Visual Ingestion</h3>
+                                    <p className="text-sm text-neutral-600 leading-relaxed">
+                                        Upload creative Canva, Figma, and modern PDF resume templates. Our spatial reading engine preserves column hierarchy without layout scrambling.
+                                    </p>
+                                </div>
+                                <div className="mt-8 pt-4 border-t border-[#EAEAE6] text-xs font-semibold text-neutral-900 flex items-center gap-1">
+                                    <span>Zero formatting corruption</span>
+                                    <AnimatedIcon icon={CheckCheck} className="w-4 h-4 text-emerald-600" variant="bounce" />
+                                </div>
+                            </motion.div>
+
+                            {/* Pillar 2 */}
+                            <motion.div
+                                whileHover={{ y: -4 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
+                                className="p-8 bg-[#FAF9F5] border border-[#EAEAE6] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow"
+                            >
+                                <div>
+                                    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAEAE6] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
+                                        <AnimatedIcon icon={SlidersHorizontal} className="w-6 h-6 text-neutral-900" variant="float" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-neutral-950 mb-3">Explainable Match Intelligence</h3>
+                                    <p className="text-sm text-neutral-600 leading-relaxed">
+                                        Understand exactly why you match a role. View transparent breakdowns across direct skills, seniority fit, and specific missing keyword gaps.
+                                    </p>
+                                </div>
+                                <div className="mt-8 pt-4 border-t border-[#EAEAE6] text-xs font-semibold text-neutral-900 flex items-center gap-1">
+                                    <span>Transparent mathematical rationale</span>
+                                    <AnimatedIcon icon={CheckCheck} className="w-4 h-4 text-emerald-600" variant="bounce" />
+                                </div>
+                            </motion.div>
+
+                            {/* Pillar 3 */}
+                            <motion.div
+                                whileHover={{ y: -4 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
+                                className="p-8 bg-[#FAF9F5] border border-[#EAEAE6] rounded-xl flex flex-col justify-between hover:shadow-md transition-shadow"
+                            >
+                                <div>
+                                    <div className="w-12 h-12 rounded-xl bg-white border border-[#EAEAE6] flex items-center justify-center text-neutral-900 mb-6 shadow-sm">
+                                        <AnimatedIcon icon={Kanban} className="w-6 h-6 text-neutral-900" variant="pulse" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-neutral-950 mb-3">Unified Application Pipeline</h3>
+                                    <p className="text-sm text-neutral-600 leading-relaxed">
+                                        Track every opportunity from initial sourcing to final interview offers. Keep salary notes, interview dates, and custom tailored versions organized.
+                                    </p>
+                                </div>
+                                <div className="mt-8 pt-4 border-t border-[#EAEAE6] text-xs font-semibold text-neutral-900 flex items-center gap-1">
+                                    <span>End-to-end career CRM</span>
+                                    <AnimatedIcon icon={CheckCheck} className="w-4 h-4 text-emerald-600" variant="bounce" />
+                                </div>
+                            </motion.div>
                         </div>
                     </div>
                 </section>
 
-                {/* 6. TECHNICAL FAQ ACCORDION */}
-                <section id="faq" className="py-20 border-t border-[#E5E5E0] bg-white">
+                {/* 4. TRUST & ACCURACY METRICS */}
+                <section className="py-16 bg-[#FAF9F5] border-b border-[#EAEAE6]">
+                    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                            <div>
+                                <div className="text-4xl sm:text-5xl font-black text-neutral-950 tracking-tight mb-1">99.4%</div>
+                                <div className="text-xs sm:text-sm text-neutral-500 font-medium">Layout Parsing Accuracy</div>
+                            </div>
+                            <div>
+                                <div className="text-4xl sm:text-5xl font-black text-neutral-950 tracking-tight mb-1">10-Point</div>
+                                <div className="text-xs sm:text-sm text-neutral-500 font-medium">ATS Compliance Check</div>
+                            </div>
+                            <div>
+                                <div className="text-4xl sm:text-5xl font-black text-neutral-950 tracking-tight mb-1">100%</div>
+                                <div className="text-xs sm:text-sm text-neutral-500 font-medium">Factual Claim Integrity</div>
+                            </div>
+                            <div>
+                                <div className="text-4xl sm:text-5xl font-black text-neutral-950 tracking-tight mb-1">6 Global</div>
+                                <div className="text-xs sm:text-sm text-neutral-500 font-medium">Live Job Board Feeds</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 5. TECHNICAL FAQ */}
+                <section id="faq" className="py-20 bg-white border-b border-[#EAEAE6]">
                     <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 text-xs font-medium text-neutral-700 mb-3">
-                                <HelpCircle className="w-3.5 h-3.5" />
-                                <span>Frequently Asked Questions</span>
-                            </div>
-                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-950">
-                                Everything you need to know
+                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-950 mb-3">
+                                Frequently Asked Questions
                             </h2>
+                            <p className="text-neutral-500 text-sm">Everything you need to know about the platform.</p>
                         </div>
 
                         <div className="space-y-3">
-                            {faqItems.map((item, idx) => (
-                                <div key={idx} className="border border-[#E5E5E0] rounded-lg bg-[#FAF9F5] overflow-hidden">
+                            {faqList.map((item, idx) => (
+                                <div key={idx} className="border border-[#EAEAE6] rounded-lg bg-[#FAF9F5] overflow-hidden">
                                     <button
                                         onClick={() => toggleFaq(idx)}
                                         className="w-full px-6 py-4 text-left flex items-center justify-between font-bold text-neutral-950 hover:bg-neutral-100/50 transition-colors text-sm"
@@ -954,7 +774,7 @@ function Landing() {
                                     </button>
 
                                     {openFaq === idx && (
-                                        <div className="px-6 py-4 bg-white border-t border-[#E5E5E0] text-neutral-600 text-sm leading-relaxed">
+                                        <div className="px-6 py-4 bg-white border-t border-[#EAEAE6] text-neutral-600 text-sm leading-relaxed">
                                             {item.a}
                                         </div>
                                     )}
@@ -964,15 +784,14 @@ function Landing() {
                     </div>
                 </section>
 
-                {/* 7. ATTIO CONVERSION BANNER */}
+                {/* 6. CONVERSION BANNER */}
                 <section className="py-20 bg-neutral-950 text-white text-center">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-
                         <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
                             Start landing top roles with precision data.
                         </h2>
                         <p className="text-base sm:text-lg text-neutral-400 max-w-xl mx-auto mb-8">
-                            Upload your resume now to run the 10-layer diagnostic and match live Adzuna opportunities in real-time.
+                            Upload your resume now to run the 10-point diagnostic and discover mathematically scored opportunities in real-time.
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-4">
                             <Link to="/register">
@@ -991,53 +810,40 @@ function Landing() {
                 </section>
             </main>
 
-            {/* 8. ATTIO MULTI-COLUMN STUDIO FOOTER */}
-            <footer className="bg-[#FAF9F5] border-t border-[#E5E5E0] py-16 text-xs text-neutral-600">
+            {/* 7. STUDIO FOOTER */}
+            <footer className="bg-[#FAF9F5] border-t border-[#EAEAE6] py-16 text-xs text-neutral-600 relative z-10">
                 <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-                        {/* Col 1: Brand & Status */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                        {/* Col 1 */}
                         <div className="col-span-2 space-y-4">
                             <Logo size="sm" />
                             <p className="text-neutral-500 max-w-sm leading-relaxed">
-                                The career intelligence and ATS diagnostic platform powered by spatial bounding box parsing and deterministic matching.
+                                The intelligent career workspace for candidates who value precision, accuracy, and real results.
                             </p>
-
                         </div>
 
-                        {/* Col 2: Product */}
+                        {/* Col 2 */}
                         <div className="space-y-3">
                             <div className="font-semibold text-neutral-950 uppercase text-[11px] tracking-wider">Product</div>
                             <ul className="space-y-2">
                                 <li><a href="#workspace" className="hover:text-neutral-950 transition-colors">Workspace</a></li>
-                                <li><a href="#features" className="hover:text-neutral-950 transition-colors">Data Engine</a></li>
-                                <li><a href="#automations" className="hover:text-neutral-950 transition-colors">Automations</a></li>
-                                <li><a href="#diagnostic" className="hover:text-neutral-950 transition-colors">10-Layer ATS Audit</a></li>
+                                <li><a href="#features" className="hover:text-neutral-950 transition-colors">Features</a></li>
+                                <li><a href="#diagnostic" className="hover:text-neutral-950 transition-colors">ATS Health Check</a></li>
                             </ul>
                         </div>
 
-                        {/* Col 3: Architecture */}
-                        <div className="space-y-3">
-                            <div className="font-semibold text-neutral-950 uppercase text-[11px] tracking-wider">Engineering</div>
-                            <ul className="space-y-2">
-                                <li><span className="text-neutral-500">PyMuPDF Spatial Fitz</span></li>
-                                <li><span className="text-neutral-500">FastAPI Async Runtime</span></li>
-                                <li><span className="text-neutral-500">SQLAlchemy 2.0 ORM</span></li>
-                                <li><span className="text-neutral-500">Adzuna Global Pipeline</span></li>
-                            </ul>
-                        </div>
-
-                        {/* Col 4: Account */}
+                        {/* Col 3 */}
                         <div className="space-y-3">
                             <div className="font-semibold text-neutral-950 uppercase text-[11px] tracking-wider">Account</div>
                             <ul className="space-y-2">
                                 <li><Link to="/login" className="hover:text-neutral-950 transition-colors">Sign In</Link></li>
                                 <li><Link to="/register" className="hover:text-neutral-950 transition-colors">Create Account</Link></li>
-                                <li><a href="#faq" className="hover:text-neutral-950 transition-colors">Security &amp; Privacy</a></li>
+                                <li><a href="#faq" className="hover:text-neutral-950 transition-colors">Privacy &amp; Security</a></li>
                             </ul>
                         </div>
                     </div>
 
-                    <div className="pt-8 border-t border-[#E5E5E0] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
+                    <div className="pt-8 border-t border-[#EAEAE6] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-neutral-500">
                         <div>&copy; 2026 Smart Job Hunter Inc. All rights reserved.</div>
                         <div className="flex items-center gap-6">
                             <span>Privacy Policy</span>
