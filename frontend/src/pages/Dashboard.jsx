@@ -144,13 +144,13 @@ function Dashboard() {
     const standardJobs = filteredJobs.filter(j => (matchResults[j.id]?.match_percentage || 0) < 70);
 
     return (
-        <div className="space-y-6 animate-fade-in relative w-full text-slate-900 font-sans">
+        <div className="space-y-6 animate-fade-in relative w-full text-slate-900 dark:text-slate-100 font-sans">
             {/* Toast Notification */}
             {toast.show && (
                 <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-xl border flex items-center gap-2.5 animate-fade-in text-xs font-semibold ${
-                    toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
-                    toast.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-                    'bg-indigo-50 border-indigo-200 text-indigo-800'
+                    toast.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200' :
+                    toast.type === 'warning' ? 'bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200' :
+                    'bg-indigo-50 dark:bg-indigo-950/80 border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200'
                 }`}>
                     <Sparkles size={16} />
                     <span>{toast.text}</span>
@@ -160,8 +160,8 @@ function Dashboard() {
             {/* 1. Header & Direct Action Links */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Overview</h1>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Overview</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         Target role compatibility, candidate pipeline, and ATS readiness.
                     </p>
                 </div>
@@ -182,73 +182,73 @@ function Dashboard() {
 
             {/* 2. Four Clean, Simple KPI Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-1">
-                    <span className="text-xs font-semibold text-slate-500">Average Match Fit</span>
-                    <div className="text-2xl font-bold text-indigo-600">
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Average Match Fit</span>
+                    <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                         {analytics?.average_match_score || 0}%
                     </div>
-                    <p className="text-[11px] text-slate-400">Explainable 4-factor scoring</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">Explainable 4-factor scoring</p>
                 </div>
 
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-1">
-                    <span className="text-xs font-semibold text-slate-500">Tracked Applications</span>
-                    <div className="text-2xl font-bold text-slate-900">
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tracked Applications</span>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
                         {analytics?.total_applications || 0}
                     </div>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">
                         {analytics?.status_counts?.interview || 0} Interviews &bull; {analytics?.status_counts?.applied || 0} Applied
                     </p>
                 </div>
 
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-1">
-                    <span className="text-xs font-semibold text-slate-500">ATS Document Health</span>
-                    <div className="text-2xl font-bold text-emerald-600">
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">ATS Document Health</span>
+                    <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                         {analytics?.ats_health_score !== null ? `${analytics?.ats_health_score}%` : 'Ready'}
                     </div>
-                    <p className="text-[11px] text-slate-400">{analytics?.ats_classification || 'Scan complete'}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">{analytics?.ats_classification || 'Scan complete'}</p>
                 </div>
 
-                <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-1">
-                    <span className="text-xs font-semibold text-slate-500">Tailored Materials</span>
-                    <div className="text-2xl font-bold text-slate-900">
+                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tailored Materials</span>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
                         {(analytics?.tailored_resumes_count || 0) + (analytics?.cover_letters_count || 0)}
                     </div>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500">
                         {analytics?.tailored_resumes_count || 0} CVs &bull; {analytics?.cover_letters_count || 0} Letters
                     </p>
                 </div>
             </div>
 
             {/* 3. Filter Controls Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <div className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium flex items-center gap-2">
-                        <Target size={14} className="text-indigo-600" />
+                    <div className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
+                        <Target size={14} className="text-indigo-600 dark:text-indigo-400" />
                         <span>Scope: {user?.profile?.preferred_role || 'Engineering Roles'}</span>
                     </div>
 
-                    <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                         <button
                             onClick={() => setMatchFilter('all')}
-                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'all' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
                             All ({jobs.length})
                         </button>
                         <button
                             onClick={() => setMatchFilter('high')}
-                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'high' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'high' ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
                             &ge;85% Fit
                         </button>
                         <button
                             onClick={() => setMatchFilter('target')}
-                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'target' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                            className={`px-2.5 py-1 rounded-md transition-all font-medium ${matchFilter === 'target' ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                         >
                             70%&ndash;84% Fit
                         </button>
                     </div>
 
-                    <div className="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-mono text-[11px]">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
                         Tabular View
                     </div>
                 </div>
@@ -256,13 +256,13 @@ function Dashboard() {
                 {/* Search Bar */}
                 <form onSubmit={(e) => { e.preventDefault(); fetchJobs(); }} className="flex items-center gap-2 w-full sm:w-auto">
                     <div className="relative flex-1 sm:w-64">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                         <input
                             type="text"
                             placeholder="Search roles, skills, companies..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
                         />
                     </div>
                     <Button type="submit" variant="primary" size="sm" className="py-1.5 text-xs">
@@ -275,15 +275,15 @@ function Dashboard() {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
                 {/* Left Area: Structured Data Table (8 Cols) */}
                 <div className="xl:col-span-8 space-y-4">
-                    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-                        <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
+                        <div className="px-5 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
                             <div className="flex items-center gap-2">
-                                <h2 className="text-sm font-bold text-slate-900">Opportunities & Matching</h2>
-                                <span className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded">
+                                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Opportunities & Matching</h2>
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                                     {filteredJobs.length} roles
                                 </span>
                             </div>
-                            <span className="text-[11px] text-slate-400 hidden sm:inline">
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
                                 Instant AI Match &bull; Factual CV Tailor &bull; Pipeline Track
                             </span>
                         </div>
@@ -305,7 +305,7 @@ function Dashboard() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse text-xs">
                                     <thead>
-                                        <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-semibold text-[11px] uppercase tracking-wider">
+                                        <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold text-[11px] uppercase tracking-wider">
                                             <th className="py-2.5 px-4">Role & Company</th>
                                             <th className="py-2.5 px-3">Workstyle</th>
                                             <th className="py-2.5 px-3">Tech Stack</th>
@@ -314,12 +314,12 @@ function Dashboard() {
                                             <th className="py-2.5 px-4 text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100 font-sans">
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-sans">
                                         {/* High Match Section */}
                                         {highMatchJobs.length > 0 && (
                                             <>
-                                                <tr className="bg-emerald-50/40 border-t border-b border-emerald-100">
-                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
+                                                <tr className="bg-emerald-50/40 dark:bg-emerald-950/30 border-t border-b border-emerald-100 dark:border-emerald-900/50">
+                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
                                                         <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2" />
                                                         High Compatibility (&ge;85%) &bull; {highMatchJobs.length} roles
                                                     </td>
@@ -334,8 +334,8 @@ function Dashboard() {
                                                         onMatch={() => handleMatch(job.id)}
                                                         onTailor={() => handleTailor(job.id)}
                                                         onTracked={() => {
-                                                            initDashboard();
-                                                            showToast("Added to Pipeline Tracker", "success");
+                                                             initDashboard();
+                                                             showToast("Added to Pipeline Tracker", "success");
                                                         }}
                                                     />
                                                 ))}
@@ -345,8 +345,8 @@ function Dashboard() {
                                         {/* Target Match Section */}
                                         {targetMatchJobs.length > 0 && (
                                             <>
-                                                <tr className="bg-indigo-50/40 border-t border-b border-indigo-100">
-                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-indigo-800 uppercase tracking-wider">
+                                                <tr className="bg-indigo-50/40 dark:bg-indigo-950/30 border-t border-b border-indigo-100 dark:border-indigo-900/50">
+                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
                                                         <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-2" />
                                                         Target Matches (70% &ndash; 84%) &bull; {targetMatchJobs.length} roles
                                                     </td>
@@ -361,8 +361,8 @@ function Dashboard() {
                                                         onMatch={() => handleMatch(job.id)}
                                                         onTailor={() => handleTailor(job.id)}
                                                         onTracked={() => {
-                                                            initDashboard();
-                                                            showToast("Added to Pipeline Tracker", "success");
+                                                             initDashboard();
+                                                             showToast("Added to Pipeline Tracker", "success");
                                                         }}
                                                     />
                                                 ))}
@@ -372,8 +372,8 @@ function Dashboard() {
                                         {/* Standard Openings */}
                                         {standardJobs.length > 0 && (
                                             <>
-                                                <tr className="bg-slate-50 border-t border-b border-slate-200">
-                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                                                <tr className="bg-slate-50 dark:bg-slate-800/40 border-t border-b border-slate-200 dark:border-slate-800">
+                                                    <td colSpan={6} className="py-1.5 px-4 text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                                                         <span className="inline-block w-2 h-2 rounded-full bg-slate-400 mr-2" />
                                                         Active Openings &bull; {standardJobs.length} roles
                                                     </td>
@@ -388,8 +388,8 @@ function Dashboard() {
                                                         onMatch={() => handleMatch(job.id)}
                                                         onTailor={() => handleTailor(job.id)}
                                                         onTracked={() => {
-                                                            initDashboard();
-                                                            showToast("Added to Pipeline Tracker", "success");
+                                                             initDashboard();
+                                                             showToast("Added to Pipeline Tracker", "success");
                                                         }}
                                                     />
                                                 ))}
@@ -405,12 +405,12 @@ function Dashboard() {
                 {/* Right Area: Clean Sidebar (4 Cols) */}
                 <div className="xl:col-span-4 space-y-4">
                     {/* Pipeline Stage Breakdown */}
-                    <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                    <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-3">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                                 Pipeline Status
                             </h3>
-                            <a href="/tracker" className="text-xs text-indigo-600 hover:underline font-medium">
+                            <a href="/tracker" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                                 Kanban
                             </a>
                         </div>
@@ -424,45 +424,45 @@ function Dashboard() {
                     </div>
 
                     {/* Recent Generated Assets */}
-                    <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+                    <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs space-y-3">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                                <History size={14} className="text-indigo-600" /> Recent Tailored Assets
+                            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                                <History size={14} className="text-indigo-600 dark:text-indigo-400" /> Recent Tailored Assets
                             </h3>
-                            <a href="/resume-hub" className="text-xs text-indigo-600 hover:underline font-medium">
+                            <a href="/resume-hub" className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
                                 View All
                             </a>
                         </div>
 
                         <div className="space-y-2 text-xs">
                             {analytics?.recent_tailored_resumes?.slice(0, 3).map(item => (
-                                <div key={item.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                                <div key={item.id} className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 flex justify-between items-center">
                                     <div>
                                         <div className="flex items-center gap-1.5">
                                             <span className="badge badge-indigo text-[10px] py-0 px-1.5">v{item.version}</span>
-                                            <span className="text-slate-900 font-bold truncate max-w-[140px]">{item.job_title}</span>
+                                            <span className="text-slate-900 dark:text-white font-bold truncate max-w-[140px]">{item.job_title}</span>
                                         </div>
-                                        <span className="text-slate-500 text-[11px]">{item.company}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px]">{item.company}</span>
                                     </div>
-                                    <a href="/resume-hub" className="text-indigo-600 hover:text-indigo-800 font-semibold text-[11px]">Diff</a>
+                                    <a href="/resume-hub" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold text-[11px]">Diff</a>
                                 </div>
                             ))}
 
                             {analytics?.recent_cover_letters?.slice(0, 2).map(letter => (
-                                <div key={letter.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                                <div key={letter.id} className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 flex justify-between items-center">
                                     <div>
                                         <div className="flex items-center gap-1.5">
                                             <span className="badge badge-cyan text-[10px] py-0 px-1.5">{letter.tone}</span>
-                                            <span className="text-slate-900 font-bold truncate max-w-[140px]">{letter.job_title}</span>
+                                            <span className="text-slate-900 dark:text-white font-bold truncate max-w-[140px]">{letter.job_title}</span>
                                         </div>
-                                        <span className="text-slate-500 text-[11px]">{letter.company}</span>
+                                        <span className="text-slate-500 dark:text-slate-400 text-[11px]">{letter.company}</span>
                                     </div>
-                                    <a href="/resume-hub" className="text-indigo-600 hover:text-indigo-800 font-semibold text-[11px]">View</a>
+                                    <a href="/resume-hub" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold text-[11px]">View</a>
                                 </div>
                             ))}
 
                             {(!analytics?.recent_tailored_resumes?.length && !analytics?.recent_cover_letters?.length) && (
-                                <p className="text-slate-500 text-xs py-2">No tailored materials generated yet.</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs py-2">No tailored materials generated yet.</p>
                             )}
                         </div>
                     </div>
@@ -483,12 +483,12 @@ function Dashboard() {
 
 function StageItem({ label, count, color }) {
     return (
-        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50">
+        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${color}`} />
-                <span className="text-slate-700 font-medium">{label}</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{label}</span>
             </div>
-            <span className="font-bold text-slate-900 font-mono">{count}</span>
+            <span className="font-bold text-slate-900 dark:text-white font-mono">{count}</span>
         </div>
     );
 }
@@ -522,21 +522,21 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
         .filter(Boolean);
 
     return (
-        <tr className="hover:bg-slate-50 transition-colors group">
+        <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
             {/* Role Title & Company */}
             <td className="py-3 px-4">
-                <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                <div className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {job.title}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1.5">
-                    <Briefcase size={12} className="text-slate-400" />
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                    <Briefcase size={12} className="text-slate-400 dark:text-slate-500" />
                     <span>{job.company}</span>
                 </div>
             </td>
 
             {/* Location / Remote Status */}
-            <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
-                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[11px] text-slate-700">
+            <td className="py-3 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-700 dark:text-slate-300">
                     {job.remote_status || 'Hybrid'}
                 </span>
             </td>
@@ -545,12 +545,12 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
             <td className="py-3 px-3">
                 <div className="flex flex-wrap gap-1 max-w-xs">
                     {skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] text-slate-700">
+                        <span key={skill} className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
                             {skill}
                         </span>
                     ))}
                     {skills.length > 3 && (
-                        <span className="text-[10px] text-slate-400 self-center">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 self-center">
                             +{skills.length - 3}
                         </span>
                     )}
@@ -562,10 +562,10 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
                 {score > 0 ? (
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                         score >= 85
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : score >= 70
-                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                            ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                     }`}>
                         {score}%
                     </span>
@@ -573,7 +573,7 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
                     <button
                         onClick={onMatch}
                         disabled={isMatching}
-                        className="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold underline disabled:opacity-50"
+                        className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold underline disabled:opacity-50"
                     >
                         {isMatching ? 'Scoring...' : 'Score'}
                     </button>
@@ -585,13 +585,13 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
                 {matchResult?.missing_skills?.length > 0 ? (
                     <div className="flex flex-wrap gap-1 max-w-[140px]">
                         {matchResult.missing_skills.slice(0, 2).map(skill => (
-                            <span key={skill} className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 text-[10px] border border-rose-200">
+                            <span key={skill} className="px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[10px] border border-rose-200 dark:border-rose-800">
                                 {skill}
                             </span>
                         ))}
                     </div>
                 ) : (
-                    <span className="text-[10px] text-slate-400 font-mono">&mdash;</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">&mdash;</span>
                 )}
             </td>
 
@@ -602,7 +602,7 @@ function JobTableRow({ job, matchResult, isMatching, isTailoring, onMatch, onTai
                         <button
                             onClick={onTailor}
                             disabled={isTailoring}
-                            className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors"
+                            className="p-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-colors"
                             title="Tailor Resume CV"
                         >
                             <Scissors size={13} />
