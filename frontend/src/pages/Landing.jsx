@@ -967,10 +967,7 @@ function Landing() {
                 {/* 7. ATTIO CONVERSION BANNER */}
                 <section className="py-20 bg-neutral-950 text-white text-center">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-800 text-emerald-400 text-xs font-mono mb-6">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <span>INSTANT ONBOARDING // ZERO SETUP</span>
-                        </div>
+
                         <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
                             Start landing top roles with precision data.
                         </h2>
