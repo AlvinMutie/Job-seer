@@ -22,14 +22,24 @@ import Lenis from 'lenis';
 
 function App() {
     useEffect(() => {
-        const lenis = new Lenis();
+        try {
+            const lenis = new Lenis();
 
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
+            let reqId;
+            function raf(time) {
+                lenis.raf(time);
+                reqId = requestAnimationFrame(raf);
+            }
+
+            reqId = requestAnimationFrame(raf);
+
+            return () => {
+                if (reqId) cancelAnimationFrame(reqId);
+                try { lenis.destroy(); } catch (e) {}
+            };
+        } catch (e) {
+            console.warn("Smooth scroll initialization skipped:", e);
         }
-
-        requestAnimationFrame(raf);
     }, []);
 
     return (

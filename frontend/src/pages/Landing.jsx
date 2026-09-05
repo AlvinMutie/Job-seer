@@ -14,6 +14,7 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import SpotlightCard from '../components/SpotlightCard';
 import ThemeToggle from '../components/ThemeToggle';
+import Logo from '../components/Logo';
 
 function Landing() {
     // State for Mobile Navigation Drawer
