@@ -20,7 +20,7 @@ function NextBestAction({ user, analytics }) {
 
     if (!hasProfile) {
         title = "Configure your target career preferences";
-        description = "Set your preferred job title, location preferences, and core technical skills to optimize AI match calculations.";
+        description = "Set your preferred job title, location preferences, and core technical skills to optimize match calculations.";
         buttonText = "Complete Profile";
         buttonIcon = Compass;
         buttonLink = "/settings";
@@ -36,7 +36,7 @@ function NextBestAction({ user, analytics }) {
         badgeVariant = "cyan";
     } else if (totalApps === 0) {
         title = "Discover tech roles & evaluate your match fit";
-        description = "Explore open tech roles filtered by remote status and experience level, then calculate your AI resume fit.";
+        description = "Explore open tech roles filtered by remote status and experience level, then calculate your resume fit.";
         buttonText = "Discover Jobs";
         buttonIcon = Briefcase;
         buttonLink = "/jobs";

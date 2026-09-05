@@ -35,7 +35,7 @@ export default function ResumeTemplateStudio({
         skills: 'Python, FastAPI, React, PostgreSQL, Docker, AWS, Git, CI/CD, Agile Methodology',
         experience: `Senior Software Engineer | Acme Corp | 2022 - Present\n- Led development of enterprise microservices handling 10M+ daily requests with 99.99% uptime.\n- Architected high-throughput data processing pipelines reducing processing latency by 40%.\n\nSoftware Engineer | Tech Innovations | 2020 - 2022\n- Developed modern responsive web applications using React, Tailwind CSS, and REST APIs.\n- Mentored 4 junior engineers and implemented automated testing pipelines.`,
         education: `B.S. in Computer Science | University of Technology | 2016 - 2020\n- Dean's List, Relevant Coursework: Algorithms, Database Management, Distributed Systems`,
-        projects: `Smart Job Hunter Platform | 2024\n- Built an AI-powered job application acceleration suite with real-time matching and automated tailoring.`
+        projects: `Smart Job Hunter Platform | 2024\n- Built an automated job application acceleration suite with real-time NLP matching and targeted CV tailoring.`
     });
 
     const [activeTab, setActiveTab] = useState('preview'); // Default to live preview for immediate visual satisfaction

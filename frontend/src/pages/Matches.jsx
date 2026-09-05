@@ -71,7 +71,7 @@ function Matches() {
                         <EmptyState
                             icon={Target}
                             title="No match recommendations available"
-                            description="Upload or update your CV in the Resume Hub to start receiving explainable AI compatibility recommendations."
+                            description="Upload or update your CV in the Resume Hub to start receiving explainable compatibility recommendations."
                             action={<Button variant="primary" onClick={() => window.location.href = '/resume-hub'}>Upload Resume in Hub</Button>}
                         />
                     </div>
@@ -82,7 +82,7 @@ function Matches() {
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
                                         <div className="text-4xl font-extrabold text-indigo-600">{match.match_percentage}%</div>
-                                        <span className="text-xs text-slate-500 font-mono">Explainable AI Score</span>
+                                        <span className="text-xs text-slate-500 font-mono">Explainable Match Score</span>
                                     </div>
                                     <Badge variant={match.match_percentage > 70 ? 'emerald' : 'slate'}>
                                         {match.match_percentage > 70 ? 'High Match' : 'Potential Match'}

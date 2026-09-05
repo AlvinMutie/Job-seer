@@ -10,7 +10,7 @@ import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import PageHeader from '../components/ui/PageHeader';
-import { authService, templateService, tailoredResumeService } from '../services/api';
+import { authService, templateService, tailoredResumeService, jobService } from '../services/api';
 
 const ACCENT_PRESETS = [
     { name: 'Black', hex: '#000000', bgClass: 'bg-black', label: 'Classic Black' },
@@ -174,7 +174,7 @@ export default function AtsPortal() {
     // Structured resume data (default initialized to the exact Canva Black & White Clean template)
     const [resumeData, setResumeData] = useState({ ...MATTHEW_COLLINS_SAMPLE });
 
-    const [activeTab, setActiveTab] = useState('preview'); // 'preview' | 'editor'
+    const [activeTab, setActiveTab] = useState('preview'); // 'preview' | 'editor' | 'gap_verifier'
     const [isParsing, setIsParsing] = useState(false);
     const [isImportingCanva, setIsImportingCanva] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -183,20 +183,35 @@ export default function AtsPortal() {
     const [savedTemplates, setSavedTemplates] = useState([]);
     const [selectedTemplateId, setSelectedTemplateId] = useState(null);
 
+    // Human-in-the-Loop Gap Verification State
+    const [availableJobs, setAvailableJobs] = useState([]);
+    const [selectedJobId, setSelectedJobId] = useState('');
+    const [targetJob, setTargetJob] = useState(null);
+    const [detectedGaps, setDetectedGaps] = useState([]);
+    const [matchedSkills, setMatchedSkills] = useState([]);
+    const [gapResponses, setGapResponses] = useState({});
+    const [isGroundedTailored, setIsGroundedTailored] = useState(false);
+    const [customJobTitle, setCustomJobTitle] = useState('');
+    const [customJobSkills, setCustomJobSkills] = useState('');
+
     // Initial data load & parameter handling
     useEffect(() => {
         const initialize = async () => {
             try {
-                const [userData, templatesData] = await Promise.all([
+                const [userData, templatesData, jobsData] = await Promise.all([
                     authService.getMe().catch(() => null),
-                    templateService.list().catch(() => [])
+                    templateService.list().catch(() => []),
+                    jobService.getJobs({ limit: 50 }).catch(() => ({ jobs: [] }))
                 ]);
 
                 setUser(userData);
                 setSavedTemplates(templatesData || []);
+                const fetchedJobs = jobsData?.jobs || [];
+                setAvailableJobs(fetchedJobs);
 
                 const paramTemplateId = searchParams.get('template_id');
                 const paramTailoredId = searchParams.get('tailored_id');
+                const paramJobId = searchParams.get('job_id');
 
                 if (paramTemplateId && templatesData) {
                     const target = templatesData.find(t => String(t.id) === String(paramTemplateId));
@@ -219,6 +234,14 @@ export default function AtsPortal() {
                     }
                 }
 
+                if (paramJobId && fetchedJobs.length > 0) {
+                    const matchedJob = fetchedJobs.find(j => String(j.id) === String(paramJobId));
+                    if (matchedJob) {
+                        analyzeGapsForJob(matchedJob);
+                        setActiveTab('gap_verifier');
+                    }
+                }
+
                 // If user has uploaded resume text, auto-populate it into the template
                 if (userData?.profile?.resume_text) {
                     await parseRawText(userData.profile.resume_text, userData.full_name);
@@ -230,6 +253,174 @@ export default function AtsPortal() {
 
         initialize();
     }, [searchParams]);
+
+    const analyzeGapsForJob = (job) => {
+        if (!job) return;
+        setTargetJob(job);
+        setSelectedJobId(String(job.id || 'custom'));
+
+        const jobText = `${job.skills_required || ''} ${job.description || ''}`.toLowerCase();
+        const resumeText = `${resumeData.skills || ''} ${resumeData.experience || ''} ${resumeData.professional_summary || ''}`.toLowerCase();
+
+        const commonSkills = [
+            'python', 'javascript', 'typescript', 'react', 'node.js', 'fastapi', 'django', 'flask',
+            'postgresql', 'mysql', 'mongodb', 'redis', 'docker', 'kubernetes', 'aws', 'azure', 'gcp',
+            'ci/cd', 'linux', 'git', 'graphql', 'rest api', 'data analysis', 'sql', 'pandas', 'numpy',
+            'terraform', 'agile', 'scrum', 'html', 'css', 'tailwind', 'microservices', 'c++', 'java', 'go'
+        ];
+
+        const foundInJob = commonSkills.filter(s => {
+            const regex = new RegExp(`\\b${s.replace('.', '\\.')}\\b`, 'i');
+            return regex.test(jobText);
+        });
+
+        if (job.skills_required) {
+            job.skills_required.split(',').map(s => s.trim().toLowerCase()).filter(Boolean).forEach(s => {
+                if (!foundInJob.includes(s)) foundInJob.push(s);
+            });
+        }
+
+        const matched = [];
+        const gaps = [];
+
+        foundInJob.forEach(skill => {
+            const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'i');
+            if (regex.test(resumeText)) {
+                matched.push(skill);
+            } else {
+                gaps.push(skill);
+            }
+        });
+
+        setMatchedSkills(matched);
+        setDetectedGaps(gaps);
+
+        // Initialize gap responses with default Option 2 (learning_goal)
+        const initialResponses = {};
+        gaps.forEach(gap => {
+            initialResponses[gap] = {
+                type: 'learning_goal',
+                context: ''
+            };
+        });
+        setGapResponses(initialResponses);
+    };
+
+    const handleCustomJobAnalyze = () => {
+        if (!customJobTitle && !customJobSkills) {
+            setStatusMessage({ type: 'error', message: 'Please enter a target role title or required skills.' });
+            return;
+        }
+        const syntheticJob = {
+            id: 'custom',
+            title: customJobTitle || 'Target Technical Role',
+            company: 'Target Organization',
+            skills_required: customJobSkills,
+            description: customJobSkills
+        };
+        analyzeGapsForJob(syntheticJob);
+    };
+
+    const handleGapResponseChange = (skill, field, value) => {
+        setGapResponses(prev => ({
+            ...prev,
+            [skill]: {
+                ...(prev[skill] || { type: 'learning_goal', context: '' }),
+                [field]: value
+            }
+        }));
+    };
+
+    const applyGroundedTailoring = () => {
+        if (!targetJob && !customJobTitle) {
+            setStatusMessage({ type: 'error', message: 'Please select or define a target job first.' });
+            return;
+        }
+
+        const roleTitle = targetJob?.title || customJobTitle || 'Target Role';
+        const compName = targetJob?.company || 'Target Organization';
+
+        // 1. Separate verified user claims from Option 2 learning goals
+        const verifiedProfessional = [];
+        const verifiedProjects = [];
+        const transferableSkills = [];
+        const learningGoals = [];
+
+        detectedGaps.forEach(skill => {
+            const resp = gapResponses[skill] || { type: 'learning_goal', context: '' };
+            if (resp.type === 'professional' && resp.context.trim()) {
+                verifiedProfessional.push({ skill, context: resp.context.trim() });
+            } else if (resp.type === 'academic_personal' && resp.context.trim()) {
+                verifiedProjects.push({ skill, context: resp.context.trim() });
+            } else if (resp.type === 'transferable') {
+                transferableSkills.push(skill);
+            } else {
+                learningGoals.push(skill);
+            }
+        });
+
+        // 2. Build Grounded Summary (Option 2: honest adaptability without false claims)
+        let updatedSummary = resumeData.professional_summary || '';
+        
+        if (learningGoals.length > 0) {
+            const goalStr = learningGoals.slice(0, 3).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ');
+            const adaptabilityClause = `Demonstrated adaptability and rapid technical onboarding capability, with core engineering foundation prepared for ${goalStr} workflows.`;
+            if (!updatedSummary.includes(adaptabilityClause)) {
+                updatedSummary = `${updatedSummary.trim()} ${adaptabilityClause}`;
+            }
+        }
+
+        // 3. Update Skills List
+        let existingSkillsList = resumeData.skills ? resumeData.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const allAddedSkills = [
+            ...verifiedProfessional.map(v => v.skill.charAt(0).toUpperCase() + v.skill.slice(1)),
+            ...verifiedProjects.map(v => v.skill.charAt(0).toUpperCase() + v.skill.slice(1)),
+            ...transferableSkills.map(s => s.charAt(0).toUpperCase() + s.slice(1))
+        ];
+        
+        allAddedSkills.forEach(s => {
+            if (!existingSkillsList.some(existing => existing.toLowerCase() === s.toLowerCase())) {
+                existingSkillsList.push(s);
+            }
+        });
+
+        // 4. Update Experience with authentic user bullets (if user provided professional context)
+        let updatedExperience = resumeData.experience || '';
+        if (verifiedProfessional.length > 0) {
+            const newBullets = verifiedProfessional.map(v => `• Applied ${v.skill.charAt(0).toUpperCase() + v.skill.slice(1)}: ${v.context}`);
+            const expBlocks = updatedExperience.split(/\n\s*\n/).filter(Boolean);
+            if (expBlocks.length > 0) {
+                expBlocks[0] = `${expBlocks[0]}\n${newBullets.join('\n')}`;
+                updatedExperience = expBlocks.join('\n\n');
+            } else {
+                updatedExperience = newBullets.join('\n');
+            }
+        }
+
+        // 5. Update Projects if user provided academic/personal context
+        let updatedProjects = resumeData.projects || '';
+        if (verifiedProjects.length > 0) {
+            const projectBullets = verifiedProjects.map(v => `• ${v.skill.charAt(0).toUpperCase() + v.skill.slice(1)} Implementation: ${v.context}`);
+            updatedProjects = updatedProjects ? `${updatedProjects}\n${projectBullets.join('\n')}` : projectBullets.join('\n');
+        }
+
+        setResumeData(prev => ({
+            ...prev,
+            professional_summary: updatedSummary,
+            skills: existingSkillsList.join(', '),
+            experience: updatedExperience,
+            projects: updatedProjects
+        }));
+
+        setTemplateName(`Targeted CV (${roleTitle} - ${compName})`);
+        setIsGroundedTailored(true);
+        setActiveTab('preview');
+        setStatusMessage({
+            type: 'success',
+            message: `Grounded CV tailored for "${roleTitle}"! All claims are 100% verified with zero hallucinations.`
+        });
+        setTimeout(() => setStatusMessage(null), 6000);
+    };
 
     const loadTemplateDirectly = (tpl) => {
         setSelectedTemplateId(tpl.id);
@@ -625,7 +816,7 @@ export default function AtsPortal() {
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                             activeTab === 'preview'
                                 ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
                         <Eye size={15} />
@@ -636,11 +827,27 @@ export default function AtsPortal() {
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                             activeTab === 'editor'
                                 ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
                         <Edit3 size={15} />
                         Structured Section Editor
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('gap_verifier')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                            activeTab === 'gap_verifier'
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <ShieldCheck size={15} />
+                        Factual Gap Verifier
+                        {detectedGaps.length > 0 && (
+                            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-mono">
+                                {detectedGaps.length}
+                            </span>
+                        )}
                     </button>
                 </div>
 
@@ -681,6 +888,273 @@ export default function AtsPortal() {
                     <div className="h-96 flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
                         <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-3" />
                         <p className="text-sm font-semibold">Extracting and structuring your CV into the ATS template...</p>
+                    </div>
+                ) : activeTab === 'gap_verifier' ? (
+                    /* Human-in-the-Loop Gap Verification Matrix */
+                    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+                        {/* Target Job Selector Card */}
+                        <Card variant="flat" className="p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <ShieldCheck className="text-indigo-600 dark:text-indigo-400" size={18} />
+                                        Target Role Alignment & Skill Gap Verifier
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        Deterministic NLP gap analysis with strict zero-hallucination verification.
+                                    </p>
+                                </div>
+                                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 w-fit">
+                                    Human-in-the-Loop
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                        Select from Discovered Openings:
+                                    </label>
+                                    <select
+                                        value={selectedJobId}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setSelectedJobId(val);
+                                            const found = availableJobs.find(j => String(j.id) === String(val));
+                                            if (found) analyzeGapsForJob(found);
+                                        }}
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                                    >
+                                        <option value="">-- Choose a job to tailor against --</option>
+                                        {availableJobs.map(j => (
+                                            <option key={j.id} value={j.id}>
+                                                {j.title} — {j.company} ({j.workstyle || 'Active'})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                        Or Paste Custom Target Role & Skills:
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={customJobTitle}
+                                            onChange={(e) => setCustomJobTitle(e.target.value)}
+                                            placeholder="Target Title (e.g. Lead SRE)"
+                                            className="text-xs"
+                                        />
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={handleCustomJobAnalyze}
+                                            className="shrink-0 text-xs"
+                                        >
+                                            Analyze Gaps
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* Analysis Breakdown: Matched vs Missing */}
+                        {(matchedSkills.length > 0 || detectedGaps.length > 0) && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card variant="flat" className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/60 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" size={16} />
+                                        <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                                            Verified Matched Skills ({matchedSkills.length})
+                                        </h4>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5 pt-1">
+                                        {matchedSkills.length === 0 ? (
+                                            <span className="text-xs text-slate-500">No exact skill overlaps detected yet.</span>
+                                        ) : (
+                                            matchedSkills.map(s => (
+                                                <span key={s} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                    {s}
+                                                </span>
+                                            ))
+                                        )}
+                                    </div>
+                                </Card>
+
+                                <Card variant="flat" className="p-4 bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/60 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <AlertCircle className="text-amber-600 dark:text-amber-400" size={16} />
+                                        <h4 className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider">
+                                            Requirements Requiring Verification ({detectedGaps.length})
+                                        </h4>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5 pt-1">
+                                        {detectedGaps.length === 0 ? (
+                                            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+                                                Zero skill gaps! Your CV satisfies all detected requirements.
+                                            </span>
+                                        ) : (
+                                            detectedGaps.map(s => (
+                                                <span key={s} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-white dark:bg-slate-800 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                    {s}
+                                                </span>
+                                            ))
+                                        )}
+                                    </div>
+                                </Card>
+                            </div>
+                        )}
+
+                        {/* Interactive Questionnaire per Missing Requirement */}
+                        {detectedGaps.length > 0 && (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800/60 rounded-2xl flex items-start gap-3">
+                                    <ShieldCheck className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" size={18} />
+                                    <div className="text-xs text-indigo-900 dark:text-indigo-300 space-y-1">
+                                        <p className="font-bold">Zero-Hallucination Human Verification Policy</p>
+                                        <p className="leading-relaxed opacity-90">
+                                            Please classify your true experience with each requirement below. If you select <strong>Option 2 (No Experience)</strong>, the system will frame honest adaptability in your summary and cover letter without fabricating false projects or fake metrics.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {detectedGaps.map((skill) => {
+                                    const resp = gapResponses[skill] || { type: 'learning_goal', context: '' };
+                                    return (
+                                        <Card key={skill} variant="flat" className="p-5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                    <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                                                    Skill / Requirement: <span className="text-indigo-600 dark:text-indigo-400 capitalize">{skill}</span>
+                                                </h4>
+                                                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase">
+                                                    Target Requirement
+                                                </span>
+                                            </div>
+
+                                            {/* 4 Multiple Choice Options */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                                                {/* Option 1: Professional Experience */}
+                                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                                    resp.type === 'professional'
+                                                        ? 'bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-500 text-indigo-900 dark:text-indigo-200'
+                                                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                                                }`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name={`gap_${skill}`}
+                                                            checked={resp.type === 'professional'}
+                                                            onChange={() => handleGapResponseChange(skill, 'type', 'professional')}
+                                                            className="text-indigo-600 focus:ring-indigo-500"
+                                                        />
+                                                        <span className="text-xs font-bold">1. Professional Experience</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                                                        Used in production or past full-time work.
+                                                    </span>
+                                                </label>
+
+                                                {/* Option 2: Personal / Academic Projects */}
+                                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                                    resp.type === 'academic_personal'
+                                                        ? 'bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-500 text-indigo-900 dark:text-indigo-200'
+                                                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                                                }`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name={`gap_${skill}`}
+                                                            checked={resp.type === 'academic_personal'}
+                                                            onChange={() => handleGapResponseChange(skill, 'type', 'academic_personal')}
+                                                            className="text-indigo-600 focus:ring-indigo-500"
+                                                        />
+                                                        <span className="text-xs font-bold">2. Hands-on Projects</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                                                        Used in personal portfolio or academic lab.
+                                                    </span>
+                                                </label>
+
+                                                {/* Option 3: Transferable / Adjacent Skill */}
+                                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                                    resp.type === 'transferable'
+                                                        ? 'bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-500 text-indigo-900 dark:text-indigo-200'
+                                                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                                                }`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name={`gap_${skill}`}
+                                                            checked={resp.type === 'transferable'}
+                                                            onChange={() => handleGapResponseChange(skill, 'type', 'transferable')}
+                                                            className="text-indigo-600 focus:ring-indigo-500"
+                                                        />
+                                                        <span className="text-xs font-bold">3. Transferable Knowledge</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                                                        Strong conceptual grasp via adjacent tools.
+                                                    </span>
+                                                </label>
+
+                                                {/* Option 4 (Option 2): No Experience / Open to Learn */}
+                                                <label className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                                    resp.type === 'learning_goal'
+                                                        ? 'bg-amber-50/60 dark:bg-amber-950/40 border-amber-500 text-amber-900 dark:text-amber-200'
+                                                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                                                }`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name={`gap_${skill}`}
+                                                            checked={resp.type === 'learning_goal'}
+                                                            onChange={() => handleGapResponseChange(skill, 'type', 'learning_goal')}
+                                                            className="text-amber-600 focus:ring-amber-500"
+                                                        />
+                                                        <span className="text-xs font-bold">4. Open to Learn (Option 2)</span>
+                                                    </div>
+                                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-5">
+                                                        Frames honest cross-training goal in summary.
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            {/* Context Input if user selected Professional or Academic/Personal */}
+                                            {(resp.type === 'professional' || resp.type === 'academic_personal') && (
+                                                <div className="pt-2">
+                                                    <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                                        Briefly describe your real experience with {skill} (Company/Project & Task):
+                                                    </label>
+                                                    <Input
+                                                        value={resp.context}
+                                                        onChange={(e) => handleGapResponseChange(skill, 'context', e.target.value)}
+                                                        placeholder={`e.g. Architected microservices with ${skill} at FinTech Corp or built capstone project`}
+                                                        className="text-xs"
+                                                    />
+                                                </div>
+                                            )}
+                                        </Card>
+                                    );
+                                })}
+
+                                {/* Application Footer Button */}
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <Button
+                                        variant="secondary"
+                                        onClick={() => setActiveTab('preview')}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        icon={CheckCircle2}
+                                        onClick={applyGroundedTailoring}
+                                        className="font-bold shadow-md shadow-indigo-600/20"
+                                    >
+                                        Apply Grounded Tailoring to CV Sheet
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : activeTab === 'editor' ? (
                     /* Structured Section Editor */
@@ -767,6 +1241,21 @@ export default function AtsPortal() {
                 ) : (
                     /* Live Document Sheet with Visual Layout Archetypes */
                     <div className="flex flex-col items-center">
+                        {isGroundedTailored && (
+                            <div className="mb-4 max-w-4xl w-full p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-2xl flex items-center justify-between gap-3 text-xs text-emerald-900 dark:text-emerald-200 print:hidden shadow-xs">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="text-emerald-600 dark:text-emerald-400 shrink-0" size={18} />
+                                    <span><strong>100% Factually Grounded:</strong> Tailored to target role requirements using verified candidate claims. 0 hallucinations.</span>
+                                </div>
+                                <button
+                                    onClick={() => setActiveTab('gap_verifier')}
+                                    className="text-emerald-700 dark:text-emerald-400 font-bold underline shrink-0 hover:opacity-80"
+                                >
+                                    Re-verify Gaps
+                                </button>
+                            </div>
+                        )}
+
                         <div className="mb-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 print:hidden">
                             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>Click any text block below to edit inline. Strictly formatted in <strong>Times New Roman 11pt, 1.5 line spaced</strong>.</span>

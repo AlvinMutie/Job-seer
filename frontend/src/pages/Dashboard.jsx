@@ -284,7 +284,7 @@ function Dashboard() {
                                 </span>
                             </div>
                             <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-                                Instant AI Match &bull; Factual CV Tailor &bull; Pipeline Track
+                                Semantic NLP Match &bull; Grounded CV Tailor &bull; Pipeline Track
                             </span>
                         </div>
 

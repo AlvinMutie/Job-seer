@@ -22,7 +22,7 @@ function TailorModal({ isOpen, onClose, suggestions, jobTitle, company }) {
                             <Sparkles size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">AI CV Tailoring</h2>
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Targeted CV Tailoring</h2>
                             <p className="text-sm text-slate-500 dark:text-slate-400">Optimizing for {jobTitle} at {company}</p>
                         </div>
                     </div>

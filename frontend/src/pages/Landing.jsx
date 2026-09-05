@@ -32,7 +32,7 @@ function Landing() {
     const faqItems = [
         {
             q: "How does Job Seer's ATS Health Check evaluate my resume?",
-            a: "Job Seer parses PDF, DOCX, and TXT resumes through a 10-layer security boundary. It evaluates structural readability, section completeness, contact details, formatting safety, and categorizes technical skills across 7 domains (languages, frontend, backend, databases, cloud, data/AI, tools)."
+            a: "Job Seer parses PDF, DOCX, and TXT resumes through a 10-layer security boundary. It evaluates structural readability, section completeness, contact details, formatting safety, and categorizes technical skills across 7 domains (languages, frontend, backend, databases, cloud, data science, tools)."
         },
         {
             q: "Does the Resume Tailoring feature hallucinate experience?",
@@ -44,7 +44,7 @@ function Landing() {
         },
         {
             q: "Is my resume and job search data private?",
-            a: "Yes. All user data is isolated per account using strict database resource-owner boundaries. Your resume content is never sold or used for public AI training."
+            a: "Yes. All user data is isolated per account using strict database resource-owner boundaries. Your resume content is never sold or used for external model training."
         },
         {
             q: "Can I export my tailored resumes and cover letters?",
@@ -173,7 +173,7 @@ function Landing() {
                         <div className="grid grid-cols-3 gap-3.5 sm:gap-4 w-full pt-6 border-t border-slate-200 dark:border-slate-800">
                             <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-slate-800 shadow-sm">
                                 <div className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight">4-Factor</div>
-                                <div className="text-xs font-bold text-slate-700 dark:text-slate-400 mt-1">Explainable AI Fit</div>
+                                <div className="text-xs font-bold text-slate-700 dark:text-slate-400 mt-1">Explainable Match Fit</div>
                             </div>
                             <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-200 dark:border-slate-800 shadow-sm">
                                 <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">90%+</div>
@@ -395,7 +395,7 @@ function Landing() {
                             <Target size={22} />
                         </div>
                         <div>
-                            <h4 className="text-base font-extrabold text-slate-950 dark:text-white">AI Job Matching</h4>
+                            <h4 className="text-base font-extrabold text-slate-950 dark:text-white">Deterministic Job Matching</h4>
                             <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Discover roles aligned with your exact technical skillset and career level.</p>
                         </div>
                     </div>
@@ -577,7 +577,7 @@ function Landing() {
                             <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 rounded-2xl flex items-center justify-center mb-6 border border-indigo-200 dark:border-indigo-800 shadow-sm">
                                 <Target size={22} />
                             </div>
-                            <h3 className="text-lg font-black mb-2 text-slate-950 dark:text-white">Explainable V2 AI Match</h3>
+                            <h3 className="text-lg font-black mb-2 text-slate-950 dark:text-white">Explainable 4-Factor Match</h3>
                             <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm font-medium mb-6">
                                 Transparent breakdown analyzing Skills (40%), Content (30%), Experience (15%), and Title (15%) with matched & missing skill chips.
                             </p>
@@ -754,7 +754,7 @@ function Landing() {
                     <span>Job Seer &bull; Intelligent Career Companion &bull; v2.2</span>
                 </div>
                 <div>
-                    Built with strict privacy, factual integrity, and explainable AI fit.
+                    Built with strict privacy, factual integrity, and explainable match fit.
                 </div>
             </footer>
         </div>

@@ -24,7 +24,7 @@ function MatchBreakdownModal({ isOpen, onClose, match }) {
                 {/* Overall Score Banner */}
                 <div className="p-5 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-between">
                     <div>
-                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overall AI Match</span>
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overall Compatibility Score</span>
                         <div className="text-3xl font-extrabold text-slate-900 mt-1">{match.match_percentage}%</div>
                     </div>
                     <div className="p-3 bg-white border border-indigo-200 rounded-xl text-indigo-600 shadow-xs">

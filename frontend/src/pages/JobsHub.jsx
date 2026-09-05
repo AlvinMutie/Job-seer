@@ -137,7 +137,7 @@ function JobsHub() {
             <PageHeader
                 badgeText="JOB DISCOVERY WORKSPACE"
                 title="Find Your Next Opportunity"
-                subtitle="Explore verified tech roles, filter by work mode and experience level, and calculate your real-time AI resume fit."
+                subtitle="Explore verified tech roles, filter by work mode and experience level, and calculate your real-time resume fit."
                 action={
                     <Button
                         variant="primary"

@@ -68,7 +68,7 @@ function Settings() {
             <PageHeader
                 badgeText="CAREER PREFERENCES"
                 title="Account Settings & Career Profile"
-                subtitle="Update your technical skills, experience level, and preferred role to optimize AI job matching calculations."
+                subtitle="Update your technical skills, experience level, and preferred role to optimize job matching calculations."
             />
 
             <Card variant="flat" className="overflow-hidden">
@@ -153,7 +153,7 @@ function Settings() {
                             onChange={e => setFormData({ ...formData, skills: e.target.value })}
                         ></textarea>
                         <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                            <Info size={11} className="text-indigo-600" /> Evaluated by AI match engine against job listings (40% skills overlap weight).
+                            <Info size={11} className="text-indigo-600" /> Evaluated by 4-factor match engine against job listings (40% skills overlap weight).
                         </p>
                     </div>
 
@@ -180,7 +180,7 @@ function Settings() {
 
             <Card variant="flat" className="p-6 bg-amber-50 border border-amber-200">
                 <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                    Note: Updating your technical skills and preferred role here directly impacts your V2 AI Match Score calculations in the Command Center and Jobs Hub.
+                    Note: Updating your technical skills and preferred role here directly impacts your V2 Match Score calculations in the Command Center and Jobs Hub.
                 </p>
             </Card>
         </div>

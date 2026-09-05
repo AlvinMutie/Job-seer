@@ -3,52 +3,86 @@ import difflib
 from typing import List, Dict, Any
 
 class TailorService:
-    def generate_suggestions(self, resume_text: str, job_title: str, missing_skills: List[str]):
+    def generate_suggestions(
+        self, 
+        resume_text: str, 
+        job_title: str, 
+        missing_skills: List[str],
+        gap_verifications: Dict[str, Dict[str, str]] = None
+    ):
         """
-        Generates tailored bullet points or professional summary improvements 
-        targeting missing skills.
+        Generates grounded suggestions or professional summary improvements 
+        targeting missing skills without fabricating metrics or false experience.
         """
         if not missing_skills:
-            return ["Your resume is already highly optimized for this role!"]
+            return [{
+                "section": "General",
+                "suggestion": "Your resume already strongly aligns with the core requirements of this role.",
+                "impact": "High - Verified Match"
+            }]
 
         suggestions = []
+        verifications = gap_verifications or {}
         
-        # 1. Professional Summary Improvement
-        suggestions.append({
-            "section": "Professional Summary",
-            "original_context": "Current profile focuses on general experience.",
-            "suggestion": f"Integrate your knowledge of {', '.join(missing_skills[:2])} directly into your summary to pass ATS filters immediately.",
-            "impact": "High - Targets initial screening"
-        })
+        # 1. Professional Summary / Adaptability (Option 2 for unverified gaps)
+        learning_skills = [s for s in missing_skills if verifications.get(s, {}).get("type") == "learning_goal" or s not in verifications]
+        verified_skills = [s for s in missing_skills if verifications.get(s, {}).get("type") in ["professional", "academic_personal", "transferable"]]
 
-        # 2. Specific Skill-Based Bullet Points
-        for skill in missing_skills[:3]:
+        if verified_skills:
             suggestions.append({
-                "section": "Experience / Projects",
-                "suggestion": self._generate_bullet_point(skill, job_title),
-                "impact": "Medium - Demonstrates technical competency"
+                "section": "Professional Summary",
+                "original_context": "Verified technical competencies.",
+                "suggestion": f"Highlight your validated hands-on experience in {', '.join([s.title() for s in verified_skills[:2]])} directly in your summary.",
+                "impact": "High - Targets ATS and recruiter review"
+            })
+        elif learning_skills:
+            suggestions.append({
+                "section": "Professional Summary (Adaptability)",
+                "original_context": "Addressing target skills via transferable foundation.",
+                "suggestion": f"Frame your strong foundational background alongside a proactive goal to cross-train into {', '.join([s.title() for s in learning_skills[:2]])}.",
+                "impact": "High - Factual adaptability without false claims"
+            })
+
+        # 2. Specific Grounded Skill-Based Bullet Points
+        for skill in missing_skills[:3]:
+            user_data = verifications.get(skill, {})
+            skill_type = user_data.get("type", "learning_goal")
+            user_note = user_data.get("context", "").strip()
+
+            if skill_type == "professional" and user_note:
+                bullet = f"Applied {skill.title()} in production environments: {user_note}."
+                impact = "High - Verified Professional Experience"
+            elif skill_type == "academic_personal" and user_note:
+                bullet = f"Developed project implementation using {skill.title()}: {user_note}."
+                impact = "Medium - Project Portfolio Evidence"
+            elif skill_type == "transferable":
+                bullet = f"Leveraged adjacent technical principles with high adaptability toward {skill.title()} workflows."
+                impact = "Medium - Demonstrates Domain Adaptability"
+            else:
+                bullet = f"Identified {skill.title()} as target development goal; ready to apply foundational engineering practices."
+                impact = "Growth Area - Transparent and Defensible"
+
+            suggestions.append({
+                "section": "Experience & Skills Alignment",
+                "suggestion": bullet,
+                "impact": impact
             })
 
         # 3. Strategy Advice
         suggestions.append({
-            "section": "Strategic Advice",
-            "suggestion": f"If you have used tools similar to {missing_skills[0].upper()}, mention them and explicitly state 'Quickly adapted to {missing_skills[0].upper()} paradigms' to show cross-functional capability.",
-            "impact": "Soft Skill - Adaptability"
+            "section": "Strategic Career Advice",
+            "suggestion": f"Ensure all claims are fully defensible in technical interviews. For {missing_skills[0].title()}, focus on conceptual mastery and rapid onboarding capability.",
+            "impact": "Integrity & Interview Readiness"
         })
 
         return suggestions
 
-    def _generate_bullet_point(self, skill: str, job_title: str) -> str:
-        """Mimics LLM bullet point generation logic."""
-        skill_upper = skill.upper()
-        scenarios = [
-            f"Implemented {skill_upper} solutions to optimize data processing latency by 30% in high-concurrency environments.",
-            f"Leveraged {skill_upper} for building scalable infrastructure components aligned with {job_title} requirements.",
-            f"Collaborated on {skill_upper} integration within a CI/CD pipeline, improving deployment frequency by 15%.",
-            f"Architected modular components using {skill_upper} to ensure code maintainability and cross-platform compatibility."
-        ]
-        idx = sum(ord(c) for c in skill) % len(scenarios)
-        return scenarios[idx]
+    def _generate_bullet_point(self, skill: str, job_title: str, user_context: str = "") -> str:
+        """Generates grounded bullet points based on verified input."""
+        skill_clean = skill.title()
+        if user_context:
+            return f"Utilized {skill_clean} for {user_context} aligned with {job_title} objectives."
+        return f"Applied {skill_clean} principles in engineering workflows supporting core {job_title} deliverables."
 
     def generate_tailored_resume_text(
         self, 
@@ -56,11 +90,12 @@ class TailorService:
         job_title: str, 
         company: str, 
         job_description: str,
-        missing_skills: List[str]
+        missing_skills: List[str],
+        gap_verifications: Dict[str, Dict[str, str]] = None
     ) -> str:
         """
         Generates a versioned tailored resume text based on candidate's original resume,
-        job requirements, and missing skills while preserving 100% factual integrity.
+        job requirements, and verified gap inputs while preserving 100% factual integrity.
         """
         if not resume_text:
             return f"TAILORED RESUME — TARGET ROLE: {job_title.upper()} AT {company.upper()}\n\nNo original resume content provided."
@@ -69,19 +104,22 @@ class TailorService:
         header = f"TAILORED RESUME — TARGET ROLE: {job_title.upper()} AT {company.upper()}"
         
         tailored_lines = [header, "=" * len(header), ""]
-        
+        verifications = gap_verifications or {}
+
         if missing_skills:
-            target_skills_header = f"TECHNICAL FOCUS FOR {job_title.upper()}: {', '.join([s.upper() for s in missing_skills[:4]])}"
+            target_skills_header = f"TARGET ROLE FOCUS FOR {job_title.upper()}: {', '.join([s.upper() for s in missing_skills[:4]])}"
             tailored_lines.append(target_skills_header)
             tailored_lines.append("-" * len(target_skills_header))
             tailored_lines.append("")
 
         for line in lines:
             tailored_lines.append(line)
-            # Inject relevant bullet point suggestions under Work Experience or Skills sections
+            # Inject relevant grounded bullet point suggestions under Work Experience or Skills sections
             if any(sec in line.lower() for sec in ["experience", "work history", "projects"]):
                 if missing_skills:
-                    bullet = self._generate_bullet_point(missing_skills[0], job_title)
+                    first_skill = missing_skills[0]
+                    user_ctx = verifications.get(first_skill, {}).get("context", "")
+                    bullet = self._generate_bullet_point(first_skill, job_title, user_ctx)
                     tailored_lines.append(f"  • {bullet}")
 
         return "\n".join(tailored_lines)

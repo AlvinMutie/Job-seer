@@ -1,3 +1,5 @@
+import json
+from typing import Optional
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -14,7 +16,7 @@ router = APIRouter(tags=["Matching"])
 engine = MatchingEngine()
 
 
-@router.post("/match", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_match"))])
+@router.post("/match", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="match_calc"))])
 async def match_resume(
     resume_text: str = Form(...), 
     job_id: int = Form(...), 
@@ -48,7 +50,7 @@ async def match_resume(
     return result
 
 
-@router.post("/generate-cover-letter", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_cover_letter"))])
+@router.post("/generate-cover-letter", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="cover_letter_gen"))])
 async def generate_cover_letter_api(
     job_id: int = Form(...),
     candidate_name: str = Form(...),
@@ -70,10 +72,11 @@ async def generate_cover_letter_api(
     return {"cover_letter": letter}
 
 
-@router.post("/tailor-resume", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="ai_tailor"))])
+@router.post("/tailor-resume", dependencies=[Depends(rate_limit(max_requests=30, key_prefix="tailor_calc"))])
 async def tailor_resume_api(
     job_id: int = Form(...),
     resume_text: str = Form(...),
+    gap_verifications: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -89,12 +92,21 @@ async def tailor_resume_api(
     
     missing_skills = list(set(job_skills) - set(resume_skills))
     
+    parsed_verifications = None
+    if gap_verifications:
+        try:
+            parsed_verifications = json.loads(gap_verifications)
+        except Exception:
+            parsed_verifications = None
+
     suggestions = tailor_service.generate_suggestions(
-        resume_text, job.title, missing_skills
+        resume_text, job.title, missing_skills, parsed_verifications
     )
     
     return {
         "job_title": job.title,
         "company": job.company,
+        "missing_skills": missing_skills,
+        "matched_skills": list(set(job_skills) & set(resume_skills)),
         "suggestions": suggestions
     }
